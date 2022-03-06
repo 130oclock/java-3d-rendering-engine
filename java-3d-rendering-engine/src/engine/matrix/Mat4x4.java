@@ -8,6 +8,7 @@ public class Mat4x4 {
 		Mat4x4.makeBlank(this);
 	}
 	
+	// Create an empty 4x4 matrix
 	public static void makeBlank(Mat4x4 mat) {
 		mat.m[0][0] = 0;
 		mat.m[1][0] = 0;
@@ -32,18 +33,19 @@ public class Mat4x4 {
 		return;
 	}
 	
-	public static void makeIdentity(Mat4x4 mat) {
+	// Create a 4x4 matrix identity
+	public static Mat4x4 makeIdentity(Mat4x4 mat) {
 		Mat4x4.makeBlank(mat);
 		mat.m[0][0] = 1;
 		mat.m[1][1] = 1;
 		mat.m[2][2] = 1;
 		mat.m[3][3] = 1;
 		
-		return;
+		return mat;
 	}
-	
+
+	// Create a matrix which can be multiplied to another matrix to make a translation
 	public static Mat4x4 translationMatrix(double x, double y, double z) {
-		// Creates a matrix which can be multiplied to another matrix to make a translation
 		Mat4x4 mat = new Mat4x4();
 		mat.m[0][0] = 1;
 		mat.m[1][1] = 1;
@@ -56,6 +58,7 @@ public class Mat4x4 {
 		return mat;
 	}
 	
+	// Multiply two 4x4 matrices together
 	public static Mat4x4 multiplyMatrix(Mat4x4 m1, Mat4x4 m2) {
 		Mat4x4 mat = new Mat4x4();
 		
@@ -68,6 +71,7 @@ public class Mat4x4 {
 		return mat;
 	}
 	
+	// Quickly invert a 4x4 matrix
 	public static Mat4x4 quickInverse(Mat4x4 m) {
 		Mat4x4 mat = new Mat4x4();
 		mat.m[0][0] = m.m[0][0]; mat.m[0][1] = m.m[1][0]; mat.m[0][2] = m.m[2][0]; mat.m[0][3] = 0;
@@ -81,7 +85,10 @@ public class Mat4x4 {
 		return mat;
 	}
 	
-	public static Mat4x4 makeProjection(double fovDegrees, double aspectRatio, double near, double far) {
+	// Create a projection matrix from specified values
+	public static Mat4x4 makeProjection(double fovDegrees, int screenHeight, int screenWidth, double near, double far) {
+		double aspectRatio = (double) screenHeight / screenWidth;
+		System.out.println(aspectRatio);
 		double FovRad = 1 / Math.tan(fovDegrees * 0.5 / 180 * Math.PI);
 		Mat4x4 matrix = new Mat4x4();
 		matrix.m[0][0] = aspectRatio * FovRad;

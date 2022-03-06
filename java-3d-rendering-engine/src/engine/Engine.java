@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import engine.camera.Camera;
 import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
+import engine.quaternion.Quaternion;
 import engine.vector.*;
 import engine.triangle.Triangle;
 
@@ -30,10 +31,11 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final double fps = 60;
 	
-	private static Camera camera = new Camera(new Vector3d(0,0,50), 500);
-	private static EnvironmentLight light = new EnvironmentLight(new Vector3d(1,0,1));
+	private static Camera camera = new Camera(new Vector3d(0,0,20), 500);
+	private static EnvironmentLight light = new EnvironmentLight(new Vector3d(0,0,-1));
 	
-	private static Mat4x4 matProj = Mat4x4.makeProjection(90, screenHeight/screenWidth, 0.1, 1000);
+	private static Mat4x4 matView = Mat4x4.makeIdentity(new Mat4x4());
+	private static Mat4x4 matProj = Mat4x4.makeProjection(90, screenHeight, screenWidth, 0.1, 1000);
 	
 	public Engine() {
 		// Generate Window
@@ -110,21 +112,20 @@ public class Engine extends Canvas implements Runnable {
 		
 		Graphics g = bs.getDrawGraphics();
 		
-		/*
-		 * Quaternion.normalize(camera.rot);
-		 * Mat4x4 matRot = Quaternion.generateMatrix(camera.rot);
-		 * Mat4x4 matTrans = mat4x4.matrix_MakeTranslation(camera.pos.x, camera.pos.y, camera.pos.z);
-		 * matTrans = mat4x4.matrix_QuickInverse(matTrans);
-		 * matView = mat4x4.matrix_MultiplyMatrix(matTrans, matRot);
-		 */
-		
-		Triangle test = new Triangle(new Vector3d(0,0,0), new Vector3d(100,0,0), new Vector3d(50,50,0), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle[] trianglesToRaster = new Triangle[] { test };
-		
-		Triangle.projectTriangles(g, trianglesToRaster, camera, null, matProj, screenWidth, screenHeight, light);
-		
 		g.setColor(Color.BLACK);
 		g.fillRect(0,  0, screenWidth, screenHeight);
+		
+		Quaternion.normalize(camera.rot);
+		Mat4x4 matRot = Quaternion.generateMatrix(camera.rot, null);
+		Mat4x4 matTrans = Mat4x4.translationMatrix(camera.pos.x, camera.pos.y, camera.pos.z);
+		matTrans = Mat4x4.quickInverse(matTrans);
+		matView = Mat4x4.multiplyMatrix(matTrans, matRot);
+		
+		Triangle test1 = new Triangle(new Vector3d(10,0,0), new Vector3d(0,-10,0), new Vector3d(-10,0,0), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test2 = new Triangle(new Vector3d(-10,0,0), new Vector3d(0,10,0), new Vector3d(10,0,0), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle[] trianglesToRaster = new Triangle[] { test1, test2 };
+		
+		Triangle.projectTriangles(g, trianglesToRaster, camera, matView, matProj, screenWidth, screenHeight, light);
 		
 		g.dispose();
 		bs.show();
