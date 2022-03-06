@@ -99,7 +99,7 @@ public class Triangle {
 			// Check if the triangle is facing towards the camera
 			Vector3d vCameraRay = Vector3d.subtract(triTransformed.p[0], camera.pos);
 			//System.out.println(vCameraRay.x + " " + vCameraRay.y + " " + vCameraRay.z + " normal: " + normal.x + " " + normal.y + " " + normal.z);
-			//if (Vector3d.dotProduct(normal, vCameraRay) < 0) {
+			if (Vector3d.dotProduct(normal, vCameraRay) < 0) {
 				Vector3d lightDirection = light.getDirection();
 				
 				double dp = Math.max(0.1, Vector3d.dotProduct(lightDirection, normal));
@@ -166,9 +166,11 @@ public class Triangle {
 				
 				//System.out.println(triProjected.p[0].x + " " + triProjected.p[0].y + " | " + triProjected.p[1].x + " " + triProjected.p[1].y + " | " + triProjected.p[2].x + " " + triProjected.p[2].y);
 
+				g.setColor(Color.BLACK);
+				g.drawPolygon(new int[]{ (int) triProjected.p[0].x, (int) triProjected.p[1].x, (int) triProjected.p[2].x }, new int[]{ (int) triProjected.p[0].y, (int) triProjected.p[1].y, (int) triProjected.p[2].y }, 3);
 				g.setColor(triProjected.brightness);
 				g.fillPolygon(new int[]{ (int) triProjected.p[0].x, (int) triProjected.p[1].x, (int) triProjected.p[2].x }, new int[]{ (int) triProjected.p[0].y, (int) triProjected.p[1].y, (int) triProjected.p[2].y }, 3);
-			//}
+			}
 		}
 	}
 }

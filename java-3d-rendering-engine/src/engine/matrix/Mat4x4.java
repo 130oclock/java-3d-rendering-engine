@@ -88,7 +88,6 @@ public class Mat4x4 {
 	// Create a projection matrix from specified values
 	public static Mat4x4 makeProjection(double fovDegrees, int screenHeight, int screenWidth, double near, double far) {
 		double aspectRatio = (double) screenHeight / screenWidth;
-		System.out.println(aspectRatio);
 		double FovRad = 1 / Math.tan(fovDegrees * 0.5 / 180 * Math.PI);
 		Mat4x4 matrix = new Mat4x4();
 		matrix.m[0][0] = aspectRatio * FovRad;

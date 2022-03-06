@@ -9,6 +9,7 @@ import java.awt.image.BufferStrategy;
 import javax.swing.JFrame;
 
 import engine.camera.Camera;
+import engine.input.*;
 import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
 import engine.quaternion.Quaternion;
@@ -31,11 +32,13 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final double fps = 60;
 	
-	private static Camera camera = new Camera(new Vector3d(0,0,20), 500);
-	private static EnvironmentLight light = new EnvironmentLight(new Vector3d(0,0,-1));
+	private Camera camera = new Camera(new Vector3d(0,0,20), 500);
+	private EnvironmentLight light = new EnvironmentLight(new Vector3d(1,1,1));
 	
-	private static Mat4x4 matView = Mat4x4.makeIdentity(new Mat4x4());
-	private static Mat4x4 matProj = Mat4x4.makeProjection(90, screenHeight, screenWidth, 0.1, 1000);
+	private Mat4x4 matView = Mat4x4.makeIdentity(new Mat4x4());
+	private Mat4x4 matProj = Mat4x4.makeProjection(90, screenHeight, screenWidth, 0.1, 1000);
+	
+	private UserInput userInput;
 	
 	public Engine() {
 		// Generate Window
@@ -43,6 +46,10 @@ public class Engine extends Canvas implements Runnable {
 		
 		Dimension size = new Dimension(screenWidth, screenHeight);
 		this.setPreferredSize(size);
+		
+		this.userInput = new UserInput();
+		
+		this.addKeyListener(this.userInput.keyboard);
 	}
 	
 	public static void main(String[] args) {
@@ -121,9 +128,19 @@ public class Engine extends Canvas implements Runnable {
 		matTrans = Mat4x4.quickInverse(matTrans);
 		matView = Mat4x4.multiplyMatrix(matTrans, matRot);
 		
-		Triangle test1 = new Triangle(new Vector3d(10,0,0), new Vector3d(0,-10,0), new Vector3d(-10,0,0), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test2 = new Triangle(new Vector3d(-10,0,0), new Vector3d(0,10,0), new Vector3d(10,0,0), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle[] trianglesToRaster = new Triangle[] { test1, test2 };
+		Triangle test1 = new Triangle(new Vector3d(-5, -5, 5), new Vector3d(5, 5, 5), new Vector3d(-5, 5, 5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test2 = new Triangle(new Vector3d(-5, -5, 5), new Vector3d(5, -5, 5), new Vector3d(5, 5, 5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test3 = new Triangle(new Vector3d(-5, -5, -5), new Vector3d(-5, 5, 5), new Vector3d(-5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test4 = new Triangle(new Vector3d(-5, -5, -5), new Vector3d(-5, -5, 5), new Vector3d(-5, 5, 5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test5 = new Triangle(new Vector3d(5, -5, 5), new Vector3d(5, 5, -5), new Vector3d(5, 5, 5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test6 = new Triangle(new Vector3d(5, -5, 5), new Vector3d(5, -5, -5), new Vector3d(5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test7 = new Triangle(new Vector3d(5, -5, -5), new Vector3d(-5, 5, -5), new Vector3d(5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test8 = new Triangle(new Vector3d(5, -5, -5), new Vector3d(-5, -5, -5), new Vector3d(-5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test9 = new Triangle(new Vector3d(-5, 5, 5), new Vector3d(5, 5, -5), new Vector3d(-5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test10 = new Triangle(new Vector3d(-5, 5, 5), new Vector3d(5, 5, 5), new Vector3d(5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test11 = new Triangle(new Vector3d(5, -5, 5), new Vector3d(-5, -5, -5), new Vector3d(5, -5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle test12 = new Triangle(new Vector3d(5, -5, 5), new Vector3d(-5, -5, 5), new Vector3d(-5, -5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
+		Triangle[] trianglesToRaster = new Triangle[] { test1, test2, test3, test4, test5, test6, test7, test8, test9, test10, test11, test12 };
 		
 		Triangle.projectTriangles(g, trianglesToRaster, camera, matView, matProj, screenWidth, screenHeight, light);
 		
@@ -132,6 +149,51 @@ public class Engine extends Canvas implements Runnable {
 	}
 	
 	private void update() {
+		Keyboard keyb = this.userInput.keyboard;
+		keyb.update();
+
+		Vector3d vUp = this.camera.rot.getUpVector();
+		Vector3d vForward = this.camera.rot.getForwardVector();
+		Vector3d vRight = this.camera.rot.getRightVector();
 		
+		if (keyb.getUp() == true) {
+			this.camera.translate(-vUp.x, -vUp.y, -vUp.z);
+		}
+		
+		if (keyb.getDown() == true) {
+			this.camera.translate(vUp.x, vUp.y, vUp.z);
+		}
+		
+		if (keyb.getRight() == true) {
+			this.camera.translate(vRight.x, vRight.y, vRight.z);
+		}
+		
+		if (keyb.getLeft() == true) {
+			this.camera.translate(-vRight.x, -vRight.y, -vRight.z);
+		}
+
+		if (keyb.getForward() == true) {
+			this.camera.translate(-vForward.x, -vForward.y, -vForward.z);
+		}
+		
+		if (keyb.getBackward() == true) {
+			this.camera.translate(vForward.x, vForward.y, vForward.z);
+		}
+		
+		if (keyb.getKUp() == true) {
+			this.camera.rotate(vRight, -0.04);
+		}
+		
+		if (keyb.getKDown() == true) {
+			this.camera.rotate(vRight, 0.04);
+		}
+		
+		if (keyb.getKRight() == true) {
+			this.camera.rotate(vUp, -0.04);
+		}
+		
+		if (keyb.getKLeft() == true) {
+			this.camera.rotate(vUp, 0.04);                    
+		}
 	}
 }

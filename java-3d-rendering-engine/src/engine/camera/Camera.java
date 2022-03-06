@@ -16,4 +16,14 @@ public class Camera {
 		this.viewDistance = viewDistance;
 		this.moveSpeed = 10;
 	}
+	
+	public void translate(double x, double y, double z) {
+		this.pos.x += x;
+		this.pos.y += y;
+		this.pos.z += z;
+	}
+	
+	public void rotate(Vector3d axis, double angle) {
+		this.rot = Quaternion.rotate(this.rot, axis, angle);
+	}
 }
