@@ -12,6 +12,7 @@ import engine.camera.Camera;
 import engine.input.*;
 import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
+import engine.modelReader.objFileReader;
 import engine.quaternion.Quaternion;
 import engine.vector.*;
 import engine.triangle.Triangle;
@@ -40,6 +41,8 @@ public class Engine extends Canvas implements Runnable {
 	
 	private UserInput userInput;
 	
+	private static Triangle[] cube;
+	
 	public Engine() {
 		// Generate Window
 		this.frame = new JFrame();
@@ -53,6 +56,10 @@ public class Engine extends Canvas implements Runnable {
 	}
 	
 	public static void main(String[] args) {
+
+		cube = objFileReader.load("Models/cube.obj");
+		//cube = objFileReader.load("Models/octahedron.obj");
+		
 		Engine engine = new Engine();
 		engine.frame.setTitle(title);
 		engine.frame.add(engine);
@@ -128,21 +135,7 @@ public class Engine extends Canvas implements Runnable {
 		matTrans = Mat4x4.quickInverse(matTrans);
 		matView = Mat4x4.multiplyMatrix(matTrans, matRot);
 		
-		Triangle test1 = new Triangle(new Vector3d(-5, -5, 5), new Vector3d(5, 5, 5), new Vector3d(-5, 5, 5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test2 = new Triangle(new Vector3d(-5, -5, 5), new Vector3d(5, -5, 5), new Vector3d(5, 5, 5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test3 = new Triangle(new Vector3d(-5, -5, -5), new Vector3d(-5, 5, 5), new Vector3d(-5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test4 = new Triangle(new Vector3d(-5, -5, -5), new Vector3d(-5, -5, 5), new Vector3d(-5, 5, 5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test5 = new Triangle(new Vector3d(5, -5, 5), new Vector3d(5, 5, -5), new Vector3d(5, 5, 5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test6 = new Triangle(new Vector3d(5, -5, 5), new Vector3d(5, -5, -5), new Vector3d(5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test7 = new Triangle(new Vector3d(5, -5, -5), new Vector3d(-5, 5, -5), new Vector3d(5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test8 = new Triangle(new Vector3d(5, -5, -5), new Vector3d(-5, -5, -5), new Vector3d(-5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test9 = new Triangle(new Vector3d(-5, 5, 5), new Vector3d(5, 5, -5), new Vector3d(-5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test10 = new Triangle(new Vector3d(-5, 5, 5), new Vector3d(5, 5, 5), new Vector3d(5, 5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test11 = new Triangle(new Vector3d(5, -5, 5), new Vector3d(-5, -5, -5), new Vector3d(5, -5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle test12 = new Triangle(new Vector3d(5, -5, 5), new Vector3d(-5, -5, 5), new Vector3d(-5, -5, -5), new Vector2d(0,0), new Vector2d(0,0), new Vector2d(0,0), null);
-		Triangle[] trianglesToRaster = new Triangle[] { test1, test2, test3, test4, test5, test6, test7, test8, test9, test10, test11, test12 };
-		
-		Triangle.projectTriangles(g, trianglesToRaster, camera, matView, matProj, screenWidth, screenHeight, light);
+		Triangle.projectTriangles(g, cube, camera, matView, matProj, screenWidth, screenHeight, light);
 		
 		g.dispose();
 		bs.show();

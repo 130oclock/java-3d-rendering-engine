@@ -67,8 +67,7 @@ public class Triangle {
 	public static void projectTriangles(Graphics g, Triangle[] trianglesToRaster, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
 		Mat4x4 matWorld = Quaternion.generateMatrix(Quaternion.empty(), new Vector3d(0, 0, 0));
 		
-		for (int i = 0; i < trianglesToRaster.length; i++) {
-			Triangle tri = trianglesToRaster[i];
+		for (Triangle tri : trianglesToRaster) {
 			//System.out.println(tri.p[0].x + " " + tri.p[0].y + " " + tri.p[0].z + " | " + tri.p[1].x + " " + tri.p[1].y + " " + tri.p[1].z + " | " + tri.p[2].x + " " + tri.p[2].y + " " + tri.p[2].z);
 			
 			Triangle triTransformed = Triangle.empty();
