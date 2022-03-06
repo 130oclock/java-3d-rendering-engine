@@ -1,0 +1,95 @@
+package engine.matrix;
+
+public class Mat4x4 {
+	
+	public double[][] m = new double[4][4];
+	
+	public Mat4x4() {
+		Mat4x4.makeBlank(this);
+	}
+	
+	public static void makeBlank(Mat4x4 mat) {
+		mat.m[0][0] = 0;
+		mat.m[1][0] = 0;
+		mat.m[2][0] = 0;
+		mat.m[3][0] = 0;
+		
+		mat.m[0][1] = 0;
+		mat.m[1][1] = 0;
+		mat.m[2][1] = 0;
+		mat.m[3][1] = 0;
+
+		mat.m[0][2] = 0;
+		mat.m[1][2] = 0;
+		mat.m[2][2] = 0;
+		mat.m[3][2] = 0;
+
+		mat.m[0][3] = 0;
+		mat.m[1][3] = 0;
+		mat.m[2][3] = 0;
+		mat.m[3][3] = 0;
+
+		return;
+	}
+	
+	public static void makeIdentity(Mat4x4 mat) {
+		Mat4x4.makeBlank(mat);
+		mat.m[0][0] = 1;
+		mat.m[1][1] = 1;
+		mat.m[2][2] = 1;
+		mat.m[3][3] = 1;
+		
+		return;
+	}
+	
+	public static Mat4x4 translationMatrix(double x, double y, double z) {
+		// Creates a matrix which can be multiplied to another matrix to make a translation
+		Mat4x4 mat = new Mat4x4();
+		mat.m[0][0] = 1;
+		mat.m[1][1] = 1;
+		mat.m[2][2] = 1;
+		mat.m[3][3] = 1;
+		mat.m[3][0] = x;
+		mat.m[3][1] = y;
+		mat.m[3][2] = z;
+		
+		return mat;
+	}
+	
+	public static Mat4x4 multiplyMatrix(Mat4x4 m1, Mat4x4 m2) {
+		Mat4x4 mat = new Mat4x4();
+		
+		for (int j = 0; j < 4; j++) {
+			for (int i = 0; i < 4; i++) {
+				mat.m[i][j] = m1.m[i][0] * m2.m[0][j] + m1.m[i][1] * m2.m[1][j] + m1.m[i][2] * m2.m[2][j] + m1.m[i][3] * m2.m[3][j];
+			}
+		}
+		
+		return mat;
+	}
+	
+	public static Mat4x4 quickInverse(Mat4x4 m) {
+		Mat4x4 mat = new Mat4x4();
+		mat.m[0][0] = m.m[0][0]; mat.m[0][1] = m.m[1][0]; mat.m[0][2] = m.m[2][0]; mat.m[0][3] = 0;
+		mat.m[1][0] = m.m[0][1]; mat.m[1][1] = m.m[1][1]; mat.m[1][2] = m.m[2][1]; mat.m[1][3] = 0;
+		mat.m[2][0] = m.m[0][2]; mat.m[2][1] = m.m[1][2]; mat.m[2][2] = m.m[2][2]; mat.m[2][3] = 0;
+		mat.m[3][0] = -(m.m[3][0] * mat.m[0][0] + m.m[3][1] * mat.m[1][0] + m.m[3][2] * mat.m[2][0]);
+		mat.m[3][1] = -(m.m[3][0] * mat.m[0][1] + m.m[3][1] * mat.m[1][1] + m.m[3][2] * mat.m[2][1]);
+		mat.m[3][2] = -(m.m[3][0] * mat.m[0][2] + m.m[3][1] * mat.m[1][2] + m.m[3][2] * mat.m[2][2]);
+		mat.m[3][3] = 1;
+		
+		return mat;
+	}
+	
+	public static Mat4x4 makeProjection(double fovDegrees, double aspectRatio, double near, double far) {
+		double FovRad = 1 / Math.tan(fovDegrees * 0.5 / 180 * Math.PI);
+		Mat4x4 matrix = new Mat4x4();
+		matrix.m[0][0] = aspectRatio * FovRad;
+		matrix.m[1][1] = FovRad;
+		matrix.m[2][2] = far / (far - near);
+		matrix.m[3][2] = (-far * near) / (far - near);
+		matrix.m[2][3] = 1;
+		matrix.m[3][3] = 0;
+		return matrix;
+	}
+}
