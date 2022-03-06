@@ -92,7 +92,7 @@ public class Quaternion {
 	}
 	
 	public static Quaternion rotate(Quaternion q1, Vector3d axis, double angle) {
-		Quaternion localRotation = Quaternion.localRotation(axis, angle);
+		Quaternion localRotation = Quaternion.localRotation(Vector3d.normalize(axis), angle);
 		return Quaternion.multiply(localRotation, q1);
 	}
 	
@@ -116,7 +116,7 @@ public class Quaternion {
 	
 	public static Mat4x4 generateMatrix(Quaternion q1, Vector3d pos) {
 		double w = q1.w, x = q1.x, y = q1.y, z = q1.z;
-		double sqw = w * w, sqx = x * x, sqy = y * y, sqz = z * z;
+		double sqx = x * x, sqy = y * y, sqz = z * z;
 		
 		Mat4x4 mat = new Mat4x4();
 		Mat4x4.makeBlank(mat);

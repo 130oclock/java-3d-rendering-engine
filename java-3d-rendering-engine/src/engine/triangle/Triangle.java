@@ -17,7 +17,6 @@ public class Triangle {
 	
 	private Vector2d[] t = new Vector2d[3];
 	
-	private Color color;
 	private Color brightness;
 	
 	public Triangle(Vector3d p0, Vector3d p1, Vector3d p2, Vector2d t0, Vector2d t1, Vector2d t2, Vector3d normal) {
@@ -64,8 +63,8 @@ public class Triangle {
 	}
 	
 	// Project a list of triangles to screen view
-	public static void projectTriangles(Graphics g, Triangle[] trianglesToRaster, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
-		Mat4x4 matWorld = Quaternion.generateMatrix(Quaternion.empty(), new Vector3d(0, 0, 0));
+	public static void projectTriangles(Graphics g, Triangle[] trianglesToRaster, Vector3d pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
+		Mat4x4 matWorld = Quaternion.generateMatrix(rot, pos);
 		
 		for (Triangle tri : trianglesToRaster) {
 			//System.out.println(tri.p[0].x + " " + tri.p[0].y + " " + tri.p[0].z + " | " + tri.p[1].x + " " + tri.p[1].y + " " + tri.p[1].z + " | " + tri.p[2].x + " " + tri.p[2].y + " " + tri.p[2].z);
@@ -165,8 +164,8 @@ public class Triangle {
 				
 				//System.out.println(triProjected.p[0].x + " " + triProjected.p[0].y + " | " + triProjected.p[1].x + " " + triProjected.p[1].y + " | " + triProjected.p[2].x + " " + triProjected.p[2].y);
 
-				g.setColor(Color.BLACK);
-				g.drawPolygon(new int[]{ (int) triProjected.p[0].x, (int) triProjected.p[1].x, (int) triProjected.p[2].x }, new int[]{ (int) triProjected.p[0].y, (int) triProjected.p[1].y, (int) triProjected.p[2].y }, 3);
+				//g.setColor(Color.BLACK);
+				//g.drawPolygon(new int[]{ (int) triProjected.p[0].x, (int) triProjected.p[1].x, (int) triProjected.p[2].x }, new int[]{ (int) triProjected.p[0].y, (int) triProjected.p[1].y, (int) triProjected.p[2].y }, 3);
 				g.setColor(triProjected.brightness);
 				g.fillPolygon(new int[]{ (int) triProjected.p[0].x, (int) triProjected.p[1].x, (int) triProjected.p[2].x }, new int[]{ (int) triProjected.p[0].y, (int) triProjected.p[1].y, (int) triProjected.p[2].y }, 3);
 			}

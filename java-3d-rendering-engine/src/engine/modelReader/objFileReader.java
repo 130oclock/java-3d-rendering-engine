@@ -1,7 +1,6 @@
 package engine.modelReader;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ public class objFileReader {
 			BufferedReader br = new BufferedReader(new FileReader(filename), 8*1024);
 			Scanner scanner = new Scanner(br);
 			
-			String title;
+			//String title;
 			List<double[]> vertices = new ArrayList<double[]>();
 			List<int[]> faces = new ArrayList<int[]>();
 			List<Triangle> triangles = new ArrayList<Triangle>();
@@ -33,7 +32,7 @@ public class objFileReader {
 				
 				switch(type) {
 				case "g": 
-					title = segments[1];
+					//title = segments[1];
 					System.out.println("loaded " + segments[1]);
 					break;
 				case "v":

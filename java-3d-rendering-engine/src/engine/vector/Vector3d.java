@@ -28,6 +28,10 @@ public class Vector3d {
 		return new Vector3d(this.x, this.y, this.z);
 	}
 	
+	public static Vector3d empty() {
+		return new Vector3d(0, 0, 0);
+	}
+	
 	// Find the distance between two 3d points
 	public static double distance(Vector3d v1, Vector3d v2) {
 		double dx = v1.x - v2.x;

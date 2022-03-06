@@ -6,7 +6,7 @@ import java.awt.event.KeyListener;
 public class Keyboard implements KeyListener {
 
 	private boolean[] keys = new boolean[66568];
-	private boolean left, right, forward, backward, up, down, kup, kdown, kleft, kright;
+	private boolean left, right, forward, backward, up, down, kup, kdown, kleft, kright, krleft, krright;
 	
 	public void update() {
 		this.left = this.keys[KeyEvent.VK_A];
@@ -20,6 +20,8 @@ public class Keyboard implements KeyListener {
 		this.kdown = this.keys[KeyEvent.VK_DOWN];
 		this.kleft = this.keys[KeyEvent.VK_LEFT];
 		this.kright = this.keys[KeyEvent.VK_RIGHT];
+		this.krleft = this.keys[KeyEvent.VK_Q];
+		this.krright = this.keys[KeyEvent.VK_E];
 	}
 	
 	public boolean getUp() {
@@ -60,6 +62,14 @@ public class Keyboard implements KeyListener {
 	
 	public boolean getKLeft() {
 		return this.kleft;
+	}
+	
+	public boolean getKRRight() {
+		return this.krright;
+	}
+	
+	public boolean getKRLeft() {
+		return this.krleft;
 	}
 	
 	@Override

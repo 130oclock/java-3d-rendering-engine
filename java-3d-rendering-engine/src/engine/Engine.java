@@ -9,13 +9,13 @@ import java.awt.image.BufferStrategy;
 import javax.swing.JFrame;
 
 import engine.camera.Camera;
+import engine.entities.Entity;
 import engine.input.*;
 import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
 import engine.modelReader.objFileReader;
 import engine.quaternion.Quaternion;
 import engine.vector.*;
-import engine.triangle.Triangle;
 
 public class Engine extends Canvas implements Runnable {
 	
@@ -27,21 +27,21 @@ public class Engine extends Canvas implements Runnable {
 	private Thread thread;
 	private JFrame frame;
 	private static String title = "3D Engine";
-	private static final int screenWidth = 800;
-	private static final int screenHeight = 600;
+	private static final int screenWidth = 1000;
+	private static final int screenHeight = 750;
 	private static boolean running = false;
 	
 	private static final double fps = 60;
 	
-	private Camera camera = new Camera(new Vector3d(0,0,20), 500);
-	private EnvironmentLight light = new EnvironmentLight(new Vector3d(1,1,1));
+	private Camera camera = new Camera(new Vector3d(0,0,10), 500);
+	private EnvironmentLight light = new EnvironmentLight(new Vector3d(1,-1,1));
 	
 	private Mat4x4 matView = Mat4x4.makeIdentity(new Mat4x4());
 	private Mat4x4 matProj = Mat4x4.makeProjection(90, screenHeight, screenWidth, 0.1, 1000);
 	
 	private UserInput userInput;
 	
-	private static Triangle[] cube;
+	private static Entity cube;
 	
 	public Engine() {
 		// Generate Window
@@ -57,8 +57,8 @@ public class Engine extends Canvas implements Runnable {
 	
 	public static void main(String[] args) {
 
-		cube = objFileReader.load("Models/cube.obj");
-		//cube = objFileReader.load("Models/octahedron.obj");
+		cube = new Entity(objFileReader.load("Models/cube.obj"), Vector3d.empty(), Quaternion.empty());
+		//cube = new Entity(objFileReader.load("Models/octahedron.obj"), Vector3d.empty(), Quaternion.empty());
 		
 		Engine engine = new Engine();
 		engine.frame.setTitle(title);
@@ -135,7 +135,7 @@ public class Engine extends Canvas implements Runnable {
 		matTrans = Mat4x4.quickInverse(matTrans);
 		matView = Mat4x4.multiplyMatrix(matTrans, matRot);
 		
-		Triangle.projectTriangles(g, cube, camera, matView, matProj, screenWidth, screenHeight, light);
+		cube.draw(g, camera, matView, matProj, screenWidth, screenHeight, light);
 		
 		g.dispose();
 		bs.show();
@@ -145,48 +145,7 @@ public class Engine extends Canvas implements Runnable {
 		Keyboard keyb = this.userInput.keyboard;
 		keyb.update();
 
-		Vector3d vUp = this.camera.rot.getUpVector();
-		Vector3d vForward = this.camera.rot.getForwardVector();
-		Vector3d vRight = this.camera.rot.getRightVector();
-		
-		if (keyb.getUp() == true) {
-			this.camera.translate(-vUp.x, -vUp.y, -vUp.z);
-		}
-		
-		if (keyb.getDown() == true) {
-			this.camera.translate(vUp.x, vUp.y, vUp.z);
-		}
-		
-		if (keyb.getRight() == true) {
-			this.camera.translate(vRight.x, vRight.y, vRight.z);
-		}
-		
-		if (keyb.getLeft() == true) {
-			this.camera.translate(-vRight.x, -vRight.y, -vRight.z);
-		}
-
-		if (keyb.getForward() == true) {
-			this.camera.translate(-vForward.x, -vForward.y, -vForward.z);
-		}
-		
-		if (keyb.getBackward() == true) {
-			this.camera.translate(vForward.x, vForward.y, vForward.z);
-		}
-		
-		if (keyb.getKUp() == true) {
-			this.camera.rotate(vRight, -0.04);
-		}
-		
-		if (keyb.getKDown() == true) {
-			this.camera.rotate(vRight, 0.04);
-		}
-		
-		if (keyb.getKRight() == true) {
-			this.camera.rotate(vUp, -0.04);
-		}
-		
-		if (keyb.getKLeft() == true) {
-			this.camera.rotate(vUp, 0.04);                    
-		}
+		this.camera.keyboard(keyb);
+		cube.update();
 	}
 }
