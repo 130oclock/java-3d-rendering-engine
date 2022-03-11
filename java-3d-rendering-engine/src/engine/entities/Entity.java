@@ -1,6 +1,8 @@
 package engine.entities;
 
 import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.List;
 
 import engine.camera.Camera;
 import engine.light.EnvironmentLight;
@@ -11,6 +13,8 @@ import engine.vector.Vector3d;
 
 public class Entity {
 	
+	public static List<Entity> entities = new ArrayList<Entity>();
+	
 	private Triangle[] model;
 	private Vector3d pos;
 	private Quaternion rot;
@@ -19,6 +23,8 @@ public class Entity {
 		this.model = model;
 		this.pos = pos;
 		this.rot = rot;
+		
+		entities.add(this);
 	}
 	
 	public void draw(Graphics g, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {

@@ -33,15 +33,13 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final double fps = 60;
 	
-	private Camera camera = new Camera(new Vector3d(0,0,10), 500);
-	private EnvironmentLight light = new EnvironmentLight(new Vector3d(1,-1,1));
+	private Camera camera = new Camera(new Vector3d(0,0,-10), 500);
+	private EnvironmentLight light = new EnvironmentLight(new Vector3d(-1,1,-1));
 	
 	private Mat4x4 matView = Mat4x4.makeIdentity(new Mat4x4());
 	private Mat4x4 matProj = Mat4x4.makeProjection(90, screenHeight, screenWidth, 0.1, 1000);
 	
 	private UserInput userInput;
-	
-	private static Entity cube;
 	
 	public Engine() {
 		// Generate Window
@@ -56,8 +54,8 @@ public class Engine extends Canvas implements Runnable {
 	}
 	
 	public static void main(String[] args) {
-
-		cube = new Entity(objFileReader.load("Models/cube.obj"), Vector3d.empty(), Quaternion.empty());
+		// initialize any entities
+		new Entity(objFileReader.load("Models/cube.obj"), Vector3d.empty(), Quaternion.empty());
 		//cube = new Entity(objFileReader.load("Models/octahedron.obj"), Vector3d.empty(), Quaternion.empty());
 		
 		Engine engine = new Engine();
@@ -135,7 +133,9 @@ public class Engine extends Canvas implements Runnable {
 		matTrans = Mat4x4.quickInverse(matTrans);
 		matView = Mat4x4.multiplyMatrix(matTrans, matRot);
 		
-		cube.draw(g, camera, matView, matProj, screenWidth, screenHeight, light);
+		for (Entity ent : Entity.entities) {
+			ent.draw(g, camera, matView, matProj, screenWidth, screenHeight, light);
+		}
 		
 		g.dispose();
 		bs.show();
@@ -146,6 +146,9 @@ public class Engine extends Canvas implements Runnable {
 		keyb.update();
 
 		this.camera.keyboard(keyb);
-		cube.update();
+		
+		for (Entity ent : Entity.entities) {
+			ent.update();
+		}
 	}
 }

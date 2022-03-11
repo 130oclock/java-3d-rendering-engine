@@ -10,12 +10,14 @@ public class Camera {
 	public Quaternion rot;
 	public double viewDistance;
 	public double moveSpeed;
+	public Vector3d clippingPlane;
 	
 	public Camera(Vector3d pos, double viewDistance) {
 		this.pos = pos;
 		this.rot = Quaternion.empty();
 		this.viewDistance = viewDistance;
 		this.moveSpeed = 0.2;
+		this.clippingPlane = new Vector3d(0, 0, 0.1);
 	}
 	
 	public void translate(Vector3d vec) {
@@ -34,27 +36,27 @@ public class Camera {
 		Vector3d vRight = this.rot.getRightVector();
 		
 		if (keyb.getUp() == true) {
-			this.translate(Vector3d.multiply(vUp, -this.moveSpeed));
-		}
-		
-		if (keyb.getDown() == true) {
 			this.translate(Vector3d.multiply(vUp, this.moveSpeed));
 		}
 		
+		if (keyb.getDown() == true) {
+			this.translate(Vector3d.multiply(vUp, -this.moveSpeed));
+		}
+		
 		if (keyb.getRight() == true) {
-			this.translate(Vector3d.multiply(vRight, this.moveSpeed));
+			this.translate(Vector3d.multiply(vRight, -this.moveSpeed));
 		}
 		
 		if (keyb.getLeft() == true) {
-			this.translate(Vector3d.multiply(vRight, -this.moveSpeed));
+			this.translate(Vector3d.multiply(vRight, this.moveSpeed));
 		}
 
 		if (keyb.getForward() == true) {
-			this.translate(Vector3d.multiply(vForward, -this.moveSpeed));
+			this.translate(Vector3d.multiply(vForward, this.moveSpeed));
 		}
 		
 		if (keyb.getBackward() == true) {
-			this.translate(Vector3d.multiply(vForward, this.moveSpeed));
+			this.translate(Vector3d.multiply(vForward, -this.moveSpeed));
 		}
 		
 		if (keyb.getKUp() == true) {
