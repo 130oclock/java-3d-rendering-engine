@@ -16,7 +16,7 @@ public class Camera {
 		this.pos = pos;
 		this.rot = Quaternion.empty();
 		this.viewDistance = viewDistance;
-		this.moveSpeed = 0.2;
+		this.moveSpeed = 0.15;
 		this.clippingPlane = new Vector3d(0, 0, 0.1);
 	}
 	

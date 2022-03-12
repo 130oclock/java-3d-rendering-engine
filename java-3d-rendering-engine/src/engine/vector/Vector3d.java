@@ -144,11 +144,11 @@ public class Vector3d {
 		double d = Vector3d.dotProduct(nPlane, pPlane);
 		double ad = Vector3d.dotProduct(start, nPlane);
 		double bd = Vector3d.dotProduct(end, nPlane);
-		return (-d - ad) / (bd - ad);
+		return (d - ad) / (bd - ad);
 	}
 	
 	// Finds the exact vector on a line between two points where they are intersected by a plane
-	public static Vector3d intersectPlaneVector3d(Vector3d p, Vector3d n, Vector3d start, Vector3d end, double t) {
+	public static Vector3d intersectPlaneVector3d(Vector3d start, Vector3d end, double t) {
 		Vector3d lineStartToEnd = Vector3d.subtract(end, start);
 		Vector3d lineToIntersect = Vector3d.multiply(lineStartToEnd, t);
 		return Vector3d.add(start, lineToIntersect);

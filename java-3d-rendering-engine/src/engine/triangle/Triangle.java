@@ -12,7 +12,7 @@ import engine.vector.Vector3d;
 
 public class Triangle {
 	
-	private static boolean drawOutlines = true;
+	private static boolean drawOutlines = false;
 	private static boolean showClipping = false;
 	
 	private Vector3d[] p = new Vector3d[3];
@@ -67,9 +67,9 @@ public class Triangle {
 		return new Vector3d[] { vec1, vec2, vec3 };
 	}
 	
-	public static double clipDist(Vector3d nPlane, Vector3d pPlane, Vector3d p) {
+	public static double signedDist(Vector3d nPlane, Vector3d pPlane, Vector3d p) {
 		Vector3d n = Vector3d.normalize(p);
-		return (nPlane.x * p.x + nPlane.y * p.y + nPlane.z * p.z - Vector3d.dotProduct(nPlane, pPlane));
+		return (nPlane.x * n.x + nPlane.y * n.y + nPlane.z * n.z - Vector3d.dotProduct(nPlane, pPlane));
 	}
 	
 	public static Triangle[] clipAgainstPlane(Vector3d pPlane, Vector3d nPlane, Triangle tri) {
@@ -80,9 +80,9 @@ public class Triangle {
 		Vector2d[] insideTex = new Vector2d[3];			int nInsideTex = 0;
 		Vector2d[] outsideTex = new Vector2d[3];		int nOutsideTex = 0;
 		
-		double d0 = Triangle.clipDist(nPlane, pPlane, tri.p[0]);
-		double d1 = Triangle.clipDist(nPlane, pPlane, tri.p[1]);
-		double d2 = Triangle.clipDist(nPlane, pPlane, tri.p[2]);
+		double d0 = Triangle.signedDist(nPlane, pPlane, tri.p[0]);
+		double d1 = Triangle.signedDist(nPlane, pPlane, tri.p[1]);
+		double d2 = Triangle.signedDist(nPlane, pPlane, tri.p[2]);
 		
 		if (d0 >= 0) {
 			insidePoints[nInsidePoints++] = tri.p[0];
@@ -115,59 +115,72 @@ public class Triangle {
 			return new Triangle[] { tri.copy(), null };
 		}
 		// if one point is on the screen and two are not on the screen
-		if (nInsidePoints == 1 && nOutsidePoints == 2) {
+		if (nInsidePoints == 1 && nOutsidePoints == 2) { // A ; B, C
 			Triangle otri1 = Triangle.empty();
 			if (showClipping == true) otri1.brightness = Color.BLUE;
 			else otri1.brightness = tri.brightness;
+			
+			// A
 			otri1.p[0] = insidePoints[0];
 			otri1.t[0] = insideTex[0];
 			
+			// intersection of AB = B'
 			double t1 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[0]);
-			otri1.p[1] = Vector3d.intersectPlaneVector3d(pPlane, nPlane, insidePoints[0], outsidePoints[0], t1);
+			otri1.p[1] = Vector3d.intersectPlaneVector3d(insidePoints[0], outsidePoints[0], t1);
 			otri1.t[1].u = t1 * (outsideTex[0].u - insideTex[0].u) + insideTex[0].u;
 			otri1.t[1].v = t1 * (outsideTex[0].v - insideTex[0].v) + insideTex[0].v;
 			otri1.t[1].w = t1 * (outsideTex[0].w - insideTex[0].w) + insideTex[0].w;
 			
+			// intersection of AC = C'
 			double t2 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[1]);
-			otri1.p[2] = Vector3d.intersectPlaneVector3d(pPlane, nPlane, insidePoints[0], outsidePoints[1], t2);
+			otri1.p[2] = Vector3d.intersectPlaneVector3d(insidePoints[0], outsidePoints[1], t2);
 			otri1.t[2].u = t2 * (outsideTex[1].u - insideTex[0].u) + insideTex[0].u;
 			otri1.t[2].v = t2 * (outsideTex[1].v - insideTex[0].v) + insideTex[0].v;
 			otri1.t[2].w = t2 * (outsideTex[1].w - insideTex[0].w) + insideTex[0].w;
 			
-			return new Triangle[] { otri1, null };
+			return new Triangle[] { otri1, null }; // Triangle AB'C'
 		}
 		// if two points are on the screen and one is not on the screen
-		if (nInsidePoints == 2 && nOutsidePoints == 1) {
+		if (nInsidePoints == 2 && nOutsidePoints == 1) { // A, B ; C
 			Triangle otri1 = Triangle.empty(), otri2 = Triangle.empty();
-			if (showClipping == true) otri1.brightness = Color.BLUE;
+			if (showClipping == true) otri1.brightness = Color.YELLOW;
 			else otri1.brightness = tri.brightness;
 
-			if (showClipping == true) otri2.brightness = Color.BLUE;
+			if (showClipping == true) otri2.brightness = Color.GREEN;
 			else otri2.brightness = tri.brightness;
 			
+			// A
 			otri1.p[0] = insidePoints[0];
 			otri1.t[0] = insideTex[0];
+			
+			// B
 			otri1.p[1] = insidePoints[1];
 			otri1.t[1] = insideTex[1];
 			
+			// intersection of AC = A'
 			double t1 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[0]);
-			otri1.p[2] = Vector3d.intersectPlaneVector3d(pPlane, nPlane, insidePoints[0], outsidePoints[0], t1);
+			otri1.p[2] = Vector3d.intersectPlaneVector3d(insidePoints[0], outsidePoints[0], t1);
 			otri1.t[2].u = t1 * (outsideTex[0].u - insideTex[0].u) + insideTex[0].u;
 			otri1.t[2].v = t1 * (outsideTex[0].v - insideTex[0].v) + insideTex[0].v;
 			otri1.t[2].w = t1 * (outsideTex[0].w - insideTex[0].w) + insideTex[0].w;
 			
-			otri2.p[0] = insidePoints[1];
-			otri2.t[0] = insideTex[1];
-			otri2.p[1] = otri1.p[2];
-			otri2.t[1] = otri1.t[2];
+			// A'
+			otri2.p[0] = otri1.p[2];
+			otri2.t[0] = otri1.t[2];
 			
+			// B
+			otri2.p[1] = insidePoints[1];
+			otri2.t[1] = insideTex[1];
+			
+			
+			// intersection of BC = B'
 			double t2 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[1], outsidePoints[0]);
-			otri1.p[2] = Vector3d.intersectPlaneVector3d(pPlane, nPlane, insidePoints[1], outsidePoints[0], t2);
-			otri1.t[2].u = t2 * (outsideTex[0].u - insideTex[1].u) + insideTex[1].u;
-			otri1.t[2].v = t2 * (outsideTex[0].v - insideTex[1].v) + insideTex[1].v;
-			otri1.t[2].w = t2 * (outsideTex[0].w - insideTex[1].w) + insideTex[1].w;
+			otri2.p[2] = Vector3d.intersectPlaneVector3d(insidePoints[1], outsidePoints[0], t2);
+			otri2.t[2].u = t2 * (outsideTex[0].u - insideTex[1].u) + insideTex[1].u;
+			otri2.t[2].v = t2 * (outsideTex[0].v - insideTex[1].v) + insideTex[1].v;
+			otri2.t[2].w = t2 * (outsideTex[0].w - insideTex[1].w) + insideTex[1].w;
 			
-			return new Triangle[] { otri1, otri2 };
+			return new Triangle[] { otri1, otri2 }; // Triangle ABA' and A'BB'
 		}
 		return null;
 	}
