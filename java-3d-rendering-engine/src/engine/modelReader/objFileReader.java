@@ -1,8 +1,10 @@
 package engine.modelReader;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -14,33 +16,41 @@ import engine.vector.Vector3d;
 public class objFileReader {
 	public static Triangle[] load(String filename) {
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(filename), 8*1024);
-			Scanner scanner = new Scanner(br);
+			FileInputStream inputStream = null;
+			Scanner scanner = null;
 			
-			//String title;
-			List<double[]> vertices = new ArrayList<double[]>();
-			List<int[]> faces = new ArrayList<int[]>();
-			List<Triangle> triangles = new ArrayList<Triangle>();
+			List<double[]> vertices = null;
+			List<int[]> faces = null;
+			List<Triangle> triangles = null;
+			try {
+				inputStream = new FileInputStream(filename);
+				scanner = new Scanner(inputStream);
+				
+				//String title;
+				vertices = new ArrayList<double[]>();
+				faces = new ArrayList<int[]>();
+				triangles = new ArrayList<Triangle>();
 			
-			while (scanner.hasNextLine()) {
-				String data = scanner.nextLine();
-				
-				String[] segments = data.split("\s+");
-				if (segments.length == 0 || segments[0].contains("#") == true) continue;
-				String type = segments[0];
-				//System.out.println(type);
-				
-				switch(type) {
-				case "g": 
-					//title = segments[1];
-					System.out.println("loaded " + segments[1]);
-					break;
-				case "v":
-					vertices.add(new double[] { Double.parseDouble(segments[1]), Double.parseDouble(segments[2]), Double.parseDouble(segments[3]) });
-					break;
-				case "f":
-					faces.add(new int[] { Integer.parseInt(segments[1]), Integer.parseInt(segments[2]), Integer.parseInt(segments[3]) });
-					break;
+				while (scanner.hasNextLine()) {
+					String data = scanner.nextLine();
+					
+					String[] segments = data.split("\s+");
+					if (segments.length == 0 || segments[0].contains("#") == true) continue;
+					String type = segments[0];
+					//System.out.println(type);
+					
+					switch(type) {
+					case "g": 
+						//title = segments[1];
+						System.out.println("loaded " + segments[1]);
+						break;
+					case "v":
+						vertices.add(new double[] { Double.parseDouble(segments[1]), Double.parseDouble(segments[2]), Double.parseDouble(segments[3]) });
+						break;
+					case "f":
+						faces.add(new int[] { Integer.parseInt(segments[1]), Integer.parseInt(segments[2]), Integer.parseInt(segments[3]) });
+						break;
+					}
 				}
 				
 				for (int[] face : faces) {
@@ -61,8 +71,19 @@ public class objFileReader {
 					
 					triangles.add(tri);
 				}
+			} finally {
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				if (scanner != null) {
+					scanner.close();
+				}
 			}
-			scanner.close();
 			
 			Triangle[] trianglesArray = triangles.toArray(new Triangle[0]);
 			return trianglesArray;

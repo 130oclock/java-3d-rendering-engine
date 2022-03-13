@@ -33,7 +33,7 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final double fps = 60;
 	
-	private Camera camera = new Camera(new Vector3d(0,0,-10), 500);
+	private Camera camera = new Camera(0, 0, -5, 500);
 	private EnvironmentLight light = new EnvironmentLight(new Vector3d(-1,1,-1));
 	
 	private Mat4x4 matView = Mat4x4.makeIdentity(new Mat4x4());
@@ -55,8 +55,9 @@ public class Engine extends Canvas implements Runnable {
 	
 	public static void main(String[] args) {
 		// initialize any entities
-		new Entity(objFileReader.load("Models/cube.obj"), Vector3d.empty(), Quaternion.empty());
-		//cube = new Entity(objFileReader.load("Models/octahedron.obj"), Vector3d.empty(), Quaternion.empty());
+		//new Entity(objFileReader.load("Models/cube.obj"));
+		//new Entity(objFileReader.load("Models/octahedron.obj"));
+		new Entity(objFileReader.load("Models/utahTeapot.obj"));
 		
 		Engine engine = new Engine();
 		engine.frame.setTitle(title);
@@ -100,14 +101,16 @@ public class Engine extends Canvas implements Runnable {
 			
 			while(delta >= 1) {
 				update();
+
+				render();
+				frames++;
+				
 				delta--;
 			}
-			render();
-			frames++;
 			
 			if (System.currentTimeMillis() - timer > 1000) {
 				timer += 1000;
-				frame.setTitle(title + " | " + frames + " fps");
+				frame.setTitle(title + " | " + frames + " fps | x " + String.format("%.2f", this.camera.pos.x) + " | y " + String.format("%.2f", this.camera.pos.y) + " | z " + String.format("%.2f", this.camera.pos.z));
 				frames = 0;
 			}
 		}

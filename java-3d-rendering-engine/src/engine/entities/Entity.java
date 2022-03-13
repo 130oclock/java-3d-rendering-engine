@@ -19,10 +19,26 @@ public class Entity {
 	private Vector3d pos;
 	private Quaternion rot;
 	
-	public Entity(Triangle[] model, Vector3d pos, Quaternion rot) {
+	public Entity(Triangle[] model) {
+		this.model = model;
+		this.pos = Vector3d.empty();
+		this.rot = Quaternion.empty();
+
+		entities.add(this);
+	}
+	
+	public Entity(Triangle[] model, double x, double y, double z) {
+		this.model = model;
+		this.pos = new Vector3d(x, y, z);
+		this.rot = Quaternion.empty();
+		
+		entities.add(this);
+	}
+	
+	public Entity(Triangle[] model, Vector3d pos) {
 		this.model = model;
 		this.pos = pos;
-		this.rot = rot;
+		this.rot = Quaternion.empty();
 		
 		entities.add(this);
 	}
