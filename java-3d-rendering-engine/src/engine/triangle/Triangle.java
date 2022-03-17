@@ -2,6 +2,8 @@ package engine.triangle;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.List;
 
 import engine.camera.Camera;
 import engine.light.EnvironmentLight;
@@ -14,6 +16,9 @@ public class Triangle {
 	
 	private static boolean drawOutlines = false;
 	private static boolean showClipping = false;
+	private static boolean doLighting = true;
+	
+	public static List<Triangle> triangleRaster = new ArrayList<Triangle>();
 	
 	private Vector3d[] p = new Vector3d[3];
 	private Vector3d normal;
@@ -21,6 +26,7 @@ public class Triangle {
 	private Vector2d[] t = new Vector2d[3];
 	
 	private Color brightness;
+	public Color color;
 	
 	public Triangle(Vector3d p0, Vector3d p1, Vector3d p2, Vector2d t0, Vector2d t1, Vector2d t2, Vector3d normal) {
 		this.p[0] = p0;
@@ -32,6 +38,8 @@ public class Triangle {
 		this.t[0] = t0;
 		this.t[1] = t1;
 		this.t[2] = t2;
+		
+		this.color = new Color(255, 255, 255);
 	}
 	
 	// Create an empty Triangle
@@ -186,7 +194,7 @@ public class Triangle {
 	}
 	
 	// Project a list of triangles to screen view
-	public static void projectTriangles(Graphics g, Triangle[] trianglesToRaster, Vector3d pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
+	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3d pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
 		Mat4x4 matWorld = Quaternion.generateMatrix(rot, pos);
 		
 		for (Triangle tri : trianglesToRaster) {
@@ -225,11 +233,16 @@ public class Triangle {
 				
 				double dp = Math.max(0.1, Vector3d.dotProduct(lightDirection, normal));
 				
-				int red = (int) ((dp * 255) * (light.color.getRed() / 255));
-				int green = (int) ((dp * 255) * (light.color.getGreen() / 255));
-				int blue = (int) ((dp * 255) * (light.color.getBlue() / 255));
-				//System.out.println(red + " " + green + " " + blue);
-				triViewed.brightness = new Color(red, green, blue);
+				if (doLighting == true) {
+					Color adjustedColor = EnvironmentLight.blend(light.color, tri.color);
+					int red = (int) ((dp * 255) * (adjustedColor.getRed() / 255));
+					int green = (int) ((dp * 255) * (adjustedColor.getGreen() / 255));
+					int blue = (int) ((dp * 255) * (adjustedColor.getBlue() / 255));
+					//System.out.println(red + " " + green + " " + blue);
+					triViewed.brightness = new Color(red, green, blue);
+				} else {
+					triViewed.brightness = tri.color;
+				}
 				
 				triViewed.p = Triangle.multiplyMatrixTriangle(matView, triTransformed);
 				
@@ -292,13 +305,297 @@ public class Triangle {
 					triProjected.p[2].y *= 0.5 * HEIGHT;
 					
 					//System.out.println(triProjected.p[0].x + " " + triProjected.p[0].y + " | " + triProjected.p[1].x + " " + triProjected.p[1].y + " | " + triProjected.p[2].x + " " + triProjected.p[2].y);
+					triangleRaster.add(triProjected);
+				}
+			}
+		}
+	}
 	
-					if (drawOutlines == true) {
-						g.setColor(Color.BLACK);
-						g.drawPolygon(new int[]{ (int) triProjected.p[0].x, (int) triProjected.p[1].x, (int) triProjected.p[2].x }, new int[]{ (int) triProjected.p[0].y, (int) triProjected.p[1].y, (int) triProjected.p[2].y }, 3);
+	public static void cullScreenEdges(int WIDTH, int HEIGHT) {
+		List<Triangle> allTriangles = new ArrayList<Triangle>();
+		for (Triangle tri : triangleRaster) {
+			List<Triangle> listTriangles = new ArrayList<Triangle>();
+			
+			listTriangles.add(tri);
+			int nNewTriangles = 1;
+			Triangle[] clipped = null;
+			// Draw Triangles
+			for (int p = 0; p < 4; p++) {
+				//System.out.println(p);
+				while (nNewTriangles > 0) {
+					Triangle test = listTriangles.remove(0);
+					nNewTriangles--;
+					switch (p) {
+						case 0: 
+							clipped = Triangle.clipAgainstPlane(new Vector3d(0, 0, 0), new Vector3d(0, 1, 0), test); 
+							break; //Top
+						case 1: 
+							clipped = Triangle.clipAgainstPlane(new Vector3d(0, HEIGHT - 1, 0), new Vector3d(0, -1, 0), test); 
+							break; //Bottom
+						case 2: 
+							clipped = Triangle.clipAgainstPlane(new Vector3d(0, 0, 0), new Vector3d(1, 0, 0), test); 
+							break; //Right
+						case 3: 
+							clipped = Triangle.clipAgainstPlane(new Vector3d(WIDTH - 1, 0, 0), new Vector3d(-1, 0, 0), test); 
+							break; //Left
 					}
-					g.setColor(triProjected.brightness);
-					g.fillPolygon(new int[]{ (int) triProjected.p[0].x, (int) triProjected.p[1].x, (int) triProjected.p[2].x }, new int[]{ (int) triProjected.p[0].y, (int) triProjected.p[1].y, (int) triProjected.p[2].y }, 3);
+					
+					for (var w = 0; w < clipped.length; w++) {
+						if (clipped[w] == null) continue;
+						listTriangles.add(clipped[w]);
+					}
+				}
+				nNewTriangles = listTriangles.size();
+			}
+			
+			for (Triangle t : listTriangles) {
+				allTriangles.add(t);
+			}
+		}
+		triangleRaster = allTriangles;
+	}
+	
+	public static void clearRaster() {
+		triangleRaster.clear();
+	}
+	
+	public static void drawTriangles(Graphics g, int[] pDepthBuffer, int WIDTH, int HEIGHT) {
+		for (Triangle tri : triangleRaster) {
+			if (drawOutlines == true) {
+				g.setColor(Color.BLACK);
+				g.drawPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
+			}
+			g.setColor(tri.brightness);
+			g.fillPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
+			//drawTriangle(g, pDepthBuffer, WIDTH, HEIGHT, tri.p[0].x, tri.p[1].x, tri.p[2].x, tri.p[0].y, tri.p[1].y, tri.p[2].y, tri.t[0].u, tri.t[1].u, tri.t[2].u, tri.t[0].v, tri.t[1].v, tri.t[2].v, tri.t[0].w, tri.t[1].w, tri.t[2].w, tri.brightness);
+		}
+	}
+	
+	private static void drawTriangle(Graphics g, int[] pDepthBuffer, int WIDTH, int HEIGHT, double x1_, double x2_, double x3_, double y1_, double y2_, double y3_, double u1, double u2, double u3, double v1, double v2, double v3, double w1, double w2, double w3, Color color) {
+		int x1 = (int) x1_;
+		int x2 = (int) x2_;
+		int x3 = (int) x3_;
+		int y1 = (int) y1_;
+		int y2 = (int) y2_;
+		int y3 = (int) y3_;
+		
+		if (y2 < y1) {
+			int temp = y1;
+			y1 = y2;
+			y2 = temp;
+			
+			temp = x1;
+			x1 = x2;
+			x2 = temp;
+			
+			double temp1 = u1;
+			u1 = u2;
+			u2 = temp1;
+			
+			temp1 = v1;
+			v1 = v2;
+			v2 = temp1;
+			
+			temp1 = w1;
+			w1 = w2;
+			w2 = temp1;
+		}
+		if (y3 < y1) {
+			int temp = y1;
+			y1 = y3;
+			y3 = temp;
+			
+			temp = x1;
+			x1 = x3;
+			x3 = temp;
+			
+			double temp1 = u1;
+			u1 = u3;
+			u3 = temp1;
+			
+			temp1 = v1;
+			v1 = v3;
+			v3 = temp1;
+			
+			temp1 = w1;
+			w1 = w3;
+			w3 = temp1;
+		}
+		if (y3 < y2) {
+			int temp = y2;
+			y2 = y3;
+			y3 = temp;
+			
+			temp = x2;
+			x2 = x3;
+			x3 = temp;
+			
+			double temp1 = u2;
+			u2 = u3;
+			u3 = temp1;
+			
+			temp1 = v2;
+			v2 = v3;
+			v3 = temp1;
+			
+			temp1 = w2;
+			w2 = w3;
+			w3 = temp1;
+			
+		}
+		
+		int dy1 = y2 - y1;
+		int dx1 = x2 - x1;
+		double du1 = u2 - u1;
+		double dv1 = v2 - v1;
+		double dw1 = w2 - w1;
+		
+		int dy2 = y3 - y1;
+		int dx2 = x3 - x1;
+		double du2 = u3 - u1;
+		double dv2 = v3 - v1;
+		double dw2 = w3 - w1;
+		
+		double tex_u, tex_v, tex_w;
+		
+		double dax_step = 0, dbx_step = 0,
+				du1_step = 0, dv1_step = 0,
+				du2_step = 0, dv2_step = 0,
+				dw1_step = 0, dw2_step = 0;
+				
+		if (dy1 != 0) {
+			dax_step = dx1 / Math.abs(dy1);
+			du1_step = du1 / Math.abs(dy1);
+			dv1_step = dv1 / Math.abs(dy1);
+			dw1_step = dw1 / Math.abs(dy1);
+		}
+
+		if (dy2 != 0) {
+			dbx_step = dx2 / Math.abs(dy2);
+			du2_step = du2 / Math.abs(dy2);
+			dv2_step = dv2 / Math.abs(dy2);
+			dw2_step = dw2 / Math.abs(dy2);
+		}
+		
+		if (dy1 != 0) {
+			for (int i = y1; i <= y2; i++) {
+				double ax = x1 + (i - y1) * dax_step;
+				double bx = x1 + (i - y1) * dbx_step;
+				
+				double tex_su = u1 + (i - y1) * du1_step;
+				double tex_sv = v1 + (i - y1) * dv1_step;
+				double tex_sw = w1 + (i - y1) * dw1_step;
+				
+				double tex_eu = u1 + (i - y1) * du2_step;
+				double tex_ev = v1 + (i - y1) * dv2_step;
+				double tex_ew = w1 + (i - y1) * dw2_step;
+				
+				if (ax > bx) {
+					double temp = ax;
+					ax = bx;
+					bx = temp;
+					temp = tex_su;
+					tex_su = tex_eu;
+					tex_eu = temp;
+					temp = tex_sv;
+					tex_sv = tex_ev;
+					tex_ev = temp;
+					temp = tex_sw;
+					tex_sw = tex_ew;
+					tex_ew = temp;
+				}
+				
+				tex_u = tex_su;
+				tex_v = tex_sv;
+				tex_w = tex_sw;
+				
+				double tstep = 1 / (bx - ax);
+				double t = 0;
+				
+				for (double j = ax; j < bx; j++) {
+					if (i > 0 && i <= HEIGHT && j > 0 && j <= WIDTH) {
+						tex_u = ((1 - t) * tex_su) + (t * tex_eu);
+						tex_v = ((1 - t) * tex_sv) + (t * tex_ev);
+						tex_w = ((1 - t) * tex_sw) + (t * tex_ew);
+						
+						int d = (int) ((i * WIDTH) + j);
+						if (tex_w > pDepthBuffer[d]) {
+							g.setColor(color);
+							g.fillRect((int) j, i, 1, 1);
+							pDepthBuffer[d] = (int) tex_w;
+						}
+						t += tstep;
+					}
+				}
+			}
+			
+			dy1 = y3 - y2;
+			dx1 = x3 - x2;
+			dv1 = v3 - v2;
+			du1 = u3 - u2;
+			dw1 = w3 - w2;
+
+			du1_step = 0; 
+			dv1_step = 0;
+			
+			if (dy1 != 0) {
+				dax_step = dx1 / Math.abs(dy1);
+				du1_step = du1 / Math.abs(dy1);
+				dv1_step = dv1 / Math.abs(dy1);
+				dw1_step = dw1 / Math.abs(dy1);
+			}
+			
+			if (dy2 != 0) dbx_step = dx2 / Math.abs(dy2);
+				
+			if (dy1 != 0) {
+				for (int i = y2; i <= y3; i++) {
+					double ax = x2 + (i - y2) * dax_step;
+					double bx = x1 + (i - y1) * dbx_step;
+					
+					double tex_su = u2 + (i - y2) * du1_step;
+					double tex_sv = v2 + (i - y2) * dv1_step;
+					double tex_sw = w2 + (i - y2) * dw1_step;
+					
+					double tex_eu = u1 + (i - y1) * du2_step;
+					double tex_ev = v1 + (i - y1) * dv2_step;
+					double tex_ew = w1 + (i - y1) * dw2_step;
+					
+					if (ax > bx) {
+						double temp = ax;
+						ax = bx;
+						bx = temp;
+						temp = tex_su;
+						tex_su = tex_eu;
+						tex_eu = temp;
+						temp = tex_sv;
+						tex_sv = tex_ev;
+						tex_ev = temp;
+						temp = tex_sw;
+						tex_sw = tex_ew;
+						tex_ew = temp;
+					}
+					
+					tex_u = tex_su;
+					tex_v = tex_sv;
+					tex_w = tex_sw;
+					
+					double tstep = 1 / (bx - ax);
+					double t = 0;
+					
+					for (double j = ax; j < bx; j++) {
+						if (i > 0 && i <= HEIGHT && j > 0 && j <= WIDTH) {
+							tex_u = ((1 - t) * tex_su) + (t * tex_eu);
+							tex_v = ((1 - t) * tex_sv) + (t * tex_ev);
+							tex_w = ((1 - t) * tex_sw) + (t * tex_ew);
+							int d = (int) ((i * WIDTH) + j);
+							if (tex_w > pDepthBuffer[d]) {
+								g.setColor(color);
+								g.fillRect((int) j, i, 1, 1);
+								pDepthBuffer[d] = (int) tex_w;
+							}
+							t += tstep;
+						}
+					}
 				}
 			}
 		}

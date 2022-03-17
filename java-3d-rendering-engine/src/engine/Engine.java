@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
@@ -15,6 +16,7 @@ import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
 import engine.modelReader.objFileReader;
 import engine.quaternion.Quaternion;
+import engine.triangle.Triangle;
 import engine.vector.*;
 
 public class Engine extends Canvas implements Runnable {
@@ -27,17 +29,20 @@ public class Engine extends Canvas implements Runnable {
 	private Thread thread;
 	private JFrame frame;
 	private static String title = "3D Engine";
-	private static final int screenWidth = 1000;
-	private static final int screenHeight = 750;
+	
+	private static final int WIDTH = 1000;
+	private static final int HEIGHT = 750;
+	private static int[] pDepthBuffer = new int[WIDTH * HEIGHT];
+	
 	private static boolean running = false;
 	
 	private static final double fps = 60;
 	
 	private Camera camera = new Camera(0, 0, -5, 500);
-	private EnvironmentLight light = new EnvironmentLight(new Vector3d(-1,1,-1));
+	private EnvironmentLight light = new EnvironmentLight(new Vector3d(-1,1,-2));
 	
 	private Mat4x4 matView = Mat4x4.makeIdentity(new Mat4x4());
-	private Mat4x4 matProj = Mat4x4.makeProjection(90, screenHeight, screenWidth, 0.1, 1000);
+	private Mat4x4 matProj = Mat4x4.makeProjection(90, HEIGHT, WIDTH, 0.1, 1000);
 	
 	private UserInput userInput;
 	
@@ -45,7 +50,7 @@ public class Engine extends Canvas implements Runnable {
 		// Generate Window
 		this.frame = new JFrame();
 		
-		Dimension size = new Dimension(screenWidth, screenHeight);
+		Dimension size = new Dimension(WIDTH, HEIGHT);
 		this.setPreferredSize(size);
 		
 		this.userInput = new UserInput();
@@ -55,9 +60,9 @@ public class Engine extends Canvas implements Runnable {
 	
 	public static void main(String[] args) {
 		// initialize any entities
-		//new Entity(objFileReader.load("Models/cube.obj"));
+		new Entity(objFileReader.load("Models/cube.obj"));
 		//new Entity(objFileReader.load("Models/octahedron.obj"));
-		new Entity(objFileReader.load("Models/utahTeapot.obj"));
+		//new Entity(objFileReader.load("Models/utahTeapot.obj"));
 		
 		Engine engine = new Engine();
 		engine.frame.setTitle(title);
@@ -120,6 +125,11 @@ public class Engine extends Canvas implements Runnable {
 	
 	private void render() {
 		BufferStrategy bs = this.getBufferStrategy();
+		
+		for (var i : pDepthBuffer) {
+			pDepthBuffer[i] = 0;
+		}
+		
 		if (bs == null) {
 			this.createBufferStrategy(3);
 			return;
@@ -128,7 +138,7 @@ public class Engine extends Canvas implements Runnable {
 		Graphics g = bs.getDrawGraphics();
 		
 		g.setColor(Color.BLACK);
-		g.fillRect(0,  0, screenWidth, screenHeight);
+		g.fillRect(0,  0, WIDTH, HEIGHT);
 		
 		Quaternion.normalize(camera.rot);
 		Mat4x4 matRot = Quaternion.generateMatrix(camera.rot, null);
@@ -136,9 +146,15 @@ public class Engine extends Canvas implements Runnable {
 		matTrans = Mat4x4.quickInverse(matTrans);
 		matView = Mat4x4.multiplyMatrix(matTrans, matRot);
 		
+		Triangle.clearRaster();
+		
 		for (Entity ent : Entity.entities) {
-			ent.draw(g, camera, matView, matProj, screenWidth, screenHeight, light);
+			ent.project(camera, matView, matProj, WIDTH, HEIGHT, light);
 		}
+		
+		Triangle.cullScreenEdges(WIDTH, HEIGHT);
+		
+		Triangle.drawTriangles(g, pDepthBuffer, WIDTH, HEIGHT);
 		
 		g.dispose();
 		bs.show();

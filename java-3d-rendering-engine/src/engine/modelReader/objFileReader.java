@@ -1,5 +1,6 @@
 package engine.modelReader;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,6 +15,9 @@ import engine.vector.Vector2d;
 import engine.vector.Vector3d;
 
 public class objFileReader {
+	
+	private static boolean showOrder = false;
+	
 	public static Triangle[] load(String filename) {
 		try {
 			FileInputStream inputStream = null;
@@ -53,7 +57,10 @@ public class objFileReader {
 					}
 				}
 				
+				int ind = 0;
+				int size = faces.size();
 				for (int[] face : faces) {
+					ind++;
 					// The indexes of the face's 3 points
 					int i1 = face[0];
 					int i2 = face[1];
@@ -68,6 +75,11 @@ public class objFileReader {
 					Vector3d vector3 = new Vector3d(v3[0], v3[1], v3[2]);
 					
 					Triangle tri = new Triangle(vector1, vector2, vector3, new Vector2d(0, 0), new Vector2d(0, 0), new Vector2d(0, 0), null);
+					
+					if (showOrder == true) {
+						int col = (ind * 255 / size) / 3;
+						tri.color = new Color(col, col * 2, col * 3);
+					}
 					
 					triangles.add(tri);
 				}

@@ -43,11 +43,11 @@ public class Entity {
 		entities.add(this);
 	}
 	
-	public void draw(Graphics g, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
-		Triangle.projectTriangles(g, this.model, this.pos, this.rot, camera, matView, matProj, WIDTH, HEIGHT, light);
+	public void project(Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
+		Triangle.projectTriangles(this.model, this.pos, this.rot, camera, matView, matProj, WIDTH, HEIGHT, light);
 	}
 	
 	public void update() {
-		//this.rot = Quaternion.rotate(this.rot, Vector3d.normalize(new Vector3d(1, 1, 1)), -0.04);
+		this.rot = Quaternion.rotate(this.rot, Vector3d.normalize(new Vector3d(1, 1, 1)), -0.04);
 	}
 }
