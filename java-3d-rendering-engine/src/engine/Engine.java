@@ -104,11 +104,11 @@ public class Engine extends Canvas implements Runnable {
 			delta += (now - lastTime) / ns;
 			lastTime = now;
 			
+			render();
+			frames++;
+			
 			while(delta >= 1) {
 				update();
-
-				render();
-				frames++;
 				
 				delta--;
 			}
@@ -126,10 +126,6 @@ public class Engine extends Canvas implements Runnable {
 	private void render() {
 		BufferStrategy bs = this.getBufferStrategy();
 		
-		for (var i : pDepthBuffer) {
-			pDepthBuffer[i] = 0;
-		}
-		
 		if (bs == null) {
 			this.createBufferStrategy(3);
 			return;
@@ -139,6 +135,10 @@ public class Engine extends Canvas implements Runnable {
 		
 		g.setColor(Color.BLACK);
 		g.fillRect(0,  0, WIDTH, HEIGHT);
+		
+		/*for (int i = 0; i < pDepthBuffer.length; i++) {
+			pDepthBuffer[i] = 0;
+		}*/
 		
 		Quaternion.normalize(camera.rot);
 		Mat4x4 matRot = Quaternion.generateMatrix(camera.rot, null);
