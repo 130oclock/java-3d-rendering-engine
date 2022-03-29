@@ -14,7 +14,8 @@ import engine.vector.Vector3d;
 
 public class Triangle {
 	
-	private static boolean drawOutlines = false;
+	private static int drawType = 0;
+	private static boolean showW = false;
 	private static boolean showClipping = false;
 	private static boolean doLighting = true;
 	
@@ -358,17 +359,16 @@ public class Triangle {
 		triangleRaster.clear();
 	}
 	
-	public static void drawTriangles(Graphics g, int[] pDepthBuffer, int WIDTH, int HEIGHT) {
+	public static void drawTriangles(Graphics g, double[] pDepthBuffer, int WIDTH, int HEIGHT) {
 		for (int i = 0; i < triangleRaster.size(); i++) {
 			Triangle tri = triangleRaster.get(i);
 			g.setColor(tri.brightness);
-			/*if (drawOutlines == true) {
+			/*if (drawType == 2) {
 				g.drawPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
-			} else {
-				g.fillPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
 			}*/
-			texturedTriangle(g, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, WIDTH, HEIGHT);
-			//drawTriangle(g, tri.p[0], tri.p[1], tri.p[2]);
+			if (drawType == 2) g.fillPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
+			if (drawType == 0) texturedTriangle(g, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, WIDTH, HEIGHT);
+			if (drawType == 1) drawTriangle(g, tri.p[0], tri.p[1], tri.p[2]);
 		}
 	}
 	
@@ -443,13 +443,13 @@ public class Triangle {
 		}
 	}
 	
-	private static void texturedTriangle(Graphics g, int[] pDepthBuffer, double x1, double y1, double u0, double v0, double w0, 
+	private static void texturedTriangle(Graphics g, double[] pDepthBuffer, double x1, double y1, double u0, double v0, double w0, 
 																		 double x2, double y2, double u1, double v1, double w1, 
 																		 double x3, double y3, double u2, double v2, double w2, int WIDTH, int HEIGHT) {
 		// sort variables by y value: y0 <= y1 <= y2
 		
-		double maxX = Math.max(x1, Math.max(x2, x3));
-		double minX = Math.min(x1, Math.min(x2, x3));
+		double maxX = Math.min(WIDTH, Math.max(x1, Math.max(x2, x3)));
+		double minX = Math.max(0, Math.min(x1, Math.min(x2, x3)));
 		
 		double temp;
 		if (y2 < y1) {
@@ -601,15 +601,20 @@ public class Triangle {
 				double t = 0;
 
 				for (int x = (int) Math.max(minX, ax); x < (int) Math.min(bx, maxX); x++) {
-					if (y > 0 && y <= HEIGHT) {
+					if (y > 0 && y < HEIGHT) {
 						tex_u = (1 - t) * tex_su + t * tex_eu;
 						tex_v = (1 - t) * tex_sv + t * tex_ev;
 						tex_w = (1 - t) * tex_sw + t * tex_ew;
 
 						int d = (int) ((y * WIDTH) + x);
 						if (tex_w > pDepthBuffer[d]) {
+							if (showW) {
+								int green = (int) (300 * tex_w);
+								green = Math.min(green, 255);
+								g.setColor(new Color(0, green, 0));
+							}
 							g.fillRect(x, y, 1, 1);
-							pDepthBuffer[d] = (int) tex_w;
+							pDepthBuffer[d] = tex_w;
 						}
 						t += tstep;
 					}
@@ -672,14 +677,19 @@ public class Triangle {
 				double t = 0;
 
 				for (int x = (int) Math.max(minX, ax); x < (int) Math.min(bx, maxX); x++) {
-					if (y > 0 && y <= HEIGHT) {
+					if (y > 0 && y < HEIGHT) {
 						tex_u = (1 - t) * tex_su + t * tex_eu;
 						tex_v = (1 - t) * tex_sv + t * tex_ev;
 						tex_w = (1 - t) * tex_sw + t * tex_ew;
 						int d = (int) ((y * WIDTH) + x);
 						if (tex_w > pDepthBuffer[d]) {
+							if (showW) {
+								int green = (int) (300 * tex_w);
+								green = Math.min(green, 255);
+								g.setColor(new Color(0, green, 0));
+							}
 							g.fillRect(x, y, 1, 1);
-							pDepthBuffer[d] = (int) tex_w;
+							pDepthBuffer[d] = tex_w;
 						}
 						t += tstep;
 					}

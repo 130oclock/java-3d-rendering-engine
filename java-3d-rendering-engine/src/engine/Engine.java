@@ -31,7 +31,7 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final int WIDTH = 1000;
 	private static final int HEIGHT = 750;
-	private static int[] pDepthBuffer;
+	private static double[] pDepthBuffer;
 	
 	private static boolean running = false;
 	
@@ -59,7 +59,8 @@ public class Engine extends Canvas implements Runnable {
 	
 	public static void main(String[] args) {
 		// initialize any entities
-		new Entity(objFileReader.load("Models/cube.obj"));
+		new Entity(objFileReader.load("Models/cube.obj"), 0, 0, 0);
+		new Entity(objFileReader.load("Models/cube.obj"), 0.5, -0.5, 0.5);
 		//new Entity(objFileReader.load("Models/octahedron.obj"));
 		//new Entity(objFileReader.load("Models/utahTeapot.obj"));
 		
@@ -135,7 +136,7 @@ public class Engine extends Canvas implements Runnable {
 		g.setColor(Color.BLACK);
 		g.fillRect(0,  0, WIDTH, HEIGHT);
 		
-		pDepthBuffer = new int[WIDTH * HEIGHT];
+		pDepthBuffer = new double[WIDTH * HEIGHT + 1];
 		/*for (int i = 0; i < pDepthBuffer.length; i++) {
 			pDepthBuffer[i] = 0;
 		}*/
@@ -152,7 +153,7 @@ public class Engine extends Canvas implements Runnable {
 			ent.project(camera, matView, matProj, WIDTH, HEIGHT, light);
 		}
 		
-		Triangle.cullScreenEdges(WIDTH, HEIGHT);
+		//Triangle.cullScreenEdges(WIDTH, HEIGHT);
 		
 		Triangle.drawTriangles(g, pDepthBuffer, WIDTH, HEIGHT);
 		
