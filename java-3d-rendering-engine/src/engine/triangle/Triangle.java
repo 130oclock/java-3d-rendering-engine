@@ -62,7 +62,29 @@ public class Triangle {
 	
 	// Make a duplicate object
 	public Triangle copy() {
-		Triangle copy = new Triangle(this.p[0].copy(), this.p[1].copy(), this.p[2].copy(), this.t[0].copy(), this.t[1].copy(), this.t[2].copy(), this.normal);
+		Triangle copy = Triangle.empty();
+		copy.p[0].x = this.p[0].x;
+		copy.p[0].y = this.p[0].y;
+		copy.p[0].z = this.p[0].z;
+		copy.p[0].w = this.p[0].w;
+		copy.p[1].x = this.p[1].x;
+		copy.p[1].y = this.p[1].y;
+		copy.p[1].z = this.p[1].z;
+		copy.p[1].w = this.p[1].w;
+		copy.p[2].x = this.p[2].x;
+		copy.p[2].y = this.p[2].y;
+		copy.p[2].z = this.p[2].z;
+		copy.p[2].w = this.p[2].w;
+		copy.t[0].u = this.t[0].u;
+		copy.t[0].v = this.t[0].v;
+		copy.t[0].w = this.t[0].w;
+		copy.t[1].u = this.t[1].u;
+		copy.t[1].v = this.t[1].v;
+		copy.t[1].w = this.t[1].w;
+		copy.t[2].u = this.t[2].u;
+		copy.t[2].v = this.t[2].v;
+		copy.t[2].w = this.t[2].w;
+		copy.normal = this.normal;
 		copy.brightness = this.brightness;
 		return copy;
 	}
@@ -359,20 +381,17 @@ public class Triangle {
 		triangleRaster.clear();
 	}
 	
-	public static void drawTriangles(Graphics g, double[] pDepthBuffer, int WIDTH, int HEIGHT) {
+	public static void drawTriangles(int[] imageBufferData, double[] pDepthBuffer, int WIDTH, int HEIGHT) {
 		for (int i = 0; i < triangleRaster.size(); i++) {
 			Triangle tri = triangleRaster.get(i);
-			g.setColor(tri.brightness);
-			/*if (drawType == 2) {
-				g.drawPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
-			}*/
-			if (drawType == 2) g.fillPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
-			if (drawType == 0) texturedTriangle(g, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, WIDTH, HEIGHT);
-			if (drawType == 1) drawTriangle(g, tri.p[0], tri.p[1], tri.p[2]);
+			//g.setColor(tri.brightness);
+			//if (drawType == 2) g.fillPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
+			if (drawType == 0) texturedTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, WIDTH, HEIGHT, tri.brightness.getRGB());
+			//if (drawType == 1) drawTriangle(g, tri.p[0], tri.p[1], tri.p[2]);
 		}
 	}
 	
-	public static void drawHorizontalLine(Graphics g, int x0, int x1, int y) {
+	/*public static void drawHorizontalLine(Graphics g, int x0, int x1, int y) {
 		if (x0 > x1) {
 			for (int i = x1; i <= x0; i++) {
 				g.fillRect(i, y, 1, 1);
@@ -441,11 +460,11 @@ public class Triangle {
 			fillBottomFlatTriangle(g, v1.x, v1.y, v2.x, v2.y, v4.x, v4.y);
 			fillTopFlatTriangle(g, v2.x, v2.y, v4.x, v4.y, v3.x, v3.y);
 		}
-	}
+	}*/
 	
-	private static void texturedTriangle(Graphics g, double[] pDepthBuffer, double x1, double y1, double u0, double v0, double w0, 
-																		 double x2, double y2, double u1, double v1, double w1, 
-																		 double x3, double y3, double u2, double v2, double w2, int WIDTH, int HEIGHT) {
+	private static void texturedTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double u1, double v1, double w1, 
+																		 double x2, double y2, double u2, double v2, double w2, 
+																		 double x3, double y3, double u3, double v3, double w3, int WIDTH, int HEIGHT, int color) {
 		// sort variables by y value: y0 <= y1 <= y2
 		
 		double maxX = Math.min(WIDTH, Math.max(x1, Math.max(x2, x3)));
@@ -461,48 +480,6 @@ public class Triangle {
 			x1 = x2;
 			x2 = temp;
 
-			temp = u0;
-			u0 = u1;
-			u1 = temp;
-
-			temp = v0;
-			v0 = v1;
-			v1 = temp;
-
-			temp = w0;
-			w0 = w1;
-			w1 = temp;
-		}
-		if (y3 < y1) {
-			temp = y1;
-			y1 = y3;
-			y3 = temp;
-
-			temp = x1;
-			x1 = x3;
-			x3 = temp;
-			
-			temp = u0;
-			u0 = u2;
-			u2 = temp;
-
-			temp = v0;
-			v0 = v2;
-			v2 = temp;
-
-			temp = w0;
-			w0 = w2;
-			w2 = temp;
-		}
-		if (y3 < y2) {
-			temp = y2;
-			y2 = y3;
-			y3 = temp;
-
-			temp = x2;
-			x2 = x3;
-			x3 = temp;
-
 			temp = u1;
 			u1 = u2;
 			u2 = temp;
@@ -515,6 +492,48 @@ public class Triangle {
 			w1 = w2;
 			w2 = temp;
 		}
+		if (y3 < y1) {
+			temp = y1;
+			y1 = y3;
+			y3 = temp;
+
+			temp = x1;
+			x1 = x3;
+			x3 = temp;
+			
+			temp = u1;
+			u1 = u3;
+			u3 = temp;
+
+			temp = v1;
+			v1 = v3;
+			v3 = temp;
+
+			temp = w1;
+			w1 = w3;
+			w3 = temp;
+		}
+		if (y3 < y2) {
+			temp = y2;
+			y2 = y3;
+			y3 = temp;
+
+			temp = x2;
+			x2 = x3;
+			x3 = temp;
+
+			temp = u2;
+			u2 = u3;
+			u3 = temp;
+
+			temp = v2;
+			v2 = v3;
+			v3 = temp;
+
+			temp = w2;
+			w2 = w3;
+			w3 = temp;
+		}
 		
 		
 		
@@ -524,17 +543,17 @@ public class Triangle {
 		double dy1 = y2 - y1;
 		double dx1 = x2 - x1;
 		
-		double dv1 = v1 - v0;
-		double du1 = u1 - u0;
-		double dw1 = w1 - w0;
+		double dv1 = v2 - v1;
+		double du1 = u2 - u1;
+		double dw1 = w2 - w1;
 		
 		// second line of triangle
 		double dy2 = y3 - y1;
 		double dx2 = x3 - x1;
 		
-		double dv2 = v2 - v0;
-		double du2 = u2 - u0;
-		double dw2 = w2 - w0;
+		double dv2 = v3 - v1;
+		double du2 = u3 - u1;
+		double dw2 = w3 - w1;
 		
 		double tex_u, tex_v, tex_w;
 
@@ -566,13 +585,13 @@ public class Triangle {
 				double bx = (x1 + (y - y1) * dbx_step);
 				
 				// start point
-				double tex_su = u0 + (y - y1) * du1_step;
-				double tex_sv = v0 + (y - y1) * dv1_step;
-				double tex_sw = w0 + (y - y1) * dw1_step;
+				double tex_su = u1 + (y - y1) * du1_step;
+				double tex_sv = v1 + (y - y1) * dv1_step;
+				double tex_sw = w1 + (y - y1) * dw1_step;
 				// end point
-				double tex_eu = u0 + (y - y1) * du2_step;
-				double tex_ev = v0 + (y - y1) * dv2_step;
-				double tex_ew = w0 + (y - y1) * dw2_step;
+				double tex_eu = u1 + (y - y1) * du2_step;
+				double tex_ev = v1 + (y - y1) * dv2_step;
+				double tex_ew = w1 + (y - y1) * dw2_step;
 
 				if (ax > bx) {
 					double temp1 = ax;
@@ -611,9 +630,9 @@ public class Triangle {
 							if (showW) {
 								int green = (int) (300 * tex_w);
 								green = Math.min(green, 255);
-								g.setColor(new Color(0, green, 0));
+								color = new Color(0, green, 0).getRGB();
 							}
-							g.fillRect(x, y, 1, 1);
+							imageBufferData[d] = color;
 							pDepthBuffer[d] = tex_w;
 						}
 						t += tstep;
@@ -625,9 +644,9 @@ public class Triangle {
 		dy1 = y3 - y2;
 		dx1 = x3 - x2;
 		
-		dv1 = v2 - v1;
-		du1 = u2 - u1;
-		dw1 = w2 - w1;
+		dv1 = v3 - v2;
+		du1 = u3 - u2;
+		dw1 = w3 - w2;
 		
 		if (dy1 != 0) dax_step = dx1 / Math.abs(dy1);
 		if (dy2 != 0) dbx_step = dx2 / Math.abs(dy2);
@@ -646,13 +665,13 @@ public class Triangle {
 				double ax = (x2 + (y - y2) * dax_step);
 				double bx = (x1 + (y - y1) * dbx_step);
 				
-				double tex_su = u1 + (y - y2) * du1_step;
-				double tex_sv = v1 + (y - y2) * dv1_step;
-				double tex_sw = w1 + (y - y2) * dw1_step;
+				double tex_su = u2 + (y - y2) * du1_step;
+				double tex_sv = v2 + (y - y2) * dv1_step;
+				double tex_sw = w2 + (y - y2) * dw1_step;
 
-				double tex_eu = u0 + (y - y1) * du2_step;
-				double tex_ev = v0 + (y - y1) * dv2_step;
-				double tex_ew = w0 + (y - y1) * dw2_step;
+				double tex_eu = u1 + (y - y1) * du2_step;
+				double tex_ev = v1 + (y - y1) * dv2_step;
+				double tex_ew = w1 + (y - y1) * dw2_step;
 
 				if (ax > bx) {
 					double temp1 = ax;
@@ -686,9 +705,9 @@ public class Triangle {
 							if (showW) {
 								int green = (int) (300 * tex_w);
 								green = Math.min(green, 255);
-								g.setColor(new Color(0, green, 0));
+								color = new Color(0, green, 0).getRGB();
 							}
-							g.fillRect(x, y, 1, 1);
+							imageBufferData[d] = color;
 							pDepthBuffer[d] = tex_w;
 						}
 						t += tstep;
