@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 
 import engine.input.Keyboard;
 import engine.quaternion.Quaternion;
+import engine.triangle.Triangle;
 import engine.vector.Vector3d;
 
 public class Camera {
@@ -11,14 +12,14 @@ public class Camera {
 	public Vector3d pos;
 	public Quaternion rot;
 	public double viewDistance;
-	public double moveSpeed;
+	public double moveSpeed = 0.75;
+	public double rotSpeed = Math.PI/16;
 	public Vector3d clippingPlane;
 	
 	public Camera(Vector3d pos, double viewDistance) {
 		this.pos = pos;
 		this.rot = Quaternion.empty();
 		this.viewDistance = viewDistance;
-		this.moveSpeed = 0.15;
 		this.clippingPlane = new Vector3d(0, 0, 0.1);
 	}
 	
@@ -26,7 +27,6 @@ public class Camera {
 		this.pos = new Vector3d(x, y, z);
 		this.rot = Quaternion.empty();
 		this.viewDistance = viewDistance;
-		this.moveSpeed = 0.15;
 		this.clippingPlane = new Vector3d(0, 0, 0.1);
 	}
 	
@@ -40,62 +40,70 @@ public class Camera {
 		this.rot = Quaternion.rotate(this.rot, axis, angle);
 	}
 	
-	public void keyboard(Keyboard keyb) {
+	public void keyboard(Keyboard keyb, double deltaTime) {
 		Vector3d vUp = this.rot.getUpVector();
 		Vector3d vForward = this.rot.getForwardVector();
 		Vector3d vRight = this.rot.getRightVector();
 		
 		if (keyb.getUp() == true) {
-			this.translate(Vector3d.multiply(vUp, this.moveSpeed));
+			this.translate(Vector3d.multiply(vUp, this.moveSpeed * deltaTime));
 		}
 		
 		if (keyb.getDown() == true) {
-			this.translate(Vector3d.multiply(vUp, -this.moveSpeed));
+			this.translate(Vector3d.multiply(vUp, -this.moveSpeed * deltaTime));
 		}
 		
 		if (keyb.getRight() == true) {
-			this.translate(Vector3d.multiply(vRight, -this.moveSpeed));
+			this.translate(Vector3d.multiply(vRight, -this.moveSpeed * deltaTime));
 		}
 		
 		if (keyb.getLeft() == true) {
-			this.translate(Vector3d.multiply(vRight, this.moveSpeed));
+			this.translate(Vector3d.multiply(vRight, this.moveSpeed * deltaTime));
 		}
 
 		if (keyb.getForward() == true) {
-			this.translate(Vector3d.multiply(vForward, this.moveSpeed));
+			this.translate(Vector3d.multiply(vForward, this.moveSpeed * deltaTime));
 		}
 		
 		if (keyb.getBackward() == true) {
-			this.translate(Vector3d.multiply(vForward, -this.moveSpeed));
+			this.translate(Vector3d.multiply(vForward, -this.moveSpeed * deltaTime));
 		}
 		
 		if (keyb.getKUp() == true) {
-			this.rotate(vRight, -0.04);
+			this.rotate(vRight, -rotSpeed * deltaTime);
 		}
 		
 		if (keyb.getKDown() == true) {
-			this.rotate(vRight, 0.04);
+			this.rotate(vRight, rotSpeed * deltaTime);
 		}
 		
 		if (keyb.getKRight() == true) {
-			this.rotate(vUp, -0.04);
+			this.rotate(vUp, -rotSpeed * deltaTime);
 		}
 		
 		if (keyb.getKLeft() == true) {
-			this.rotate(vUp, 0.04);                    
+			this.rotate(vUp, rotSpeed * deltaTime);                    
 		}
 		
 		if (keyb.getKRRight() == true) {
-			this.rotate(vForward, 0.04);
+			this.rotate(vForward, rotSpeed * deltaTime);
 		}
 		
 		if (keyb.getKRLeft() == true) {
-			this.rotate(vForward, -0.04);                    
+			this.rotate(vForward, -rotSpeed * deltaTime);                    
 		}
 		
 		if (keyb.getAnyKey(KeyEvent.VK_X)) {
 			this.pos = new Vector3d(0, 0, -5);
 			this.rot = Quaternion.empty();
+		}
+		
+		if (keyb.getAnyKey(KeyEvent.VK_O)) {
+			Triangle.doGouraud = false;
+		}
+		
+		if (keyb.getAnyKey(KeyEvent.VK_L)) {
+			Triangle.doGouraud = true;
 		}
 	}
 }

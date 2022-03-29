@@ -54,7 +54,7 @@ public class Entity {
 		Triangle.projectTriangles(this.model, this.pos, this.rot, camera, matView, matProj, WIDTH, HEIGHT, light);
 	}
 	
-	public void update() {
-		this.rot = Quaternion.rotate(this.rot, Vector3d.normalize(new Vector3d(1, 1, 1)), -0.04);
+	public void update(double deltaTime) {
+		//this.rot = Quaternion.rotate(this.rot, Vector3d.normalize(new Vector3d(1, 1, 1)), -0.05 * deltaTime);
 	}
 }

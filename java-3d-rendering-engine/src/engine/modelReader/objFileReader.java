@@ -76,7 +76,7 @@ public class objFileReader {
 						
 						int num_Triangles = verticesIndex.length - 2;
 
-						String[] indices = segments[0].split("/");
+						String[] indices = segments[1].split("/");
 						int format = 0;
 						if (indices.length == 1) format = 1;
 						if (indices.length == 2) format = 2;

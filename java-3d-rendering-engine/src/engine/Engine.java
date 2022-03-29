@@ -70,7 +70,8 @@ public class Engine extends Canvas implements Runnable {
 		// load models
 		//objFileReader.load("Models/cubeN.obj", "cube");
 		//objFileReader.load("Models/octahedron.obj", "octahedron");
-		objFileReader.load("Models/blenderMonkey.obj", "suzanne");
+		//objFileReader.load("Models/blenderMonkey.obj", "suzanne");
+		objFileReader.load("Models/smoothBlenderMonkey.obj", "suzanne");
 		//objFileReader.load("Models/utahTeapot.obj", "teapot");
 		
 		// initialize any entities
@@ -117,14 +118,15 @@ public class Engine extends Canvas implements Runnable {
 		
 		while(running) {
 			long now = System.nanoTime();
-			delta += (now - lastTime) / ns;
+			double deltaTime = (now - lastTime) / ns;
+			delta += deltaTime;
 			lastTime = now;
 			
 			render();
 			frames++;
 			
 			while(delta >= 1) {
-				update();
+				update(deltaTime);
 				
 				delta--;
 			}
@@ -177,14 +179,14 @@ public class Engine extends Canvas implements Runnable {
 		bs.show();
 	}
 	
-	private void update() {
+	private void update(double deltaTime) {
 		Keyboard keyb = this.userInput.keyboard;
 		keyb.update();
 
-		this.camera.keyboard(keyb);
+		this.camera.keyboard(keyb, deltaTime);
 		
 		for (Entity ent : Entity.entities) {
-			ent.update();
+			ent.update(deltaTime);
 		}
 	}
 }

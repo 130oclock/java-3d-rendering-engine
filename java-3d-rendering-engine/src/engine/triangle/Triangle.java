@@ -16,6 +16,7 @@ public class Triangle {
 	
 	private static boolean showClipping = false;
 	private static int lightingType = 0;
+	public static boolean doGouraud = false;
 	
 	public static List<Triangle> triangleRaster = new ArrayList<Triangle>();
 	
@@ -307,6 +308,7 @@ public class Triangle {
 	// Project a list of triangles to screen view
 	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3d pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
 		Mat4x4 matWorld = Quaternion.generateMatrix(rot, pos);
+		Mat4x4 matRot = Quaternion.generateMatrix(rot, Vector3d.empty());
 		
 		for (Triangle tri : trianglesToRaster) {
 			//System.out.println(tri.p[0].x + " " + tri.p[0].y + " " + tri.p[0].z + " | " + tri.p[1].x + " " + tri.p[1].y + " " + tri.p[1].z + " | " + tri.p[2].x + " " + tri.p[2].y + " " + tri.p[2].z);
@@ -332,15 +334,19 @@ public class Triangle {
 
 				double dp1, dp2, dp3;
 				boolean doNotGouraud = false;
-				if (tri.n[0] == null) doNotGouraud = true;
+				if (tri.n[0] == null || doGouraud == false) doNotGouraud = true;
 				if (doNotGouraud) {
 					dp1 = Math.max(0.1, Vector3d.dotProduct(lightDirection, normal));
 					dp2 = dp1;
 					dp3 = dp1;
 				} else {
-					dp1 = Math.max(0.1, Vector3d.dotProduct(lightDirection, tri.n[0]));
-					dp2 = Math.max(0.1, Vector3d.dotProduct(lightDirection, tri.n[1]));
-					dp3 = Math.max(0.1, Vector3d.dotProduct(lightDirection, tri.n[2]));
+					Vector3d vec1 = Vector3d.mutiplyMatrixVector(matRot, tri.n[0]);
+					Vector3d vec2 = Vector3d.mutiplyMatrixVector(matRot, tri.n[1]);
+					Vector3d vec3 = Vector3d.mutiplyMatrixVector(matRot, tri.n[1]);
+					
+					dp1 = Math.max(0.1, Vector3d.dotProduct(lightDirection, vec1));
+					dp2 = Math.max(0.1, Vector3d.dotProduct(lightDirection, vec2));
+					dp3 = Math.max(0.1, Vector3d.dotProduct(lightDirection, vec3));
 				}
 				
 				if (lightingType == 0) {
