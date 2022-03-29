@@ -28,6 +28,10 @@ public class Vector3d {
 		return new Vector3d(this.x, this.y, this.z);
 	}
 	
+	public static Vector3d up() {
+		return new Vector3d(0, 1, 0);
+	}
+	
 	public static Vector3d empty() {
 		return new Vector3d(0, 0, 0);
 	}

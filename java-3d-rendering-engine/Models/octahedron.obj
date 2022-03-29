@@ -1,7 +1,7 @@
 # octahedron.obj
 #
  
-g octahedron
+o octahedron
  
 v  1  0  0
 v  0  -1  0

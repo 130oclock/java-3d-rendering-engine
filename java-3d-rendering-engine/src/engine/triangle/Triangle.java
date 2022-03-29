@@ -14,31 +14,83 @@ import engine.vector.Vector3d;
 
 public class Triangle {
 	
-	private static int drawType = 0;
-	private static boolean showW = false;
 	private static boolean showClipping = false;
-	private static boolean doLighting = true;
+	private static int lightingType = 0;
 	
 	public static List<Triangle> triangleRaster = new ArrayList<Triangle>();
 	
 	private Vector3d[] p = new Vector3d[3];
-	private Vector3d normal;
+	private Vector3d[] n = new Vector3d[3];
 	
 	private Vector2d[] t = new Vector2d[3];
 	
-	private Color brightness;
+	private Color[] brightness = new Color[3];
 	public Color color;
 	
-	public Triangle(Vector3d p0, Vector3d p1, Vector3d p2, Vector2d t0, Vector2d t1, Vector2d t2, Vector3d normal) {
+	public Triangle(Vector3d p0, Vector3d p1, Vector3d p2, Vector2d t0, Vector2d t1, Vector2d t2, Vector3d n0, Vector3d n1, Vector3d n2) {
 		this.p[0] = p0;
 		this.p[1] = p1;
 		this.p[2] = p2;
 
-		this.normal = normal;
+		this.n[0] = n0;
+		this.n[1] = n1;
+		this.n[2] = n2;
 		
 		this.t[0] = t0;
 		this.t[1] = t1;
 		this.t[2] = t2;
+		
+		this.color = new Color(255, 255, 255);
+	}
+	
+	public Triangle(double[] v1, double[] v2, double[] v3) {
+		this.p[0] = new Vector3d(v1[0], v1[1], v1[2]);
+		this.p[1] = new Vector3d(v2[0], v2[1], v2[2]);
+		this.p[2] = new Vector3d(v3[0], v3[1], v3[2]);
+		
+		this.n[0] = null;
+		this.n[1] = null;
+		this.n[2] = null;
+		
+		this.t[0] = new Vector2d(0, 0);
+		this.t[1] = new Vector2d(0, 0);
+		this.t[2] = new Vector2d(0, 0);
+		
+		this.color = new Color(255, 255, 255);
+	}
+	public Triangle(double[] v1, double[] v2, double[] v3, double[] vt1, double[] vt2, double[] vt3) {
+		this.p[0] = new Vector3d(v1[0], v1[1], v1[2]);
+		this.p[1] = new Vector3d(v2[0], v2[1], v2[2]);
+		this.p[2] = new Vector3d(v3[0], v3[1], v3[2]);
+		
+		this.n[0] = null;
+		this.n[1] = null;
+		this.n[2] = null;
+		
+		this.t[0] = new Vector2d(vt1[0], vt1[1]);
+		this.t[1] = new Vector2d(vt2[0], vt2[1]);
+		this.t[2] = new Vector2d(vt3[0], vt3[1]);
+		
+		this.color = new Color(255, 255, 255);
+	}
+	public Triangle(double[] v1, double[] v2, double[] v3, double[] vt1, double[] vt2, double[] vt3, double[] vn1, double[] vn2, double[] vn3) {
+		this.p[0] = new Vector3d(v1[0], v1[1], v1[2]);
+		this.p[1] = new Vector3d(v2[0], v2[1], v2[2]);
+		this.p[2] = new Vector3d(v3[0], v3[1], v3[2]);
+		
+		this.n[0] = new Vector3d(vn1[0], vn1[1], vn1[2]);
+		this.n[1] = new Vector3d(vn2[0], vn2[1], vn2[2]);
+		this.n[2] = new Vector3d(vn3[0], vn3[1], vn3[2]);
+		
+		if (vt1 == null) {
+			this.t[0] = new Vector2d(0, 0);
+			this.t[1] = new Vector2d(0, 0);
+			this.t[2] = new Vector2d(0, 0);
+		} else {
+			this.t[0] = new Vector2d(vt1[0], vt1[1]);
+			this.t[1] = new Vector2d(vt2[0], vt2[1]);
+			this.t[2] = new Vector2d(vt3[0], vt3[1]);
+		}
 		
 		this.color = new Color(255, 255, 255);
 	}
@@ -48,11 +100,10 @@ public class Triangle {
 		Vector3d v1 = new Vector3d(0, 0, 0);
 		Vector3d v2 = new Vector3d(0, 0, 0);
 		Vector3d v3 = new Vector3d(0, 0, 0);
-		Vector3d normal = null;
 		Vector2d v4 = new Vector2d(0, 0);
 		Vector2d v5 = new Vector2d(0, 0);
 		Vector2d v6 = new Vector2d(0, 0);
-		return new Triangle(v1, v2, v3, v4, v5, v6, normal);
+		return new Triangle(v1, v2, v3, v4, v5, v6, null, null, null);
 	}
 	
 	// Return the nth point on the triangle
@@ -75,6 +126,23 @@ public class Triangle {
 		copy.p[2].y = this.p[2].y;
 		copy.p[2].z = this.p[2].z;
 		copy.p[2].w = this.p[2].w;
+		
+		if (n[0] != null) {
+			copy.n[0].x = this.n[0].x;
+			copy.n[0].y = this.n[0].y;
+			copy.n[0].z = this.n[0].z;
+		}
+		if (n[1] != null) {
+			copy.n[1].x = this.n[1].x;
+			copy.n[1].y = this.n[1].y;
+			copy.n[1].z = this.n[1].z;
+		}
+		if (n[2] != null) {
+			copy.n[2].x = this.n[2].x;
+			copy.n[2].y = this.n[2].y;
+			copy.n[2].z = this.n[2].z;
+		}
+		
 		copy.t[0].u = this.t[0].u;
 		copy.t[0].v = this.t[0].v;
 		copy.t[0].w = this.t[0].w;
@@ -84,7 +152,7 @@ public class Triangle {
 		copy.t[2].u = this.t[2].u;
 		copy.t[2].v = this.t[2].v;
 		copy.t[2].w = this.t[2].w;
-		copy.normal = this.normal;
+		
 		copy.brightness = this.brightness;
 		return copy;
 	}
@@ -147,8 +215,11 @@ public class Triangle {
 		// if one point is on the screen and two are not on the screen
 		if (nInsidePoints == 1 && nOutsidePoints == 2) { // A ; B, C
 			Triangle otri1 = Triangle.empty();
-			if (showClipping == true) otri1.brightness = Color.BLUE;
-			else otri1.brightness = tri.brightness;
+			if (showClipping == true) {
+				otri1.brightness[0] = Color.BLUE;
+				otri1.brightness[1] = Color.BLUE;
+				otri1.brightness[2] = Color.BLUE;
+			} else otri1.brightness = tri.brightness;
 			
 			// A
 			otri1.p[0] = insidePoints[0];
@@ -173,11 +244,17 @@ public class Triangle {
 		// if two points are on the screen and one is not on the screen
 		if (nInsidePoints == 2 && nOutsidePoints == 1) { // A, B ; C
 			Triangle otri1 = Triangle.empty(), otri2 = Triangle.empty();
-			if (showClipping == true) otri1.brightness = Color.YELLOW;
-			else otri1.brightness = tri.brightness;
+			if (showClipping == true) {
+				otri1.brightness[0] = Color.YELLOW;
+				otri1.brightness[1] = Color.YELLOW;
+				otri1.brightness[2] = Color.YELLOW;
+			} else otri1.brightness = tri.brightness;
 
-			if (showClipping == true) otri2.brightness = Color.GREEN;
-			else otri2.brightness = tri.brightness;
+			if (showClipping == true) {
+				otri2.brightness[0] = Color.GREEN;
+				otri2.brightness[1] = Color.GREEN;
+				otri2.brightness[2] = Color.GREEN;
+			} else otri2.brightness = tri.brightness;
 			
 			// A
 			otri1.p[0] = insidePoints[0];
@@ -215,6 +292,18 @@ public class Triangle {
 		return null;
 	}
 	
+	public static Vector3d findFaceNormal(Vector3d v1, Vector3d v2, Vector3d v3) {
+		Vector3d normal, line1, line2;
+		line1 = Vector3d.subtract(v2, v1);
+		line2 = Vector3d.subtract(v3, v1);
+		//System.out.println(line1.x + " " + line1.y + " " + line1.z + " | " + line2.x + " " + line2.y + " " + line2.z);
+		
+		normal = Vector3d.crossProduct(line1, line2);
+		//System.out.println(normal.x + " " + normal.y + " " + normal.z);
+		
+		return Vector3d.normalize(normal);
+	}
+	
 	// Project a list of triangles to screen view
 	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3d pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
 		Mat4x4 matWorld = Quaternion.generateMatrix(rot, pos);
@@ -233,37 +322,56 @@ public class Triangle {
 			triTransformed.t[1] = tri.t[1];
 			triTransformed.t[2] = tri.t[2];
 			
-			Vector3d normal, line1, line2;
-			if (tri.normal == null) {
-				line1 = Vector3d.subtract(triTransformed.p[1], triTransformed.p[0]);
-				line2 = Vector3d.subtract(triTransformed.p[2], triTransformed.p[0]);
-				//System.out.println(line1.x + " " + line1.y + " " + line1.z + " | " + line2.x + " " + line2.y + " " + line2.z);
-				
-				normal = Vector3d.crossProduct(line1, line2);
-				//System.out.println(normal.x + " " + normal.y + " " + normal.z);
-				
-				normal = Vector3d.normalize(normal);
-			} else {
-				normal = tri.normal;
-			}
+			Vector3d normal = Triangle.findFaceNormal(triTransformed.p[0], triTransformed.p[1], triTransformed.p[2]);
 			
 			// Check if the triangle is facing towards the camera
 			Vector3d vCameraRay = Vector3d.subtract(triTransformed.p[0], camera.pos);
 			//System.out.println(vCameraRay.x + " " + vCameraRay.y + " " + vCameraRay.z + " normal: " + normal.x + " " + normal.y + " " + normal.z);
 			if (Vector3d.dotProduct(normal, vCameraRay) < 0) {
 				Vector3d lightDirection = light.getDirection();
-				
-				double dp = Math.max(0.1, Vector3d.dotProduct(lightDirection, normal));
-				
-				if (doLighting == true) {
-					Color adjustedColor = EnvironmentLight.blend(light.color, tri.color);
-					int red = (int) ((dp * 255) * (adjustedColor.getRed() / 255));
-					int green = (int) ((dp * 255) * (adjustedColor.getGreen() / 255));
-					int blue = (int) ((dp * 255) * (adjustedColor.getBlue() / 255));
-					//System.out.println(red + " " + green + " " + blue);
-					triViewed.brightness = new Color(red, green, blue);
+
+				double dp1, dp2, dp3;
+				boolean doNotGouraud = false;
+				if (tri.n[0] == null) doNotGouraud = true;
+				if (doNotGouraud) {
+					dp1 = Math.max(0.1, Vector3d.dotProduct(lightDirection, normal));
+					dp2 = dp1;
+					dp3 = dp1;
 				} else {
-					triViewed.brightness = tri.color;
+					dp1 = Math.max(0.1, Vector3d.dotProduct(lightDirection, tri.n[0]));
+					dp2 = Math.max(0.1, Vector3d.dotProduct(lightDirection, tri.n[1]));
+					dp3 = Math.max(0.1, Vector3d.dotProduct(lightDirection, tri.n[2]));
+				}
+				
+				if (lightingType == 0) {
+					Color adjustedColor = EnvironmentLight.blend(light.color, tri.color);
+					if (doNotGouraud) {
+						int red1 = (int) ((dp1 * 255) * (adjustedColor.getRed() / 255));
+						int green1 = (int) ((dp1 * 255) * (adjustedColor.getGreen() / 255));
+						int blue1 = (int) ((dp1 * 255) * (adjustedColor.getBlue() / 255));
+						triViewed.brightness[0] = new Color(red1, green1, blue1);
+						triViewed.brightness[1] = new Color(red1, green1, blue1);
+						triViewed.brightness[2] = new Color(red1, green1, blue1);
+					} else {
+						int red1 = (int) ((dp1 * 255) * (adjustedColor.getRed() / 255));
+						int green1 = (int) ((dp1 * 255) * (adjustedColor.getGreen() / 255));
+						int blue1 = (int) ((dp1 * 255) * (adjustedColor.getBlue() / 255));
+						triViewed.brightness[0] = new Color(red1, green1, blue1);
+	
+						int red2 = (int) ((dp2 * 255) * (adjustedColor.getRed() / 255));
+						int green2 = (int) ((dp2 * 255) * (adjustedColor.getGreen() / 255));
+						int blue2 = (int) ((dp2 * 255) * (adjustedColor.getBlue() / 255));
+						triViewed.brightness[1] = new Color(red2, green2, blue2);
+	
+						int red3 = (int) ((dp3 * 255) * (adjustedColor.getRed() / 255));
+						int green3 = (int) ((dp3 * 255) * (adjustedColor.getGreen() / 255));
+						int blue3 = (int) ((dp3 * 255) * (adjustedColor.getBlue() / 255));
+						triViewed.brightness[2] = new Color(red3, green3, blue3);
+					}
+				} else {
+					triViewed.brightness[0] = tri.color;
+					triViewed.brightness[1] = tri.color;
+					triViewed.brightness[2] = tri.color;
 				}
 				
 				triViewed.p = Triangle.multiplyMatrixTriangle(matView, triTransformed);
@@ -384,10 +492,12 @@ public class Triangle {
 	public static void drawTriangles(int[] imageBufferData, double[] pDepthBuffer, int WIDTH, int HEIGHT) {
 		for (int i = 0; i < triangleRaster.size(); i++) {
 			Triangle tri = triangleRaster.get(i);
-			//g.setColor(tri.brightness);
-			//if (drawType == 2) g.fillPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
-			if (drawType == 0) texturedTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, WIDTH, HEIGHT, tri.brightness.getRGB());
-			//if (drawType == 1) drawTriangle(g, tri.p[0], tri.p[1], tri.p[2]);
+			float[][] colors = new float[3][3];
+			for (int j = 0; j < tri.brightness.length; j++) {
+				Color c = tri.brightness[j];
+				Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), colors[j]);
+			}
+			texturedTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, WIDTH, HEIGHT, colors[0], colors[1], colors[2]);
 		}
 	}
 	
@@ -463,14 +573,16 @@ public class Triangle {
 	}*/
 	
 	private static void texturedTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double u1, double v1, double w1, 
-																		 double x2, double y2, double u2, double v2, double w2, 
-																		 double x3, double y3, double u3, double v3, double w3, int WIDTH, int HEIGHT, int color) {
+																					   double x2, double y2, double u2, double v2, double w2, 
+																					   double x3, double y3, double u3, double v3, double w3, 
+																					   int WIDTH, int HEIGHT, float[] color1, float[] color2, float[] color3) {
 		// sort variables by y value: y0 <= y1 <= y2
 		
 		double maxX = Math.min(WIDTH, Math.max(x1, Math.max(x2, x3)));
 		double minX = Math.max(0, Math.min(x1, Math.min(x2, x3)));
 		
 		double temp;
+		float[] tempc;
 		if (y2 < y1) {
 			temp = y1;
 			y1 = y2;
@@ -491,6 +603,10 @@ public class Triangle {
 			temp = w1;
 			w1 = w2;
 			w2 = temp;
+			
+			tempc = color1;
+			color1 = color2;
+			color2 = tempc;
 		}
 		if (y3 < y1) {
 			temp = y1;
@@ -512,6 +628,10 @@ public class Triangle {
 			temp = w1;
 			w1 = w3;
 			w3 = temp;
+
+			tempc = color1;
+			color1 = color3;
+			color3 = tempc;
 		}
 		if (y3 < y2) {
 			temp = y2;
@@ -533,62 +653,76 @@ public class Triangle {
 			temp = w2;
 			w2 = w3;
 			w3 = temp;
+			
+			tempc = color2;
+			color2 = color3;
+			color3 = tempc;
 		}
-		
-		
 		
 		//System.out.print("Tri " + color + " : " + y0 + " " + y1 + " " + y2);
 
-		// first line of triangle
+		// find the slope components of the first line of triangle
 		double dy1 = y2 - y1;
 		double dx1 = x2 - x1;
+		
+		double dc1 = color2[2] - color1[2];
 		
 		double dv1 = v2 - v1;
 		double du1 = u2 - u1;
 		double dw1 = w2 - w1;
 		
-		// second line of triangle
+		// find the slope components of the second line of triangle
 		double dy2 = y3 - y1;
 		double dx2 = x3 - x1;
+		
+		double dc2 = color3[2] - color1[2];
 		
 		double dv2 = v3 - v1;
 		double du2 = u3 - u1;
 		double dw2 = w3 - w1;
 		
-		double tex_u, tex_v, tex_w;
+		double c_c, tex_u, tex_v, tex_w;
 
-		// steps distance of the line
+		// step distances of the line
 		double dax_step = 0, dbx_step = 0,
 				du1_step = 0, dv1_step = 0,
 				du2_step = 0, dv2_step = 0,
-				dw1_step = 0, dw2_step = 0;
+				dw1_step = 0, dw2_step = 0,
+				dc1_step = 0, dc2_step = 0;
 
 		if (dy1 != 0) dax_step = dx1 / Math.abs(dy1);
 		if (dy2 != 0) dbx_step = dx2 / Math.abs(dy2);
 	
 		if (dy1 != 0) {
-			du1_step = du1 / Math.abs(dy1);
-			dv1_step = dv1 / Math.abs(dy1);
-			dw1_step = dw1 / Math.abs(dy1);
+			double absdy1 = Math.abs(dy1);
+			dc1_step = dc1 / absdy1;
+			du1_step = du1 / absdy1;
+			dv1_step = dv1 / absdy1;
+			dw1_step = dw1 / absdy1;
 		}
 
 		if (dy2 != 0) {
-			du2_step = du2 / Math.abs(dy2);
-			dv2_step = dv2 / Math.abs(dy2);
-			dw2_step = dw2 / Math.abs(dy2);
+			double absdy2 = Math.abs(dy2);
+			dc1_step = dc2 / absdy2;
+			du2_step = du2 / absdy2;
+			dv2_step = dv2 / absdy2;
+			dw2_step = dw2 / absdy2;
 		}
 		
 		if (dy1 != 0) {
 			for (int y = (int) y1; y <= (int) y2; y++) { // raws until it hits the flat bottom or middle of the triangle.
 				
+				// interpolate the x stat and end values 
 				double ax = (x1 + (y - y1) * dax_step);
 				double bx = (x1 + (y - y1) * dbx_step);
 				
 				// start point
+				double sc = color1[2] + (y - y1) * dc1_step;
 				double tex_su = u1 + (y - y1) * du1_step;
 				double tex_sv = v1 + (y - y1) * dv1_step;
 				double tex_sw = w1 + (y - y1) * dw1_step;
 				// end point
+				double ec = color1[2] + (y - y1) * dc2_step;
 				double tex_eu = u1 + (y - y1) * du2_step;
 				double tex_ev = v1 + (y - y1) * dv2_step;
 				double tex_ew = w1 + (y - y1) * dw2_step;
@@ -609,9 +743,14 @@ public class Triangle {
 					temp1 = tex_sw;
 					tex_sw = tex_ew;
 					tex_ew = temp1;
+					
+					temp1 = sc;
+					sc = ec;
+					ec = temp1;
 				}
 				
 				// always make tex_su come first
+				c_c = sc;
 				tex_u = tex_su;
 				tex_v = tex_sv;
 				tex_w = tex_sw;
@@ -621,18 +760,14 @@ public class Triangle {
 
 				for (int x = (int) Math.max(minX, ax); x < (int) Math.min(bx, maxX); x++) {
 					if (y > 0 && y < HEIGHT) {
+						c_c = (1 - t) * sc + t * ec;
 						tex_u = (1 - t) * tex_su + t * tex_eu;
 						tex_v = (1 - t) * tex_sv + t * tex_ev;
 						tex_w = (1 - t) * tex_sw + t * tex_ew;
 
 						int d = (int) ((y * WIDTH) + x);
 						if (tex_w > pDepthBuffer[d]) {
-							if (showW) {
-								int green = (int) (300 * tex_w);
-								green = Math.min(green, 255);
-								color = new Color(0, green, 0).getRGB();
-							}
-							imageBufferData[d] = color;
+							imageBufferData[d] = Color.HSBtoRGB(color1[0], color1[1], (float) c_c);
 							pDepthBuffer[d] = tex_w;
 						}
 						t += tstep;
@@ -643,6 +778,8 @@ public class Triangle {
 		
 		dy1 = y3 - y2;
 		dx1 = x3 - x2;
+		
+		dc1 = color3[2] - color2[2];
 		
 		dv1 = v3 - v2;
 		du1 = u3 - u2;
@@ -655,20 +792,24 @@ public class Triangle {
 		dv1_step = 0;
 
 		if (dy1 != 0) {
-			du1_step = du1 / Math.abs(dy1);
-			dv1_step = dv1 / Math.abs(dy1);
-			dw1_step = dw1 / Math.abs(dy1);
+			double absdy1 = Math.abs(dy1);
+			dc1_step = dc1 / absdy1;
+			du1_step = du1 / absdy1;
+			dv1_step = dv1 / absdy1;
+			dw1_step = dw1 / absdy1;
 		}
 
 		if (dy1 != 0) {
 			for (int y = (int) y2; y <= (int) y3; y++) {
 				double ax = (x2 + (y - y2) * dax_step);
 				double bx = (x1 + (y - y1) * dbx_step);
-				
+
+				double sc = color2[2] + (y - y2) * dc1_step;
 				double tex_su = u2 + (y - y2) * du1_step;
 				double tex_sv = v2 + (y - y2) * dv1_step;
 				double tex_sw = w2 + (y - y2) * dw1_step;
 
+				double ec = color1[2] + (y - y1) * dc2_step;
 				double tex_eu = u1 + (y - y1) * du2_step;
 				double tex_ev = v1 + (y - y1) * dv2_step;
 				double tex_ew = w1 + (y - y1) * dw2_step;
@@ -677,17 +818,25 @@ public class Triangle {
 					double temp1 = ax;
 					ax = bx;
 					bx = temp1;
+					
 					temp1 = tex_su;
 					tex_su = tex_eu;
 					tex_eu = temp1;
+					
 					temp1 = tex_sv;
 					tex_sv = tex_ev;
 					tex_ev = temp1;
+					
 					temp1 = tex_sw;
 					tex_sw = tex_ew;
 					tex_ew = temp1;
+					
+					temp1 = sc;
+					sc = ec;
+					ec = temp1;
 				}
 
+				c_c = sc;
 				tex_u = tex_su;
 				tex_v = tex_sv;
 				tex_w = tex_sw;
@@ -697,17 +846,13 @@ public class Triangle {
 
 				for (int x = (int) Math.max(minX, ax); x < (int) Math.min(bx, maxX); x++) {
 					if (y > 0 && y < HEIGHT) {
+						c_c = (1 - t) * sc + t * ec;
 						tex_u = (1 - t) * tex_su + t * tex_eu;
 						tex_v = (1 - t) * tex_sv + t * tex_ev;
 						tex_w = (1 - t) * tex_sw + t * tex_ew;
 						int d = (int) ((y * WIDTH) + x);
 						if (tex_w > pDepthBuffer[d]) {
-							if (showW) {
-								int green = (int) (300 * tex_w);
-								green = Math.min(green, 255);
-								color = new Color(0, green, 0).getRGB();
-							}
-							imageBufferData[d] = color;
+							imageBufferData[d] = Color.HSBtoRGB(color1[0], color1[1], (float) c_c);
 							pDepthBuffer[d] = tex_w;
 						}
 						t += tstep;

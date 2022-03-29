@@ -67,11 +67,18 @@ public class Engine extends Canvas implements Runnable {
 	}
 	
 	public static void main(String[] args) {
+		// load models
+		//objFileReader.load("Models/cubeN.obj", "cube");
+		//objFileReader.load("Models/octahedron.obj", "octahedron");
+		objFileReader.load("Models/blenderMonkey.obj", "suzanne");
+		//objFileReader.load("Models/utahTeapot.obj", "teapot");
+		
 		// initialize any entities
-		new Entity(objFileReader.load("Models/cube.obj"), 0, 0, 0);
-		//new Entity(objFileReader.load("Models/cube.obj"), 0.5, -0.5, 0.5);
-		//new Entity(objFileReader.load("Models/octahedron.obj"));
-		//new Entity(objFileReader.load("Models/utahTeapot.obj"));
+		new Entity(objFileReader.get("suzanne"), new Vector3d(0, 0, 0), Quaternion.localRotation(Vector3d.up(), Math.PI));
+		//new Entity(objFileReader.get("cube"), 0, 0, 0);
+		//new Entity(objFileReader.get("cube"), 0.5, -0.5, 0.5);
+		//new Entity (objFileReader.get("octahedron"));
+		//new Entity(objFileReader.get("teapot"));
 		
 		Engine engine = new Engine();
 		engine.frame.setTitle(title);
@@ -124,7 +131,7 @@ public class Engine extends Canvas implements Runnable {
 			
 			if (System.currentTimeMillis() - timer > 1000) {
 				timer += 1000;
-				frame.setTitle(title + " | " + frames + " fps | x " + String.format("%.2f", this.camera.pos.x) + " | y " + String.format("%.2f", this.camera.pos.y) + " | z " + String.format("%.2f", this.camera.pos.z));
+				frame.setTitle(title + " | " + frames + " fps");
 				frames = 0;
 			}
 		}
@@ -141,7 +148,7 @@ public class Engine extends Canvas implements Runnable {
 		}
 		
 		screen.clear();
-		screen.render();
+		//screen.render();
 		
 		Quaternion.normalize(camera.rot);
 		Mat4x4 matRot = Quaternion.generateMatrix(camera.rot, null);
@@ -163,9 +170,6 @@ public class Engine extends Canvas implements Runnable {
 		}
 		
 		Graphics g = bs.getDrawGraphics();
-		
-		//g.setColor(Color.BLACK);
-		//g.fillRect(0,  0, WIDTH, HEIGHT);
 		
 		g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
 		

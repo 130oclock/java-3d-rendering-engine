@@ -14,6 +14,11 @@ public class EnvironmentLight {
 		this.color = Color.WHITE;
 	}
 	
+	public EnvironmentLight(Vector3d dir, Color color) {
+		this.direction = Vector3d.normalize(dir);
+		this.color = color;
+	}
+	
 	public Vector3d getDirection() {
 		return this.direction;
 	}

@@ -1,7 +1,7 @@
 # cube.obj
 #
  
-g cube
+o Cube
  
 v -0.5 -0.5 -0.5
 v -0.5 -0.5 0.5
