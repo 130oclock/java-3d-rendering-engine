@@ -1,5 +1,7 @@
 package engine.camera;
 
+import java.awt.event.KeyEvent;
+
 import engine.input.Keyboard;
 import engine.quaternion.Quaternion;
 import engine.vector.Vector3d;
@@ -89,6 +91,11 @@ public class Camera {
 		
 		if (keyb.getKRLeft() == true) {
 			this.rotate(vForward, -0.04);                    
+		}
+		
+		if (keyb.getAnyKey(KeyEvent.VK_X)) {
+			this.pos = new Vector3d(0, 0, -5);
+			this.rot = Quaternion.empty();
 		}
 	}
 }

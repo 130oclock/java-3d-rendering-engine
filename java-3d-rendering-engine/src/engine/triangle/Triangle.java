@@ -2,7 +2,6 @@ package engine.triangle;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -360,67 +359,101 @@ public class Triangle {
 	}
 	
 	public static void drawTriangles(Graphics g, int[] pDepthBuffer, int WIDTH, int HEIGHT) {
-		for (Triangle tri : triangleRaster) {
+		for (int i = 0; i < triangleRaster.size(); i++) {
+			Triangle tri = triangleRaster.get(i);
 			g.setColor(tri.brightness);
-			if (drawOutlines == true) {
+			/*if (drawOutlines == true) {
 				g.drawPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
 			} else {
 				g.fillPolygon(new int[]{ (int) tri.p[0].x, (int) tri.p[1].x, (int) tri.p[2].x }, new int[]{ (int) tri.p[0].y, (int) tri.p[1].y, (int) tri.p[2].y }, 3);
-			}
-			/*texturedTriangle(g, pDepthBuffer, WIDTH, HEIGHT, (int)tri.p[0].x, (int)tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, 
-															 (int)tri.p[1].x, (int)tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, 
-															 (int)tri.p[2].x, (int)tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w);*/
+			}*/
+			texturedTriangle(g, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, WIDTH, HEIGHT);
+			//drawTriangle(g, tri.p[0], tri.p[1], tri.p[2]);
 		}
 	}
 	
-	/*private static void texturedTriangle(Graphics g, int[] pDepthBuffer, int WIDTH, int HEIGHT, int x0, int y0, double u0, double v0, double w0, 
-																								int x1, int y1, double u1, double v1, double w1, 
-																								int x2, int y2, double u2, double v2, double w2) {
+	public static void drawHorizontalLine(Graphics g, int x0, int x1, int y) {
+		if (x0 > x1) {
+			for (int i = x1; i <= x0; i++) {
+				g.fillRect(i, y, 1, 1);
+			}
+		} else {
+			for (int i = x0; i <= x1; i++) {
+				g.fillRect(i, y, 1, 1);
+			}
+		}
+	}
+	
+	public static void fillBottomFlatTriangle(Graphics g, double x1, double y1, double x2, double y2, double x3, double y3) {
+		double invslope1 = (x2 - x1) / (y2 - y1);
+		double invslope2 = (x3 - x1) / (y3 - y1);
+
+		double curx1 = x1;
+		double curx2 = x1;
+
+		for (int scanlineY = (int) y1; scanlineY <= (int) y2; scanlineY++) {
+			drawHorizontalLine(g, (int)curx1, (int)curx2, (int)scanlineY);
+			curx1 += invslope1;
+			curx2 += invslope2;
+		}
+	}
+	
+	public static void fillTopFlatTriangle(Graphics g, double x1, double y1, double x2, double y2, double x3, double y3) {
+		double invslope1 = (x3 - x1) / (y3 - y1);
+		double invslope2 = (x3 - x2) / (y3 - y2);
+
+		double curx1 = x3;
+		double curx2 = x3;
+
+		for (int scanlineY = (int) y3; scanlineY >= (int) y1; scanlineY--) {
+			drawHorizontalLine(g, (int)curx1, (int)curx2, (int)scanlineY);
+			curx1 -= invslope1;
+			curx2 -= invslope2;
+		}
+	}
+	
+	public static void drawTriangle(Graphics g, Vector3d v1, Vector3d v2, Vector3d v3) {
+		//System.out.print("Tri x: " + v1.x + "y:" + v1.y + ", x: " + v2.x + "y:" + v2.y + ", x: " + v3.x + "y:" + v3.y);
+		
+		Vector3d temp;
+		
+		if (v2.y < v1.y) {
+			temp = v1;
+			v1 = v2;
+			v2 = temp;
+		}
+		if (v3.y < v1.y) {
+			temp = v1;
+			v1 = v3;
+			v3 = temp;
+		}
+		if (v3.y < v2.y) {
+			temp = v2;
+			v2 = v3;
+			v3 = temp;
+		}	
+		if (v2.y == v3.y) {
+			fillBottomFlatTriangle(g, v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
+		} else if (v1.y == v2.y) {
+			fillTopFlatTriangle(g, v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
+		} else {
+			Vector3d v4 = new Vector3d((v1.x + ((double)(v2.y - v1.y) / (double)(v3.y - v1.y)) * (v3.x - v1.x)), v2.y, 0);
+			fillBottomFlatTriangle(g, v1.x, v1.y, v2.x, v2.y, v4.x, v4.y);
+			fillTopFlatTriangle(g, v2.x, v2.y, v4.x, v4.y, v3.x, v3.y);
+		}
+	}
+	
+	private static void texturedTriangle(Graphics g, int[] pDepthBuffer, double x1, double y1, double u0, double v0, double w0, 
+																		 double x2, double y2, double u1, double v1, double w1, 
+																		 double x3, double y3, double u2, double v2, double w2, int WIDTH, int HEIGHT) {
 		// sort variables by y value: y0 <= y1 <= y2
-		if (y1 < y0) {
-			int temp = y0;
-			y0 = y1;
-			y1 = temp;
-
-			temp = x0;
-			x0 = x1;
-			x1 = temp;
-
-			double temp1 = u0;
-			u0 = u1;
-			u1 = temp1;
-
-			temp1 = v0;
-			v0 = v1;
-			v1 = temp1;
-
-			temp1 = w0;
-			w0 = w1;
-			w1 = temp1;
-		}
-		if (y2 < y0) {
-			int temp = y0;
-			y0 = y2;
-			y2 = temp;
-
-			temp = x0;
-			x0 = x2;
-			x2 = temp;
-			
-			double temp1 = u0;
-			u0 = u2;
-			u2 = temp1;
-
-			temp1 = v0;
-			v0 = v2;
-			v2 = temp1;
-
-			temp1 = w0;
-			w0 = w2;
-			w2 = temp1;
-		}
+		
+		double maxX = Math.max(x1, Math.max(x2, x3));
+		double minX = Math.min(x1, Math.min(x2, x3));
+		
+		double temp;
 		if (y2 < y1) {
-			int temp = y1;
+			temp = y1;
 			y1 = y2;
 			y2 = temp;
 
@@ -428,31 +461,76 @@ public class Triangle {
 			x1 = x2;
 			x2 = temp;
 
-			double temp1 = u1;
-			u1 = u2;
-			u2 = temp1;
+			temp = u0;
+			u0 = u1;
+			u1 = temp;
 
-			temp1 = v1;
-			v1 = v2;
-			v2 = temp1;
+			temp = v0;
+			v0 = v1;
+			v1 = temp;
 
-			temp1 = w1;
-			w1 = w2;
-			w2 = temp1;
-
+			temp = w0;
+			w0 = w1;
+			w1 = temp;
 		}
+		if (y3 < y1) {
+			temp = y1;
+			y1 = y3;
+			y3 = temp;
+
+			temp = x1;
+			x1 = x3;
+			x3 = temp;
+			
+			temp = u0;
+			u0 = u2;
+			u2 = temp;
+
+			temp = v0;
+			v0 = v2;
+			v2 = temp;
+
+			temp = w0;
+			w0 = w2;
+			w2 = temp;
+		}
+		if (y3 < y2) {
+			temp = y2;
+			y2 = y3;
+			y3 = temp;
+
+			temp = x2;
+			x2 = x3;
+			x3 = temp;
+
+			temp = u1;
+			u1 = u2;
+			u2 = temp;
+
+			temp = v1;
+			v1 = v2;
+			v2 = temp;
+
+			temp = w1;
+			w1 = w2;
+			w2 = temp;
+		}
+		
+		
+		
+		//System.out.print("Tri " + color + " : " + y0 + " " + y1 + " " + y2);
 
 		// first line of triangle
-		int dy1 = y1 - y0;
-		int dx1 = x1 - x0;
+		double dy1 = y2 - y1;
+		double dx1 = x2 - x1;
 		
 		double dv1 = v1 - v0;
 		double du1 = u1 - u0;
 		double dw1 = w1 - w0;
 		
 		// second line of triangle
-		int dy2 = y2 - y0;
-		int dx2 = x2 - x0;
+		double dy2 = y3 - y1;
+		double dx2 = x3 - x1;
 		
 		double dv2 = v2 - v0;
 		double du2 = u2 - u0;
@@ -468,7 +546,7 @@ public class Triangle {
 
 		if (dy1 != 0) dax_step = dx1 / Math.abs(dy1);
 		if (dy2 != 0) dbx_step = dx2 / Math.abs(dy2);
-		
+	
 		if (dy1 != 0) {
 			du1_step = du1 / Math.abs(dy1);
 			dv1_step = dv1 / Math.abs(dy1);
@@ -480,131 +558,133 @@ public class Triangle {
 			dv2_step = dv2 / Math.abs(dy2);
 			dw2_step = dw2 / Math.abs(dy2);
 		}
-
+		
 		if (dy1 != 0) {
-			for (int i = y0; i <= y1; i++) { // raws until it hits the flat bottom or middle of the triangle.
-				double ax = x0 + (double)(i - y0) * dax_step;
-				double bx = x0 + (double)(i - y0) * dbx_step;
+			for (int y = (int) y1; y <= (int) y2; y++) { // raws until it hits the flat bottom or middle of the triangle.
+				
+				double ax = (x1 + (y - y1) * dax_step);
+				double bx = (x1 + (y - y1) * dbx_step);
+				
 				// start point
-				double tex_su = u0 + (double)(i - y0) * du1_step;
-				double tex_sv = v0 + (double)(i - y0) * dv1_step;
-				double tex_sw = w0 + (double)(i - y0) * dw1_step;
+				double tex_su = u0 + (y - y1) * du1_step;
+				double tex_sv = v0 + (y - y1) * dv1_step;
+				double tex_sw = w0 + (y - y1) * dw1_step;
 				// end point
-				double tex_eu = u0 + (double)(i - y0) * du2_step;
-				double tex_ev = v0 + (double)(i - y0) * dv2_step;
-				double tex_ew = w0 + (double)(i - y0) * dw2_step;
+				double tex_eu = u0 + (y - y1) * du2_step;
+				double tex_ev = v0 + (y - y1) * dv2_step;
+				double tex_ew = w0 + (y - y1) * dw2_step;
 
 				if (ax > bx) {
-					double temp = ax;
+					double temp1 = ax;
 					ax = bx;
-					bx = temp;
+					bx = temp1;
 					
-					temp = tex_su;
+					temp1 = tex_su;
 					tex_su = tex_eu;
-					tex_eu = temp;
+					tex_eu = temp1;
 					
-					temp = tex_sv;
+					temp1 = tex_sv;
 					tex_sv = tex_ev;
-					tex_ev = temp;
+					tex_ev = temp1;
 					
-					temp = tex_sw;
+					temp1 = tex_sw;
 					tex_sw = tex_ew;
-					tex_ew = temp;
+					tex_ew = temp1;
 				}
 				
 				// always make tex_su come first
-
 				tex_u = tex_su;
 				tex_v = tex_sv;
 				tex_w = tex_sw;
 
-				double tstep = 1d / ((double)(bx - ax));
-				double t = 0d;
+				double tstep = 1 / (bx - ax);
+				double t = 0;
 
-				for (int j = (int)ax; j < (int)bx; j++) {
-					if (i > 0 && i <= HEIGHT && j > 0 && j <= WIDTH) {
-						tex_u = (1d - t) * tex_su + t * tex_eu;
-						tex_v = (1d - t) * tex_sv + t * tex_ev;
-						tex_w = (1d - t) * tex_sw + t * tex_ew;
+				for (int x = (int) Math.max(minX, ax); x < (int) Math.min(bx, maxX); x++) {
+					if (y > 0 && y <= HEIGHT) {
+						tex_u = (1 - t) * tex_su + t * tex_eu;
+						tex_v = (1 - t) * tex_sv + t * tex_ev;
+						tex_w = (1 - t) * tex_sw + t * tex_ew;
 
-						int d = (int) ((i * WIDTH) + j);
+						int d = (int) ((y * WIDTH) + x);
 						if (tex_w > pDepthBuffer[d]) {
-							g.fillRect(j, i, 1, 1);
+							g.fillRect(x, y, 1, 1);
 							pDepthBuffer[d] = (int) tex_w;
 						}
 						t += tstep;
 					}
 				}
 			}
+		}
+		
+		dy1 = y3 - y2;
+		dx1 = x3 - x2;
+		
+		dv1 = v2 - v1;
+		du1 = u2 - u1;
+		dw1 = w2 - w1;
+		
+		if (dy1 != 0) dax_step = dx1 / Math.abs(dy1);
+		if (dy2 != 0) dbx_step = dx2 / Math.abs(dy2);
 
-			dy1 = y2 - y1;
-			dx1 = x2 - x1;
-			dv1 = v2 - v1;
-			du1 = u2 - u1;
-			dw1 = w2 - w1;
-			
-			if (dy1 != 0) dax_step = dx1 / Math.abs(dy1);
-			if (dy2 != 0) dbx_step = dx2 / Math.abs(dy2);
+		du1_step = 0; 
+		dv1_step = 0;
 
-			du1_step = 0; 
-			dv1_step = 0;
+		if (dy1 != 0) {
+			du1_step = du1 / Math.abs(dy1);
+			dv1_step = dv1 / Math.abs(dy1);
+			dw1_step = dw1 / Math.abs(dy1);
+		}
 
-			if (dy1 != 0) {
-				du1_step = du1 / Math.abs(dy1);
-				dv1_step = dv1 / Math.abs(dy1);
-				dw1_step = dw1 / Math.abs(dy1);
-			}
+		if (dy1 != 0) {
+			for (int y = (int) y2; y <= (int) y3; y++) {
+				double ax = (x2 + (y - y2) * dax_step);
+				double bx = (x1 + (y - y1) * dbx_step);
+				
+				double tex_su = u1 + (y - y2) * du1_step;
+				double tex_sv = v1 + (y - y2) * dv1_step;
+				double tex_sw = w1 + (y - y2) * dw1_step;
 
-			if (dy1 != 0) {
-				for (int i = y1; i <= y2; i++) {
-					double ax = x1 + (i - y1) * dax_step;
-					double bx = x0 + (i - y0) * dbx_step;
+				double tex_eu = u0 + (y - y1) * du2_step;
+				double tex_ev = v0 + (y - y1) * dv2_step;
+				double tex_ew = w0 + (y - y1) * dw2_step;
 
-					double tex_su = u1 + (i - y1) * du1_step;
-					double tex_sv = v1 + (i - y1) * dv1_step;
-					double tex_sw = w1 + (i - y1) * dw1_step;
+				if (ax > bx) {
+					double temp1 = ax;
+					ax = bx;
+					bx = temp1;
+					temp1 = tex_su;
+					tex_su = tex_eu;
+					tex_eu = temp1;
+					temp1 = tex_sv;
+					tex_sv = tex_ev;
+					tex_ev = temp1;
+					temp1 = tex_sw;
+					tex_sw = tex_ew;
+					tex_ew = temp1;
+				}
 
-					double tex_eu = u0 + (i - y0) * du2_step;
-					double tex_ev = v0 + (i - y0) * dv2_step;
-					double tex_ew = w0 + (i - y0) * dw2_step;
+				tex_u = tex_su;
+				tex_v = tex_sv;
+				tex_w = tex_sw;
 
-					if (ax > bx) {
-						double temp = ax;
-						ax = bx;
-						bx = temp;
-						temp = tex_su;
-						tex_su = tex_eu;
-						tex_eu = temp;
-						temp = tex_sv;
-						tex_sv = tex_ev;
-						tex_ev = temp;
-						temp = tex_sw;
-						tex_sw = tex_ew;
-						tex_ew = temp;
-					}
+				double tstep = 1 / (double) (bx - ax);
+				double t = 0;
 
-					tex_u = tex_su;
-					tex_v = tex_sv;
-					tex_w = tex_sw;
-
-					double tstep = 1 / (bx - ax);
-					double t = 0;
-
-					for (int j = (int)ax; j < (int)bx; j++) {
-						if (i > 0 && i <= HEIGHT && j > 0 && j <= WIDTH) {
-							tex_u = (1d - t) * tex_su + t * tex_eu;
-							tex_v = (1d - t) * tex_sv + t * tex_ev;
-							tex_w = (1d - t) * tex_sw + t * tex_ew;
-							int d = (int) ((i * WIDTH) + j);
-							if (tex_w > pDepthBuffer[d]) {
-								g.fillRect(j, i, 1, 1);
-								pDepthBuffer[d] = (int) tex_w;
-							}
-							t += tstep;
+				for (int x = (int) Math.max(minX, ax); x < (int) Math.min(bx, maxX); x++) {
+					if (y > 0 && y <= HEIGHT) {
+						tex_u = (1 - t) * tex_su + t * tex_eu;
+						tex_v = (1 - t) * tex_sv + t * tex_ev;
+						tex_w = (1 - t) * tex_sw + t * tex_ew;
+						int d = (int) ((y * WIDTH) + x);
+						if (tex_w > pDepthBuffer[d]) {
+							g.fillRect(x, y, 1, 1);
+							pDepthBuffer[d] = (int) tex_w;
 						}
+						t += tstep;
 					}
 				}
 			}
 		}
-	}*/
+	}
 }

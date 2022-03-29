@@ -1,6 +1,5 @@
 package engine.entities;
 
-import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +47,6 @@ public class Entity {
 	}
 	
 	public void update() {
-		this.rot = Quaternion.rotate(this.rot, Vector3d.normalize(new Vector3d(1, 1, 1)), -0.04);
+		//this.rot = Quaternion.rotate(this.rot, Vector3d.normalize(new Vector3d(1, 1, 1)), -0.04);
 	}
 }

@@ -72,6 +72,10 @@ public class Keyboard implements KeyListener {
 		return this.krleft;
 	}
 	
+	public boolean getAnyKey(int key) {
+		return this.keys[key];
+	}
+	
 	@Override
 	public void keyTyped(KeyEvent e) {
 		

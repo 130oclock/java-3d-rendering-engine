@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
-import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
@@ -32,7 +31,7 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final int WIDTH = 1000;
 	private static final int HEIGHT = 750;
-	private static int[] pDepthBuffer = new int[WIDTH * HEIGHT];
+	private static int[] pDepthBuffer;
 	
 	private static boolean running = false;
 	
@@ -136,6 +135,7 @@ public class Engine extends Canvas implements Runnable {
 		g.setColor(Color.BLACK);
 		g.fillRect(0,  0, WIDTH, HEIGHT);
 		
+		pDepthBuffer = new int[WIDTH * HEIGHT];
 		/*for (int i = 0; i < pDepthBuffer.length; i++) {
 			pDepthBuffer[i] = 0;
 		}*/
