@@ -72,9 +72,8 @@ public class Engine extends Canvas implements Runnable {
 		// load models
 		// initialize any entities
 		
-		//objFileReader.load("Models/cubeN.obj", "cube");
-		//new Entity(objFileReader.get("cube"), 0, 0, 0);
-		//new Entity(objFileReader.get("cube"), 0.5, -0.5, 0.5);
+		objFileReader.load("Models/cubeN.obj", "cube");
+		new Entity(objFileReader.get("cube"), 0, 0, 0);
 		
 		//objFileReader.load("Models/octahedron.obj", "octahedron");
 		//new Entity (objFileReader.get("octahedron"));
@@ -82,8 +81,8 @@ public class Engine extends Canvas implements Runnable {
 		//objFileReader.load("Models/utahTeapot.obj", "teapot");
 		//new Entity(objFileReader.get("teapot"));
 		
-		objFileReader.load("Models/lowPolySphere.obj", "sphere");
-		new Entity(objFileReader.get("sphere"), 0, 0, 0);
+		//objFileReader.load("Models/lowPolySphere.obj", "sphere");
+		//new Entity(objFileReader.get("sphere"), 0, 0, 0);
 		
 		//objFileReader.load("Models/blenderMonkey.obj", "suzanne");
 		//objFileReader.load("Models/smoothBlenderMonkey.obj", "suzanne");

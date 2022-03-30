@@ -1,5 +1,6 @@
 package engine.entities;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class Entity {
 	private Triangle[] model;
 	private Vector3d pos;
 	private Quaternion rot;
+	private Color color = new Color(255, 255, 255);
 	
 	public Entity(Triangle[] model) {
 		this.model = model;
@@ -30,6 +32,15 @@ public class Entity {
 		this.model = model;
 		this.pos = new Vector3d(x, y, z);
 		this.rot = Quaternion.empty();
+		
+		entities.add(this);
+	}
+	
+	public Entity(Triangle[] model, double x, double y, double z, Color color) {
+		this.model = model;
+		this.pos = new Vector3d(x, y, z);
+		this.rot = Quaternion.empty();
+		this.color = color;
 		
 		entities.add(this);
 	}
@@ -51,7 +62,7 @@ public class Entity {
 	}
 	
 	public void project(Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
-		Triangle.projectTriangles(this.model, this.pos, this.rot, camera, matView, matProj, WIDTH, HEIGHT, light);
+		Triangle.projectTriangles(this.model, this.pos, this.rot, camera, matView, matProj, WIDTH, HEIGHT, light, this.color);
 	}
 	
 	public void update(double deltaTime) {

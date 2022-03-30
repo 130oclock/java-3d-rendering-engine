@@ -177,8 +177,8 @@ public class Triangle {
 		
 		Vector3d[] insidePoints = new Vector3d[3];		int nInsidePoints = 0;
 		Vector3d[] outsidePoints = new Vector3d[3];		int nOutsidePoints = 0;
-		Vector3d[] insideNorm = new Vector3d[3];		int nInsideNorm = 0;
-		Vector3d[] outsideNorm = new Vector3d[3];		int nOutsideNorm = 0;
+		Color[] insideColor = new Color[3];				int nInsideColor = 0;
+		Color[] outsideColor = new Color[3];			int nOutsideColor = 0;
 		Vector2d[] insideTex = new Vector2d[3];			int nInsideTex = 0;
 		Vector2d[] outsideTex = new Vector2d[3];		int nOutsideTex = 0;
 		
@@ -188,29 +188,29 @@ public class Triangle {
 		
 		if (d0 >= 0) {
 			insidePoints[nInsidePoints++] = tri.p[0];
-			insideNorm[nInsideNorm++] = tri.n[0];
+			insideColor[nInsideColor++] = tri.brightness[0];
 			insideTex[nInsideTex++] = tri.t[0];
 		} else {
 			outsidePoints[nOutsidePoints++] = tri.p[0];
-			outsideNorm[nOutsideNorm++] = tri.n[0];
+			outsideColor[nOutsideColor++] = tri.brightness[0];
 			outsideTex[nOutsideTex++] = tri.t[0];
 		}
 		if (d1 >= 0) {
 			insidePoints[nInsidePoints++] = tri.p[1];
-			insideNorm[nInsideNorm++] = tri.n[1];
+			insideColor[nInsideColor++] = tri.brightness[1];
 			insideTex[nInsideTex++] = tri.t[1];
 		} else {
 			outsidePoints[nOutsidePoints++] = tri.p[1];
-			outsideNorm[nOutsideNorm++] = tri.n[1];
+			outsideColor[nOutsideColor++] = tri.brightness[1];
 			outsideTex[nOutsideTex++] = tri.t[1];
 		}
 		if (d2 >= 0) {
 			insidePoints[nInsidePoints++] = tri.p[2];
-			insideNorm[nInsideNorm++] = tri.n[2];
+			insideColor[nInsideColor++] = tri.brightness[2];
 			insideTex[nInsideTex++] = tri.t[2];
 		} else {
 			outsidePoints[nOutsidePoints++] = tri.p[2];
-			outsideNorm[nOutsideNorm++] = tri.n[2];
+			outsideColor[nOutsideColor++] = tri.brightness[2];
 			outsideTex[nOutsideTex++] = tri.t[2];
 		}
 		
@@ -225,19 +225,11 @@ public class Triangle {
 		// if one point is on the screen and two are not on the screen
 		if (nInsidePoints == 1 && nOutsidePoints == 2) { // A ; B, C
 			Triangle otri1 = Triangle.empty();
-			if (showClipping == true) {
-				otri1.brightness[0] = Color.BLUE;
-				otri1.brightness[1] = Color.BLUE;
-				otri1.brightness[2] = Color.BLUE;
-			} else otri1.brightness = tri.brightness;
 			
 			// A
 			otri1.p[0] = insidePoints[0];
-			otri1.n[0] = insideNorm[0];
 			otri1.t[0] = insideTex[0];
-
-			otri1.n[1] = insideNorm[1];
-			otri1.n[2] = insideNorm[2];
+			otri1.brightness[0] = insideColor[0];
 			
 			// intersection of AB = B'
 			double t1 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[0]);
@@ -245,6 +237,7 @@ public class Triangle {
 			otri1.t[1].u = t1 * (outsideTex[0].u - insideTex[0].u) + insideTex[0].u;
 			otri1.t[1].v = t1 * (outsideTex[0].v - insideTex[0].v) + insideTex[0].v;
 			otri1.t[1].w = t1 * (outsideTex[0].w - insideTex[0].w) + insideTex[0].w;
+			otri1.brightness[1] = new Color ((int) (t1 * (outsideColor[0].getRed() - insideColor[0].getRed()) + insideColor[0].getRed()), (int) (t1 * (outsideColor[0].getGreen() - insideColor[0].getGreen()) + insideColor[0].getGreen()), (int) (t1 * (outsideColor[0].getBlue() - insideColor[0].getBlue()) + insideColor[0].getBlue()));
 			
 			// intersection of AC = C'
 			double t2 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[1]);
@@ -252,35 +245,29 @@ public class Triangle {
 			otri1.t[2].u = t2 * (outsideTex[1].u - insideTex[0].u) + insideTex[0].u;
 			otri1.t[2].v = t2 * (outsideTex[1].v - insideTex[0].v) + insideTex[0].v;
 			otri1.t[2].w = t2 * (outsideTex[1].w - insideTex[0].w) + insideTex[0].w;
+			otri1.brightness[2] = new Color ((int) (t2 * (outsideColor[1].getRed() - insideColor[0].getRed()) + insideColor[0].getRed()), (int) (t2 * (outsideColor[1].getGreen() - insideColor[0].getGreen()) + insideColor[0].getGreen()), (int) (t2 * (outsideColor[1].getBlue() - insideColor[0].getBlue()) + insideColor[0].getBlue()));
+			
+			if (showClipping == true) {
+				otri1.brightness[0] = Color.BLUE;
+				otri1.brightness[1] = Color.BLUE;
+				otri1.brightness[2] = Color.BLUE;
+			}
 			
 			return new Triangle[] { otri1, null }; // Triangle AB'C'
 		}
 		// if two points are on the screen and one is not on the screen
 		if (nInsidePoints == 2 && nOutsidePoints == 1) { // A, B ; C
 			Triangle otri1 = Triangle.empty(), otri2 = Triangle.empty();
-			if (showClipping == true) {
-				otri1.brightness[0] = Color.YELLOW;
-				otri1.brightness[1] = Color.YELLOW;
-				otri1.brightness[2] = Color.YELLOW;
-			} else otri1.brightness = tri.brightness;
-
-			if (showClipping == true) {
-				otri2.brightness[0] = Color.GREEN;
-				otri2.brightness[1] = Color.GREEN;
-				otri2.brightness[2] = Color.GREEN;
-			} else otri2.brightness = tri.brightness;
 			
 			// A
 			otri1.p[0] = insidePoints[0];
-			otri1.n[0] = insideNorm[0];
 			otri1.t[0] = insideTex[0];
+			otri1.brightness[0] = insideColor[0];
 			
 			// B
 			otri1.p[1] = insidePoints[1];
-			otri1.n[1] = insideNorm[1];
 			otri1.t[1] = insideTex[1];
-			
-			otri1.n[2] = insideNorm[2];
+			otri1.brightness[1] = insideColor[1];
 			
 			// intersection of AC = A'
 			double t1 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[0]);
@@ -288,15 +275,17 @@ public class Triangle {
 			otri1.t[2].u = t1 * (outsideTex[0].u - insideTex[0].u) + insideTex[0].u;
 			otri1.t[2].v = t1 * (outsideTex[0].v - insideTex[0].v) + insideTex[0].v;
 			otri1.t[2].w = t1 * (outsideTex[0].w - insideTex[0].w) + insideTex[0].w;
+			otri1.brightness[2] = new Color ((int) (t1 * (outsideColor[0].getRed() - insideColor[0].getRed()) + insideColor[0].getRed()), (int) (t1 * (outsideColor[0].getGreen() - insideColor[0].getGreen()) + insideColor[0].getGreen()), (int) (t1 * (outsideColor[0].getBlue() - insideColor[0].getBlue()) + insideColor[0].getBlue()));
 			
 			// A'
 			otri2.p[0] = otri1.p[2];
 			otri2.t[0] = otri1.t[2];
+			otri2.brightness[0] = otri1.brightness[2];
 			
 			// B
 			otri2.p[1] = insidePoints[1];
 			otri2.t[1] = insideTex[1];
-			
+			otri2.brightness[1] = insideColor[1];
 			
 			// intersection of BC = B'
 			double t2 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[1], outsidePoints[0]);
@@ -304,6 +293,16 @@ public class Triangle {
 			otri2.t[2].u = t2 * (outsideTex[0].u - insideTex[1].u) + insideTex[1].u;
 			otri2.t[2].v = t2 * (outsideTex[0].v - insideTex[1].v) + insideTex[1].v;
 			otri2.t[2].w = t2 * (outsideTex[0].w - insideTex[1].w) + insideTex[1].w;
+			otri2.brightness[2] = new Color ((int) (t2 * (outsideColor[0].getRed() - insideColor[1].getRed()) + insideColor[1].getRed()), (int) (t2 * (outsideColor[0].getGreen() - insideColor[1].getGreen()) + insideColor[1].getGreen()), (int) (t2 * (outsideColor[0].getBlue() - insideColor[1].getBlue()) + insideColor[1].getBlue()));
+			
+			if (showClipping == true) {
+				otri1.brightness[0] = Color.YELLOW;
+				otri1.brightness[1] = Color.YELLOW;
+				otri1.brightness[2] = Color.YELLOW;
+				otri2.brightness[0] = Color.GREEN;
+				otri2.brightness[1] = Color.GREEN;
+				otri2.brightness[2] = Color.GREEN;
+			}
 			
 			return new Triangle[] { otri1, otri2 }; // Triangle ABA' and A'BB'
 		}
@@ -323,7 +322,7 @@ public class Triangle {
 	}
 	
 	// Project a list of triangles to screen view
-	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3d pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
+	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3d pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light, Color color) {
 		Mat4x4 matWorld = Quaternion.generateMatrix(rot, pos);
 		Mat4x4 matRot = Quaternion.generateMatrix(rot, Vector3d.empty());
 		
@@ -367,7 +366,7 @@ public class Triangle {
 				}
 				
 				if (lightingType == 0) {
-					Color adjustedColor = EnvironmentLight.blend(light.color, tri.color);
+					Color adjustedColor = EnvironmentLight.blend(light.color, color);
 					if (doNotGouraud) {
 						int red1 = (int) ((dp1 * 255) * (adjustedColor.getRed() / 255));
 						int green1 = (int) ((dp1 * 255) * (adjustedColor.getGreen() / 255));
@@ -533,9 +532,16 @@ public class Triangle {
 																					   int WIDTH, int HEIGHT, float[] color1, float[] color2, float[] color3) {
 		// sort variables by y value: y0 <= y1 <= y2
 		
-		double maxX = Math.min(WIDTH, Math.max(x1, Math.max(x2, x3)));
-		double minX = Math.max(0, Math.min(x1, Math.min(x2, x3)));
+		//double maxX = Math.min(WIDTH, Math.max(x1, Math.max(x2, x3)));
+		//double minX = Math.max(0, Math.min(x1, Math.min(x2, x3)));
 			
+		x1 = (int) x1;
+		y1 = (int) y1;
+		x2 = (int) x2;
+		y2 = (int) y2;
+		x3 = (int) x3;
+		y3 = (int) y3;
+		
 		double temp;
 		float[] tempc;
 		if (y2 < y1) {
@@ -712,11 +718,11 @@ public class Triangle {
 				double tstep = 1 / (bx - ax);
 				double t = 0;
 				
-				double xStart = Math.max(minX, ax);
-				double xEnd = Math.min(bx, maxX);
+				double xStart = ax;//Math.max(minX, ax);
+				double xEnd = bx;//Math.min(bx, maxX);
 
 				for (int x = (int) xStart; x < (int) xEnd; x++) {
-					if (y > 0 && y < HEIGHT) {
+					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
 						c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
 						
 						tex_u = (1 - t) * tex_su + t * tex_eu;
@@ -804,11 +810,11 @@ public class Triangle {
 				double tstep = 1 / (double) (bx - ax);
 				double t = 0;
 				
-				double xStart = Math.max(minX, ax);
-				double xEnd = Math.min(bx, maxX);
+				double xStart = ax;//Math.max(minX, ax);
+				double xEnd = bx;//Math.min(bx, maxX);
 				
 				for (int x = (int) xStart; x < (int) xEnd; x++) {
-					if (y > 0 && y < HEIGHT) {
+					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
 						c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
 						
 						tex_u = (1 - t) * tex_su + t * tex_eu;
