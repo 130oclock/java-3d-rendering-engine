@@ -18,12 +18,4 @@ public class Screen {
 			imageBufferData[i] = 0;
 		}
 	}
-	
-	public void render() {
-		for (int y = 0; y < HEIGHT; y++) {
-			for (int x = 0; x < WIDTH; x++) {
-				imageBufferData[y * WIDTH + x] = backgroundColor;
-			}
-		}
-	}
 }

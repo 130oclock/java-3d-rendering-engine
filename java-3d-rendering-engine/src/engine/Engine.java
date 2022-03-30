@@ -18,7 +18,7 @@ import engine.graphics.Screen;
 import engine.input.*;
 import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
-import engine.modelReader.objFileReader;
+import engine.models.objFileReader;
 import engine.quaternion.Quaternion;
 import engine.triangle.Triangle;
 import engine.vector.*;
@@ -47,7 +47,7 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final double fps = 60;
 	
-	private Camera camera = new Camera(0, 5, -5, 500);
+	private Camera camera = new Camera(0, 5, -10, 500);
 	private EnvironmentLight light = new EnvironmentLight(new Vector3d(-1, 1, -2));
 	
 	private Mat4x4 matView;
@@ -69,14 +69,29 @@ public class Engine extends Canvas implements Runnable {
 	}
 	
 	public static void main(String[] args) {
+		loadEntities();
+		
+		Engine engine = new Engine();
+		engine.frame.setTitle(title);
+		engine.frame.add(engine);
+		engine.frame.pack();
+		engine.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		engine.frame.setLocationRelativeTo(null);
+		engine.frame.setResizable(false);
+		engine.frame.setVisible(true);
+		
+		engine.start();
+	}
+	
+	public static void loadEntities() {
 		// load models
 		// initialize any entities
 		
 		//objFileReader.load("Models/plane.obj", "plane");
 		//new Entity(objFileReader.get("plane"), 0, 0, 0);
 		
-		//objFileReader.load("Models/cube.obj", "cube");
-		//new Entity(objFileReader.get("cube"), 0, 0, 0);
+		objFileReader.load("Models/cube.obj", "cube");
+		new Entity(objFileReader.get("cube"), 0, 5, 0);
 		
 		//objFileReader.load("Models/octahedron.obj", "octahedron");
 		//new Entity (objFileReader.get("octahedron"));
@@ -89,17 +104,6 @@ public class Engine extends Canvas implements Runnable {
 		
 		//objFileReader.load("Models/smoothBlenderMonkey.obj", "suzanne");
 		//new Entity(objFileReader.get("suzanne"), new Vector3d(0, 0, 0), Quaternion.localRotation(Vector3d.up(), Math.PI));
-		
-		Engine engine = new Engine();
-		engine.frame.setTitle(title);
-		engine.frame.add(engine);
-		engine.frame.pack();
-		engine.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		engine.frame.setLocationRelativeTo(null);
-		engine.frame.setResizable(false);
-		engine.frame.setVisible(true);
-		
-		engine.start();
 	}
 	
 	public synchronized void start() {
@@ -159,7 +163,6 @@ public class Engine extends Canvas implements Runnable {
 		}
 		
 		screen.clear();
-		//screen.render();
 		
 		Quaternion.normalize(camera.rot);
 		Mat4x4 matRot = Quaternion.generateMatrix(camera.rot, null);
@@ -173,7 +176,6 @@ public class Engine extends Canvas implements Runnable {
 		
 		Triangle.cullScreenEdges(WIDTH, HEIGHT);
 		Triangle.drawTriangles(screen.imageBufferData, pDepthBuffer, WIDTH, HEIGHT);
-		Triangle.clearRaster();
 		
 		for (int i = 0; i < imageBufferData.length; i++) {
 			imageBufferData[i] = screen.imageBufferData[i];
@@ -186,6 +188,8 @@ public class Engine extends Canvas implements Runnable {
 		
 		g.dispose();
 		bs.show();
+		
+		Triangle.clearRaster();
 	}
 	
 	private void update(double deltaTime) {

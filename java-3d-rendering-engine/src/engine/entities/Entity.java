@@ -18,47 +18,31 @@ public class Entity {
 	private Triangle[] model;
 	private Vector3d pos;
 	private Quaternion rot;
-	private Color color = new Color(255, 255, 255);
+	private Color color;
 	
-	public Entity(Triangle[] model) {
+	public Entity(Triangle[] model, Vector3d pos, Quaternion rot, Color color) {
 		this.model = model;
-		this.pos = Vector3d.empty();
-		this.rot = Quaternion.empty();
-
-		entities.add(this);
-	}
-	
-	public Entity(Triangle[] model, double x, double y, double z) {
-		this.model = model;
-		this.pos = new Vector3d(x, y, z);
-		this.rot = Quaternion.empty();
-		
-		entities.add(this);
-	}
-	
-	public Entity(Triangle[] model, double x, double y, double z, Color color) {
-		this.model = model;
-		this.pos = new Vector3d(x, y, z);
-		this.rot = Quaternion.empty();
+		this.pos = pos;
+		this.rot = rot;
 		this.color = color;
 		
 		entities.add(this);
 	}
 	
-	public Entity(Triangle[] model, Vector3d pos) {
-		this.model = model;
-		this.pos = pos;
-		this.rot = Quaternion.empty();
-		
-		entities.add(this);
+	public Entity(Triangle[] model) {
+		this(model, Vector3d.empty(), Quaternion.empty(), Color.WHITE);
 	}
 	
-	public Entity(Triangle[] model, Vector3d pos, Quaternion rot) {
-		this.model = model;
-		this.pos = pos;
-		this.rot = rot;
-		
-		entities.add(this);
+	public Entity(Triangle[] model, double x, double y, double z) {
+		this(model, new Vector3d(x, y, z), Quaternion.empty(), Color.WHITE);
+	}
+	
+	public Entity(Triangle[] model, double x, double y, double z, Color color) {
+		this(model, new Vector3d(x, y, z), Quaternion.empty(), color);
+	}
+	
+	public Entity(Triangle[] model, Vector3d pos) {
+		this(model, pos, Quaternion.empty(), Color.WHITE);
 	}
 	
 	public void project(Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {

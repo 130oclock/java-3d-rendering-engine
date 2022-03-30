@@ -43,7 +43,7 @@ public class Triangle {
 		this.t[1] = t1;
 		this.t[2] = t2;
 		
-		this.color = new Color(255, 255, 255);
+		this.color = Color.WHITE;
 	}
 	
 	public Triangle(double[] v1, double[] v2, double[] v3) {
@@ -531,11 +531,6 @@ public class Triangle {
 																					   double x2, double y2, double u2, double v2, double w2, 
 																					   double x3, double y3, double u3, double v3, double w3, 
 																					   int WIDTH, int HEIGHT, float[] color1, float[] color2, float[] color3) {
-		// sort variables by y value: y0 <= y1 <= y2
-		
-		//double maxX = Math.min(WIDTH, Math.max(x1, Math.max(x2, x3)));
-		//double minX = Math.max(0, Math.min(x1, Math.min(x2, x3)));
-			
 		x1 = (int) x1;
 		y1 = (int) y1;
 		x2 = (int) x2;
@@ -543,6 +538,7 @@ public class Triangle {
 		x3 = (int) x3;
 		y3 = (int) y3;
 		
+		// sort variables by y value: y0 <= y1 <= y2
 		double temp;
 		float[] tempc;
 		if (y2 < y1) {
@@ -620,10 +616,6 @@ public class Triangle {
 			color2 = color3;
 			color3 = tempc;
 		}
-		
-		//System.out.println("color1 " + color1[0] + " " + color1[1] + " " + color1[2] + " color2 " + color2[0] + " " + color2[1] + " " + color2[2] + " color3 " + color3[0] + " " + color3[1] + " " + color3[2]);
-		
-		//System.out.print("Tri " + color + " : " + y0 + " " + y1 + " " + y2);
 
 		// find the slope components of the first line of triangle
 		double dy1 = y2 - y1;
@@ -719,8 +711,8 @@ public class Triangle {
 				double tstep = 1 / (bx - ax);
 				double t = 0;
 				
-				double xStart = ax;//Math.max(minX, ax);
-				double xEnd = bx;//Math.min(bx, maxX);
+				double xStart = ax;
+				double xEnd = bx;
 
 				for (int x = (int) xStart; x < (int) xEnd; x++) {
 					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
@@ -811,8 +803,8 @@ public class Triangle {
 				double tstep = 1 / (double) (bx - ax);
 				double t = 0;
 				
-				double xStart = ax;//Math.max(minX, ax);
-				double xEnd = bx;//Math.min(bx, maxX);
+				double xStart = ax;
+				double xEnd = bx;
 				
 				for (int x = (int) xStart; x < (int) xEnd; x++) {
 					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
