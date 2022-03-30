@@ -94,7 +94,7 @@ public class Camera {
 		}
 		
 		if (keyb.getAnyKey(KeyEvent.VK_X)) {
-			this.pos = new Vector3d(0, 0, -5);
+			this.pos = new Vector3d(0, 5, -5);
 			this.rot = Quaternion.empty();
 		}
 		

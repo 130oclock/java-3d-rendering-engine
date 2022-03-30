@@ -18,6 +18,7 @@ public class Triangle {
 	private static int lightingType = 0;
 	public static boolean doGouraud = true;
 	private static double minimumBrightness = 0.1;
+	private static boolean showOutlines = true;
 	
 	public static List<Triangle> triangleRaster = new ArrayList<Triangle>();
 	
