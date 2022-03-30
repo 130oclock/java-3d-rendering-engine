@@ -176,6 +176,8 @@ public class Triangle {
 		
 		Vector3d[] insidePoints = new Vector3d[3];		int nInsidePoints = 0;
 		Vector3d[] outsidePoints = new Vector3d[3];		int nOutsidePoints = 0;
+		Vector3d[] insideNorm = new Vector3d[3];		int nInsideNorm = 0;
+		Vector3d[] outsideNorm = new Vector3d[3];		int nOutsideNorm = 0;
 		Vector2d[] insideTex = new Vector2d[3];			int nInsideTex = 0;
 		Vector2d[] outsideTex = new Vector2d[3];		int nOutsideTex = 0;
 		
@@ -185,23 +187,29 @@ public class Triangle {
 		
 		if (d0 >= 0) {
 			insidePoints[nInsidePoints++] = tri.p[0];
+			insideNorm[nInsideNorm++] = tri.n[0];
 			insideTex[nInsideTex++] = tri.t[0];
 		} else {
 			outsidePoints[nOutsidePoints++] = tri.p[0];
+			outsideNorm[nOutsideNorm++] = tri.n[0];
 			outsideTex[nOutsideTex++] = tri.t[0];
 		}
 		if (d1 >= 0) {
 			insidePoints[nInsidePoints++] = tri.p[1];
+			insideNorm[nInsideNorm++] = tri.n[1];
 			insideTex[nInsideTex++] = tri.t[1];
 		} else {
 			outsidePoints[nOutsidePoints++] = tri.p[1];
+			outsideNorm[nOutsideNorm++] = tri.n[1];
 			outsideTex[nOutsideTex++] = tri.t[1];
 		}
 		if (d2 >= 0) {
 			insidePoints[nInsidePoints++] = tri.p[2];
+			insideNorm[nInsideNorm++] = tri.n[2];
 			insideTex[nInsideTex++] = tri.t[2];
 		} else {
 			outsidePoints[nOutsidePoints++] = tri.p[2];
+			outsideNorm[nOutsideNorm++] = tri.n[2];
 			outsideTex[nOutsideTex++] = tri.t[2];
 		}
 		
@@ -224,7 +232,11 @@ public class Triangle {
 			
 			// A
 			otri1.p[0] = insidePoints[0];
+			otri1.n[0] = insideNorm[0];
 			otri1.t[0] = insideTex[0];
+
+			otri1.n[1] = insideNorm[1];
+			otri1.n[2] = insideNorm[2];
 			
 			// intersection of AB = B'
 			double t1 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[0]);
@@ -259,11 +271,15 @@ public class Triangle {
 			
 			// A
 			otri1.p[0] = insidePoints[0];
+			otri1.n[0] = insideNorm[0];
 			otri1.t[0] = insideTex[0];
 			
 			// B
 			otri1.p[1] = insidePoints[1];
+			otri1.n[1] = insideNorm[1];
 			otri1.t[1] = insideTex[1];
+			
+			otri1.n[2] = insideNorm[2];
 			
 			// intersection of AC = A'
 			double t1 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[0]);
@@ -336,17 +352,17 @@ public class Triangle {
 				boolean doNotGouraud = false;
 				if (tri.n[0] == null || doGouraud == false) doNotGouraud = true;
 				if (doNotGouraud) {
-					dp1 = Math.max(0.1, Vector3d.dotProduct(lightDirection, normal));
+					dp1 = Math.max(0.05, Vector3d.dotProduct(lightDirection, normal));
 					dp2 = dp1;
 					dp3 = dp1;
 				} else {
 					Vector3d vec1 = Vector3d.mutiplyMatrixVector(matRot, tri.n[0]);
 					Vector3d vec2 = Vector3d.mutiplyMatrixVector(matRot, tri.n[1]);
-					Vector3d vec3 = Vector3d.mutiplyMatrixVector(matRot, tri.n[1]);
+					Vector3d vec3 = Vector3d.mutiplyMatrixVector(matRot, tri.n[2]);
 					
-					dp1 = Math.max(0.1, Vector3d.dotProduct(lightDirection, vec1));
-					dp2 = Math.max(0.1, Vector3d.dotProduct(lightDirection, vec2));
-					dp3 = Math.max(0.1, Vector3d.dotProduct(lightDirection, vec3));
+					dp1 = Math.max(0.05, Vector3d.dotProduct(lightDirection, vec1));
+					dp2 = Math.max(0.05, Vector3d.dotProduct(lightDirection, vec2));
+					dp3 = Math.max(0.05, Vector3d.dotProduct(lightDirection, vec3));
 				}
 				
 				if (lightingType == 0) {
@@ -503,7 +519,10 @@ public class Triangle {
 				Color c = tri.brightness[j];
 				Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), colors[j]);
 			}
-			texturedTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, WIDTH, HEIGHT, colors[0], colors[1], colors[2]);
+			texturedTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, 
+															tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, 
+															tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, 
+															WIDTH, HEIGHT, colors[0], colors[1], colors[2]);
 		}
 	}
 	
@@ -586,7 +605,7 @@ public class Triangle {
 		
 		double maxX = Math.min(WIDTH, Math.max(x1, Math.max(x2, x3)));
 		double minX = Math.max(0, Math.min(x1, Math.min(x2, x3)));
-		
+			
 		double temp;
 		float[] tempc;
 		if (y2 < y1) {
@@ -665,6 +684,8 @@ public class Triangle {
 			color3 = tempc;
 		}
 		
+		//System.out.println("color1 " + color1[0] + " " + color1[1] + " " + color1[2] + " color2 " + color2[0] + " " + color2[1] + " " + color2[2] + " color3 " + color3[0] + " " + color3[1] + " " + color3[2]);
+		
 		//System.out.print("Tri " + color + " : " + y0 + " " + y1 + " " + y2);
 
 		// find the slope components of the first line of triangle
@@ -693,15 +714,13 @@ public class Triangle {
 		double dax_step = 0, dbx_step = 0,
 				du1_step = 0, dv1_step = 0,
 				du2_step = 0, dv2_step = 0,
-				dw1_step = 0, dw2_step = 0,
-				dc1_step = 0, dc2_step = 0;
+				dw1_step = 0, dw2_step = 0;
 
 		if (dy1 != 0) dax_step = dx1 / Math.abs(dy1);
 		if (dy2 != 0) dbx_step = dx2 / Math.abs(dy2);
 	
 		if (dy1 != 0) {
 			double absdy1 = Math.abs(dy1);
-			dc1_step = dc1 / absdy1;
 			du1_step = du1 / absdy1;
 			dv1_step = dv1 / absdy1;
 			dw1_step = dw1 / absdy1;
@@ -709,7 +728,6 @@ public class Triangle {
 
 		if (dy2 != 0) {
 			double absdy2 = Math.abs(dy2);
-			dc1_step = dc2 / absdy2;
 			du2_step = du2 / absdy2;
 			dv2_step = dv2 / absdy2;
 			dw2_step = dw2 / absdy2;
@@ -721,17 +739,18 @@ public class Triangle {
 				// interpolate the x stat and end values 
 				double ax = (x1 + (y - y1) * dax_step);
 				double bx = (x1 + (y - y1) * dbx_step);
-				
 				// start point
-				double sc = color1[2] + (y - y1) * dc1_step;
 				double tex_su = u1 + (y - y1) * du1_step;
 				double tex_sv = v1 + (y - y1) * dv1_step;
 				double tex_sw = w1 + (y - y1) * dw1_step;
 				// end point
-				double ec = color1[2] + (y - y1) * dc2_step;
 				double tex_eu = u1 + (y - y1) * du2_step;
 				double tex_ev = v1 + (y - y1) * dv2_step;
 				double tex_ew = w1 + (y - y1) * dw2_step;
+				
+				// color
+				double sc = ((y - y1) / dy1) * dc1 + color1[2];
+				double ec = ((y - y1) / dy2) * dc2 + color1[2];
 
 				if (ax > bx) {
 					double temp1 = ax;
@@ -757,16 +776,21 @@ public class Triangle {
 				
 				// always make tex_su come first
 				c_c = sc;
+				
 				tex_u = tex_su;
 				tex_v = tex_sv;
 				tex_w = tex_sw;
 
 				double tstep = 1 / (bx - ax);
 				double t = 0;
+				
+				double xStart = Math.max(minX, ax);
+				double xEnd = Math.min(bx, maxX);
 
-				for (int x = (int) Math.max(minX, ax); x < (int) Math.min(bx, maxX); x++) {
+				for (int x = (int) xStart; x < (int) xEnd; x++) {
 					if (y > 0 && y < HEIGHT) {
-						c_c = (1 - t) * sc + t * ec;
+						c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
+						
 						tex_u = (1 - t) * tex_su + t * tex_eu;
 						tex_v = (1 - t) * tex_sv + t * tex_ev;
 						tex_w = (1 - t) * tex_sw + t * tex_ew;
@@ -799,27 +823,28 @@ public class Triangle {
 
 		if (dy1 != 0) {
 			double absdy1 = Math.abs(dy1);
-			dc1_step = dc1 / absdy1;
 			du1_step = du1 / absdy1;
 			dv1_step = dv1 / absdy1;
 			dw1_step = dw1 / absdy1;
 		}
 
 		if (dy1 != 0) {
-			for (int y = (int) y2; y <= (int) y3; y++) {
+			for (int y = (int) y2; y <= (int) y3; y++) { // raws until it hits the flat top or middle of the triangle.
 				double ax = (x2 + (y - y2) * dax_step);
 				double bx = (x1 + (y - y1) * dbx_step);
 
-				double sc = color2[2] + (y - y2) * dc1_step;
 				double tex_su = u2 + (y - y2) * du1_step;
 				double tex_sv = v2 + (y - y2) * dv1_step;
 				double tex_sw = w2 + (y - y2) * dw1_step;
 
-				double ec = color1[2] + (y - y1) * dc2_step;
 				double tex_eu = u1 + (y - y1) * du2_step;
 				double tex_ev = v1 + (y - y1) * dv2_step;
 				double tex_ew = w1 + (y - y1) * dw2_step;
 
+				// color
+				double sc = ((y - y2) / dy1) * dc1 + color2[2];
+				double ec = ((y - y1) / dy2) * dc2 + color1[2];
+				
 				if (ax > bx) {
 					double temp1 = ax;
 					ax = bx;
@@ -836,23 +861,28 @@ public class Triangle {
 					temp1 = tex_sw;
 					tex_sw = tex_ew;
 					tex_ew = temp1;
-					
+
 					temp1 = sc;
 					sc = ec;
 					ec = temp1;
 				}
 
-				c_c = sc;
+				c_c = sc;	
+				
 				tex_u = tex_su;
 				tex_v = tex_sv;
 				tex_w = tex_sw;
 
 				double tstep = 1 / (double) (bx - ax);
 				double t = 0;
-
-				for (int x = (int) Math.max(minX, ax); x < (int) Math.min(bx, maxX); x++) {
+				
+				double xStart = Math.max(minX, ax);
+				double xEnd = Math.min(bx, maxX);
+				
+				for (int x = (int) xStart; x < (int) xEnd; x++) {
 					if (y > 0 && y < HEIGHT) {
-						c_c = (1 - t) * sc + t * ec;
+						c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
+						
 						tex_u = (1 - t) * tex_su + t * tex_eu;
 						tex_v = (1 - t) * tex_sv + t * tex_ev;
 						tex_w = (1 - t) * tex_sw + t * tex_ew;

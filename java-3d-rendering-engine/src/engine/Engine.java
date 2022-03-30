@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -46,7 +48,7 @@ public class Engine extends Canvas implements Runnable {
 	private static final double fps = 60;
 	
 	private Camera camera = new Camera(0, 0, -5, 500);
-	private EnvironmentLight light = new EnvironmentLight(new Vector3d(-1,1,-2));
+	private EnvironmentLight light = new EnvironmentLight(new Vector3d(-1, 1, -2));
 	
 	private Mat4x4 matView;
 	private Mat4x4 matProj = Mat4x4.makeProjection(90, HEIGHT, WIDTH, 0.1, 1000);
@@ -73,8 +75,10 @@ public class Engine extends Canvas implements Runnable {
 		//objFileReader.load("Models/blenderMonkey.obj", "suzanne");
 		objFileReader.load("Models/smoothBlenderMonkey.obj", "suzanne");
 		//objFileReader.load("Models/utahTeapot.obj", "teapot");
+		//objFileReader.load("Models/lowPolySphere.obj", "sphere");
 		
 		// initialize any entities
+		//new Entity(objFileReader.get("sphere"), 0, 0, 0);
 		new Entity(objFileReader.get("suzanne"), new Vector3d(0, 0, 0), Quaternion.localRotation(Vector3d.up(), Math.PI));
 		//new Entity(objFileReader.get("cube"), 0, 0, 0);
 		//new Entity(objFileReader.get("cube"), 0.5, -0.5, 0.5);
