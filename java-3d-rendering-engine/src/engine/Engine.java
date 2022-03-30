@@ -70,20 +70,24 @@ public class Engine extends Canvas implements Runnable {
 	
 	public static void main(String[] args) {
 		// load models
-		//objFileReader.load("Models/cubeN.obj", "cube");
-		//objFileReader.load("Models/octahedron.obj", "octahedron");
-		//objFileReader.load("Models/blenderMonkey.obj", "suzanne");
-		objFileReader.load("Models/smoothBlenderMonkey.obj", "suzanne");
-		//objFileReader.load("Models/utahTeapot.obj", "teapot");
-		//objFileReader.load("Models/lowPolySphere.obj", "sphere");
-		
 		// initialize any entities
-		//new Entity(objFileReader.get("sphere"), 0, 0, 0);
-		new Entity(objFileReader.get("suzanne"), new Vector3d(0, 0, 0), Quaternion.localRotation(Vector3d.up(), Math.PI));
+		
+		//objFileReader.load("Models/cubeN.obj", "cube");
 		//new Entity(objFileReader.get("cube"), 0, 0, 0);
 		//new Entity(objFileReader.get("cube"), 0.5, -0.5, 0.5);
+		
+		//objFileReader.load("Models/octahedron.obj", "octahedron");
 		//new Entity (objFileReader.get("octahedron"));
+		
+		//objFileReader.load("Models/utahTeapot.obj", "teapot");
 		//new Entity(objFileReader.get("teapot"));
+		
+		objFileReader.load("Models/lowPolySphere.obj", "sphere");
+		new Entity(objFileReader.get("sphere"), 0, 0, 0);
+		
+		//objFileReader.load("Models/blenderMonkey.obj", "suzanne");
+		//objFileReader.load("Models/smoothBlenderMonkey.obj", "suzanne");
+		//new Entity(objFileReader.get("suzanne"), new Vector3d(0, 0, 0), Quaternion.localRotation(Vector3d.up(), Math.PI));
 		
 		Engine engine = new Engine();
 		engine.frame.setTitle(title);

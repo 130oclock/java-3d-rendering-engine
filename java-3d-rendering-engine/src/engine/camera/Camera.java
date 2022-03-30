@@ -12,8 +12,8 @@ public class Camera {
 	public Vector3d pos;
 	public Quaternion rot;
 	public double viewDistance;
-	public double moveSpeed = 0.75;
-	public double rotSpeed = Math.PI/16;
+	public double moveSpeed = 0.2;
+	public double rotSpeed = Math.PI/64;
 	public Vector3d clippingPlane;
 	
 	public Camera(Vector3d pos, double viewDistance) {
@@ -46,51 +46,51 @@ public class Camera {
 		Vector3d vRight = this.rot.getRightVector();
 		
 		if (keyb.getUp() == true) {
-			this.translate(Vector3d.multiply(vUp, this.moveSpeed * deltaTime));
+			this.translate(Vector3d.multiply(vUp, this.moveSpeed));
 		}
 		
 		if (keyb.getDown() == true) {
-			this.translate(Vector3d.multiply(vUp, -this.moveSpeed * deltaTime));
+			this.translate(Vector3d.multiply(vUp, -this.moveSpeed));
 		}
 		
 		if (keyb.getRight() == true) {
-			this.translate(Vector3d.multiply(vRight, -this.moveSpeed * deltaTime));
+			this.translate(Vector3d.multiply(vRight, -this.moveSpeed));
 		}
 		
 		if (keyb.getLeft() == true) {
-			this.translate(Vector3d.multiply(vRight, this.moveSpeed * deltaTime));
+			this.translate(Vector3d.multiply(vRight, this.moveSpeed));
 		}
 
 		if (keyb.getForward() == true) {
-			this.translate(Vector3d.multiply(vForward, this.moveSpeed * deltaTime));
+			this.translate(Vector3d.multiply(vForward, this.moveSpeed));
 		}
 		
 		if (keyb.getBackward() == true) {
-			this.translate(Vector3d.multiply(vForward, -this.moveSpeed * deltaTime));
+			this.translate(Vector3d.multiply(vForward, -this.moveSpeed));
 		}
 		
 		if (keyb.getKUp() == true) {
-			this.rotate(vRight, -rotSpeed * deltaTime);
+			this.rotate(vRight, -rotSpeed);
 		}
 		
 		if (keyb.getKDown() == true) {
-			this.rotate(vRight, rotSpeed * deltaTime);
+			this.rotate(vRight, rotSpeed);
 		}
 		
 		if (keyb.getKRight() == true) {
-			this.rotate(vUp, -rotSpeed * deltaTime);
+			this.rotate(vUp, -rotSpeed);
 		}
 		
 		if (keyb.getKLeft() == true) {
-			this.rotate(vUp, rotSpeed * deltaTime);                    
+			this.rotate(vUp, rotSpeed);                    
 		}
 		
 		if (keyb.getKRRight() == true) {
-			this.rotate(vForward, rotSpeed * deltaTime);
+			this.rotate(vForward, rotSpeed);
 		}
 		
 		if (keyb.getKRLeft() == true) {
-			this.rotate(vForward, -rotSpeed * deltaTime);                    
+			this.rotate(vForward, -rotSpeed);                    
 		}
 		
 		if (keyb.getAnyKey(KeyEvent.VK_X)) {

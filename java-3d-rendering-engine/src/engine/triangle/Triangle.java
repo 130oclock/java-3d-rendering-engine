@@ -16,7 +16,8 @@ public class Triangle {
 	
 	private static boolean showClipping = false;
 	private static int lightingType = 0;
-	public static boolean doGouraud = false;
+	public static boolean doGouraud = true;
+	private static double minimumBrightness = 0.1;
 	
 	public static List<Triangle> triangleRaster = new ArrayList<Triangle>();
 	
@@ -352,7 +353,7 @@ public class Triangle {
 				boolean doNotGouraud = false;
 				if (tri.n[0] == null || doGouraud == false) doNotGouraud = true;
 				if (doNotGouraud) {
-					dp1 = Math.max(0.05, Vector3d.dotProduct(lightDirection, normal));
+					dp1 = Math.max(minimumBrightness, Vector3d.dotProduct(lightDirection, normal));
 					dp2 = dp1;
 					dp3 = dp1;
 				} else {
@@ -360,9 +361,9 @@ public class Triangle {
 					Vector3d vec2 = Vector3d.mutiplyMatrixVector(matRot, tri.n[1]);
 					Vector3d vec3 = Vector3d.mutiplyMatrixVector(matRot, tri.n[2]);
 					
-					dp1 = Math.max(0.05, Vector3d.dotProduct(lightDirection, vec1));
-					dp2 = Math.max(0.05, Vector3d.dotProduct(lightDirection, vec2));
-					dp3 = Math.max(0.05, Vector3d.dotProduct(lightDirection, vec3));
+					dp1 = Math.max(minimumBrightness, Vector3d.dotProduct(lightDirection, vec1));
+					dp2 = Math.max(minimumBrightness, Vector3d.dotProduct(lightDirection, vec2));
+					dp3 = Math.max(minimumBrightness, Vector3d.dotProduct(lightDirection, vec3));
 				}
 				
 				if (lightingType == 0) {
@@ -526,77 +527,6 @@ public class Triangle {
 		}
 	}
 	
-	/*public static void drawHorizontalLine(Graphics g, int x0, int x1, int y) {
-		if (x0 > x1) {
-			for (int i = x1; i <= x0; i++) {
-				g.fillRect(i, y, 1, 1);
-			}
-		} else {
-			for (int i = x0; i <= x1; i++) {
-				g.fillRect(i, y, 1, 1);
-			}
-		}
-	}
-	
-	public static void fillBottomFlatTriangle(Graphics g, double x1, double y1, double x2, double y2, double x3, double y3) {
-		double invslope1 = (x2 - x1) / (y2 - y1);
-		double invslope2 = (x3 - x1) / (y3 - y1);
-
-		double curx1 = x1;
-		double curx2 = x1;
-
-		for (int scanlineY = (int) y1; scanlineY <= (int) y2; scanlineY++) {
-			drawHorizontalLine(g, (int)curx1, (int)curx2, (int)scanlineY);
-			curx1 += invslope1;
-			curx2 += invslope2;
-		}
-	}
-	
-	public static void fillTopFlatTriangle(Graphics g, double x1, double y1, double x2, double y2, double x3, double y3) {
-		double invslope1 = (x3 - x1) / (y3 - y1);
-		double invslope2 = (x3 - x2) / (y3 - y2);
-
-		double curx1 = x3;
-		double curx2 = x3;
-
-		for (int scanlineY = (int) y3; scanlineY >= (int) y1; scanlineY--) {
-			drawHorizontalLine(g, (int)curx1, (int)curx2, (int)scanlineY);
-			curx1 -= invslope1;
-			curx2 -= invslope2;
-		}
-	}
-	
-	public static void drawTriangle(Graphics g, Vector3d v1, Vector3d v2, Vector3d v3) {
-		//System.out.print("Tri x: " + v1.x + "y:" + v1.y + ", x: " + v2.x + "y:" + v2.y + ", x: " + v3.x + "y:" + v3.y);
-		
-		Vector3d temp;
-		
-		if (v2.y < v1.y) {
-			temp = v1;
-			v1 = v2;
-			v2 = temp;
-		}
-		if (v3.y < v1.y) {
-			temp = v1;
-			v1 = v3;
-			v3 = temp;
-		}
-		if (v3.y < v2.y) {
-			temp = v2;
-			v2 = v3;
-			v3 = temp;
-		}	
-		if (v2.y == v3.y) {
-			fillBottomFlatTriangle(g, v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
-		} else if (v1.y == v2.y) {
-			fillTopFlatTriangle(g, v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
-		} else {
-			Vector3d v4 = new Vector3d((v1.x + ((double)(v2.y - v1.y) / (double)(v3.y - v1.y)) * (v3.x - v1.x)), v2.y, 0);
-			fillBottomFlatTriangle(g, v1.x, v1.y, v2.x, v2.y, v4.x, v4.y);
-			fillTopFlatTriangle(g, v2.x, v2.y, v4.x, v4.y, v3.x, v3.y);
-		}
-	}*/
-	
 	private static void texturedTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double u1, double v1, double w1, 
 																					   double x2, double y2, double u2, double v2, double w2, 
 																					   double x3, double y3, double u3, double v3, double w3, 
@@ -735,8 +665,7 @@ public class Triangle {
 		
 		if (dy1 != 0) {
 			for (int y = (int) y1; y <= (int) y2; y++) { // raws until it hits the flat bottom or middle of the triangle.
-				
-				// interpolate the x stat and end values 
+				// interpolate the x start and end values 
 				double ax = (x1 + (y - y1) * dax_step);
 				double bx = (x1 + (y - y1) * dbx_step);
 				// start point
@@ -747,7 +676,6 @@ public class Triangle {
 				double tex_eu = u1 + (y - y1) * du2_step;
 				double tex_ev = v1 + (y - y1) * dv2_step;
 				double tex_ew = w1 + (y - y1) * dw2_step;
-				
 				// color
 				double sc = ((y - y1) / dy1) * dc1 + color1[2];
 				double ec = ((y - y1) / dy2) * dc2 + color1[2];
@@ -829,18 +757,18 @@ public class Triangle {
 		}
 
 		if (dy1 != 0) {
-			for (int y = (int) y2; y <= (int) y3; y++) { // raws until it hits the flat top or middle of the triangle.
+			for (int y = (int) y2; y < (int) y3; y++) { // raws until it hits the flat top or middle of the triangle.
+				// interpolate the x start and end values 
 				double ax = (x2 + (y - y2) * dax_step);
 				double bx = (x1 + (y - y1) * dbx_step);
-
+				// start point
 				double tex_su = u2 + (y - y2) * du1_step;
 				double tex_sv = v2 + (y - y2) * dv1_step;
 				double tex_sw = w2 + (y - y2) * dw1_step;
-
+				// end point
 				double tex_eu = u1 + (y - y1) * du2_step;
 				double tex_ev = v1 + (y - y1) * dv2_step;
 				double tex_ew = w1 + (y - y1) * dw2_step;
-
 				// color
 				double sc = ((y - y2) / dy1) * dc1 + color2[2];
 				double ec = ((y - y1) / dy2) * dc2 + color1[2];
