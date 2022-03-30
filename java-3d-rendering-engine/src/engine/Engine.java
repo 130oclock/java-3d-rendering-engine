@@ -48,7 +48,7 @@ public class Engine extends Canvas implements Runnable {
 	private static final double fps = 60;
 	
 	private Camera camera = new Camera(0, 5, -10, 500);
-	private EnvironmentLight light = new EnvironmentLight(new Vector3d(-1, 1, -2));
+	private EnvironmentLight light = new EnvironmentLight(new Vector3(-1, 1, -2));
 	
 	private Mat4x4 matView;
 	private Mat4x4 matProj = Mat4x4.makeProjection(90, HEIGHT, WIDTH, 0.1, 1000);
@@ -87,8 +87,8 @@ public class Engine extends Canvas implements Runnable {
 		// load models
 		// initialize any entities
 		
-		//objFileReader.load("Models/plane.obj", "plane");
-		//new Entity(objFileReader.get("plane"), 0, 0, 0);
+		objFileReader.load("Models/plane.obj", "plane");
+		new Entity(objFileReader.get("plane"), 0, 0, 0);
 		
 		objFileReader.load("Models/cube.obj", "cube");
 		new Entity(objFileReader.get("cube"), 0, 5, 0);

@@ -9,18 +9,18 @@ import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
 import engine.quaternion.Quaternion;
 import engine.triangle.Triangle;
-import engine.vector.Vector3d;
+import engine.vector.Vector3;
 
 public class Entity {
 	
 	public static List<Entity> entities = new ArrayList<Entity>();
 	
 	private Triangle[] model;
-	private Vector3d pos;
+	private Vector3 pos;
 	private Quaternion rot;
 	private Color color;
 	
-	public Entity(Triangle[] model, Vector3d pos, Quaternion rot, Color color) {
+	public Entity(Triangle[] model, Vector3 pos, Quaternion rot, Color color) {
 		this.model = model;
 		this.pos = pos;
 		this.rot = rot;
@@ -30,18 +30,18 @@ public class Entity {
 	}
 	
 	public Entity(Triangle[] model) {
-		this(model, Vector3d.empty(), Quaternion.empty(), Color.WHITE);
+		this(model, Vector3.empty(), Quaternion.empty(), Color.WHITE);
 	}
 	
 	public Entity(Triangle[] model, double x, double y, double z) {
-		this(model, new Vector3d(x, y, z), Quaternion.empty(), Color.WHITE);
+		this(model, new Vector3(x, y, z), Quaternion.empty(), Color.WHITE);
 	}
 	
 	public Entity(Triangle[] model, double x, double y, double z, Color color) {
-		this(model, new Vector3d(x, y, z), Quaternion.empty(), color);
+		this(model, new Vector3(x, y, z), Quaternion.empty(), color);
 	}
 	
-	public Entity(Triangle[] model, Vector3d pos) {
+	public Entity(Triangle[] model, Vector3 pos) {
 		this(model, pos, Quaternion.empty(), Color.WHITE);
 	}
 	

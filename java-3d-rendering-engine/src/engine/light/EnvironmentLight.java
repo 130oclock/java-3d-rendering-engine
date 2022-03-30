@@ -2,24 +2,24 @@ package engine.light;
 
 import java.awt.Color;
 
-import engine.vector.Vector3d;
+import engine.vector.Vector3;
 
 public class EnvironmentLight {
 	
-	private Vector3d direction;
+	private Vector3 direction;
 	public Color color;
 	
-	public EnvironmentLight(Vector3d dir) {
-		this.direction = Vector3d.normalize(dir);
+	public EnvironmentLight(Vector3 dir) {
+		this.direction = Vector3.normalize(dir);
 		this.color = Color.WHITE;
 	}
 	
-	public EnvironmentLight(Vector3d dir, Color color) {
-		this.direction = Vector3d.normalize(dir);
+	public EnvironmentLight(Vector3 dir, Color color) {
+		this.direction = Vector3.normalize(dir);
 		this.color = color;
 	}
 	
-	public Vector3d getDirection() {
+	public Vector3 getDirection() {
 		return this.direction;
 	}
 	

@@ -1,7 +1,7 @@
 package engine.quaternion;
 
 import engine.matrix.Mat4x4;
-import engine.vector.Vector3d;
+import engine.vector.Vector3;
 
 public class Quaternion {
 	
@@ -14,29 +14,29 @@ public class Quaternion {
 		this.z = z;
 	}
 	
-	public Vector3d getForwardVector() {
+	public Vector3 getForwardVector() {
 		double x = 2 * ((this.x * this.z) + (this.w * this.y));
 		double y = 2 * ((this.y * this.z) - (this.w * this.x));
 		double z = 1 - (2 * ((this.x * this.x) + (this.y * this.y)));
-		return new Vector3d(x, y, z);
+		return new Vector3(x, y, z);
 	}
 	
-	public Vector3d getUpVector() {
+	public Vector3 getUpVector() {
 		double x = 2 * ((this.x * this.y) - (this.w * this.z));
 		double y = 1 - (2 * ((this.x * this.x) + (this.z * this.z)));
 		double z = 2 * ((this.y * this.z) + (this.w * this.x));
-		return new Vector3d(x, y, z);
+		return new Vector3(x, y, z);
 	}
 	
-	public Vector3d getRightVector() {
+	public Vector3 getRightVector() {
 		double x = 1 - (2 * ((this.y * this.y) + (this.z * this.z)));
 		double y = 2 * ((this.x * this.y) + (this.w * this.z));
 		double z = 2 * ((this.x * this.z) - (this.w * this.y));
-		return new Vector3d(x, y, z);
+		return new Vector3(x, y, z);
 	}
 	
-	public Vector3d getAxis() {
-		return new Vector3d(this.x, this.y, this.z);
+	public Vector3 getAxis() {
+		return new Vector3(this.x, this.y, this.z);
 	}
 	
 
@@ -81,7 +81,7 @@ public class Quaternion {
 		return new Quaternion(q1.w, -q1.x, -q1.y, -q1.z);
 	}
 	
-	public static Quaternion localRotation(Vector3d axis, double angle) {
+	public static Quaternion localRotation(Vector3 axis, double angle) {
 		double angleHalf = angle * 0.5;
 		double w = Math.cos(angleHalf);
 		double x = axis.x * Math.sin(angleHalf);
@@ -91,16 +91,16 @@ public class Quaternion {
 		return new Quaternion(w, x, y, z);
 	}
 	
-	public static Quaternion rotate(Quaternion q1, Vector3d axis, double angle) {
-		Quaternion localRotation = Quaternion.localRotation(Vector3d.normalize(axis), angle);
+	public static Quaternion rotate(Quaternion q1, Vector3 axis, double angle) {
+		Quaternion localRotation = Quaternion.localRotation(Vector3.normalize(axis), angle);
 		return Quaternion.multiply(localRotation, q1);
 	}
 	
-	public static Quaternion lookAt(Vector3d pos, Vector3d target) {
-		Vector3d test = new Vector3d(0, 0, 1);
-		Vector3d axis;
-		Vector3d forward = Vector3d.normalize(Vector3d.subtract(target, pos));
-		double dot = Vector3d.dotProduct(test, forward);
+	public static Quaternion lookAt(Vector3 pos, Vector3 target) {
+		Vector3 test = new Vector3(0, 0, 1);
+		Vector3 axis;
+		Vector3 forward = Vector3.normalize(Vector3.subtract(target, pos));
+		double dot = Vector3.dotProduct(test, forward);
 		
 		if (Math.abs(dot - (-1.0)) < 0.000001) {
 			return new Quaternion(Math.PI, 0, 1, 0);
@@ -110,11 +110,11 @@ public class Quaternion {
 		}
 		
 		double angle = Math.acos(dot);
-		axis = Vector3d.normalize(Vector3d.crossProduct(test, forward));
+		axis = Vector3.normalize(Vector3.crossProduct(test, forward));
 		return Quaternion.normalize(Quaternion.localRotation(axis, angle));
 	}
 	
-	public static Mat4x4 generateMatrix(Quaternion q1, Vector3d pos) {
+	public static Mat4x4 generateMatrix(Quaternion q1, Vector3 pos) {
 		double w = q1.w, x = q1.x, y = q1.y, z = q1.z;
 		double sqx = x * x, sqy = y * y, sqz = z * z;
 		

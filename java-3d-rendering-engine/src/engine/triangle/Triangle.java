@@ -9,8 +9,8 @@ import engine.camera.Camera;
 import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
 import engine.quaternion.Quaternion;
-import engine.vector.Vector2d;
-import engine.vector.Vector3d;
+import engine.vector.Vector2;
+import engine.vector.Vector3;
 
 public class Triangle {
 	
@@ -22,15 +22,15 @@ public class Triangle {
 	
 	public static List<Triangle> triangleRaster = new ArrayList<Triangle>();
 	
-	private Vector3d[] p = new Vector3d[3];
-	private Vector3d[] n = new Vector3d[3];
+	private Vector3[] p = new Vector3[3];
+	private Vector3[] n = new Vector3[3];
 	
-	private Vector2d[] t = new Vector2d[3];
+	private Vector2[] t = new Vector2[3];
 	
 	private Color[] brightness = new Color[3];
 	public Color color;
 	
-	public Triangle(Vector3d p0, Vector3d p1, Vector3d p2, Vector2d t0, Vector2d t1, Vector2d t2, Vector3d n0, Vector3d n1, Vector3d n2) {
+	public Triangle(Vector3 p0, Vector3 p1, Vector3 p2, Vector2 t0, Vector2 t1, Vector2 t2, Vector3 n0, Vector3 n1, Vector3 n2) {
 		this.p[0] = p0;
 		this.p[1] = p1;
 		this.p[2] = p2;
@@ -47,52 +47,52 @@ public class Triangle {
 	}
 	
 	public Triangle(double[] v1, double[] v2, double[] v3) {
-		this.p[0] = new Vector3d(v1[0], v1[1], v1[2]);
-		this.p[1] = new Vector3d(v2[0], v2[1], v2[2]);
-		this.p[2] = new Vector3d(v3[0], v3[1], v3[2]);
+		this.p[0] = new Vector3(v1[0], v1[1], v1[2]);
+		this.p[1] = new Vector3(v2[0], v2[1], v2[2]);
+		this.p[2] = new Vector3(v3[0], v3[1], v3[2]);
 		
 		this.n[0] = null;
 		this.n[1] = null;
 		this.n[2] = null;
 		
-		this.t[0] = new Vector2d(0, 0);
-		this.t[1] = new Vector2d(0, 0);
-		this.t[2] = new Vector2d(0, 0);
+		this.t[0] = new Vector2(0, 0);
+		this.t[1] = new Vector2(0, 0);
+		this.t[2] = new Vector2(0, 0);
 		
 		this.color = new Color(255, 255, 255);
 	}
 	public Triangle(double[] v1, double[] v2, double[] v3, double[] vt1, double[] vt2, double[] vt3) {
-		this.p[0] = new Vector3d(v1[0], v1[1], v1[2]);
-		this.p[1] = new Vector3d(v2[0], v2[1], v2[2]);
-		this.p[2] = new Vector3d(v3[0], v3[1], v3[2]);
+		this.p[0] = new Vector3(v1[0], v1[1], v1[2]);
+		this.p[1] = new Vector3(v2[0], v2[1], v2[2]);
+		this.p[2] = new Vector3(v3[0], v3[1], v3[2]);
 		
 		this.n[0] = null;
 		this.n[1] = null;
 		this.n[2] = null;
 		
-		this.t[0] = new Vector2d(vt1[0], vt1[1]);
-		this.t[1] = new Vector2d(vt2[0], vt2[1]);
-		this.t[2] = new Vector2d(vt3[0], vt3[1]);
+		this.t[0] = new Vector2(vt1[0], vt1[1]);
+		this.t[1] = new Vector2(vt2[0], vt2[1]);
+		this.t[2] = new Vector2(vt3[0], vt3[1]);
 		
 		this.color = new Color(255, 255, 255);
 	}
 	public Triangle(double[] v1, double[] v2, double[] v3, double[] vt1, double[] vt2, double[] vt3, double[] vn1, double[] vn2, double[] vn3) {
-		this.p[0] = new Vector3d(v1[0], v1[1], v1[2]);
-		this.p[1] = new Vector3d(v2[0], v2[1], v2[2]);
-		this.p[2] = new Vector3d(v3[0], v3[1], v3[2]);
+		this.p[0] = new Vector3(v1[0], v1[1], v1[2]);
+		this.p[1] = new Vector3(v2[0], v2[1], v2[2]);
+		this.p[2] = new Vector3(v3[0], v3[1], v3[2]);
 		
-		this.n[0] = new Vector3d(vn1[0], vn1[1], vn1[2]);
-		this.n[1] = new Vector3d(vn2[0], vn2[1], vn2[2]);
-		this.n[2] = new Vector3d(vn3[0], vn3[1], vn3[2]);
+		this.n[0] = new Vector3(vn1[0], vn1[1], vn1[2]);
+		this.n[1] = new Vector3(vn2[0], vn2[1], vn2[2]);
+		this.n[2] = new Vector3(vn3[0], vn3[1], vn3[2]);
 		
 		if (vt1 == null) {
-			this.t[0] = new Vector2d(0, 0);
-			this.t[1] = new Vector2d(0, 0);
-			this.t[2] = new Vector2d(0, 0);
+			this.t[0] = new Vector2(0, 0);
+			this.t[1] = new Vector2(0, 0);
+			this.t[2] = new Vector2(0, 0);
 		} else {
-			this.t[0] = new Vector2d(vt1[0], vt1[1]);
-			this.t[1] = new Vector2d(vt2[0], vt2[1]);
-			this.t[2] = new Vector2d(vt3[0], vt3[1]);
+			this.t[0] = new Vector2(vt1[0], vt1[1]);
+			this.t[1] = new Vector2(vt2[0], vt2[1]);
+			this.t[2] = new Vector2(vt3[0], vt3[1]);
 		}
 		
 		this.color = new Color(255, 255, 255);
@@ -100,17 +100,17 @@ public class Triangle {
 	
 	// Create an empty Triangle
 	public static Triangle empty() {
-		Vector3d v1 = new Vector3d(0, 0, 0);
-		Vector3d v2 = new Vector3d(0, 0, 0);
-		Vector3d v3 = new Vector3d(0, 0, 0);
-		Vector2d v4 = new Vector2d(0, 0);
-		Vector2d v5 = new Vector2d(0, 0);
-		Vector2d v6 = new Vector2d(0, 0);
+		Vector3 v1 = new Vector3(0, 0, 0);
+		Vector3 v2 = new Vector3(0, 0, 0);
+		Vector3 v3 = new Vector3(0, 0, 0);
+		Vector2 v4 = new Vector2(0, 0);
+		Vector2 v5 = new Vector2(0, 0);
+		Vector2 v6 = new Vector2(0, 0);
 		return new Triangle(v1, v2, v3, v4, v5, v6, null, null, null);
 	}
 	
 	// Return the nth point on the triangle
-	public Vector3d getVector(int n) {
+	public Vector3 getVector(int n) {
 		return this.p[n].copy();
 	}
 	
@@ -161,27 +161,27 @@ public class Triangle {
 	}
 	
 	// Multiply a Triangle by a matrix
-	public static Vector3d[] multiplyMatrixTriangle(Mat4x4 mat, Triangle tri) {
-		Vector3d vec1 = Vector3d.mutiplyMatrixVector(mat, tri.p[0]);
-		Vector3d vec2 = Vector3d.mutiplyMatrixVector(mat, tri.p[1]);
-		Vector3d vec3 = Vector3d.mutiplyMatrixVector(mat, tri.p[2]);
+	public static Vector3[] multiplyMatrixTriangle(Mat4x4 mat, Triangle tri) {
+		Vector3 vec1 = Vector3.mutiplyMatrixVector(mat, tri.p[0]);
+		Vector3 vec2 = Vector3.mutiplyMatrixVector(mat, tri.p[1]);
+		Vector3 vec3 = Vector3.mutiplyMatrixVector(mat, tri.p[2]);
 		
-		return new Vector3d[] { vec1, vec2, vec3 };
+		return new Vector3[] { vec1, vec2, vec3 };
 	}
 	
-	private static double signedDist(Vector3d nPlane, Vector3d pPlane, Vector3d p) {
-		return (nPlane.x * p.x + nPlane.y * p.y + nPlane.z * p.z - Vector3d.dotProduct(nPlane, pPlane));
+	private static double signedDist(Vector3 nPlane, Vector3 pPlane, Vector3 p) {
+		return (nPlane.x * p.x + nPlane.y * p.y + nPlane.z * p.z - Vector3.dotProduct(nPlane, pPlane));
 	}
 	
-	public static Triangle[] clipAgainstPlane(Vector3d pPlane, Vector3d nPlane, Triangle tri) {
-		nPlane = Vector3d.normalize(nPlane);
+	public static Triangle[] clipAgainstPlane(Vector3 pPlane, Vector3 nPlane, Triangle tri) {
+		nPlane = Vector3.normalize(nPlane);
 		
-		Vector3d[] insidePoints = new Vector3d[3];		int nInsidePoints = 0;
-		Vector3d[] outsidePoints = new Vector3d[3];		int nOutsidePoints = 0;
+		Vector3[] insidePoints = new Vector3[3];		int nInsidePoints = 0;
+		Vector3[] outsidePoints = new Vector3[3];		int nOutsidePoints = 0;
 		Color[] insideColor = new Color[3];				int nInsideColor = 0;
 		Color[] outsideColor = new Color[3];			int nOutsideColor = 0;
-		Vector2d[] insideTex = new Vector2d[3];			int nInsideTex = 0;
-		Vector2d[] outsideTex = new Vector2d[3];		int nOutsideTex = 0;
+		Vector2[] insideTex = new Vector2[3];			int nInsideTex = 0;
+		Vector2[] outsideTex = new Vector2[3];		int nOutsideTex = 0;
 		
 		double d0 = Triangle.signedDist(nPlane, pPlane, tri.p[0]);
 		double d1 = Triangle.signedDist(nPlane, pPlane, tri.p[1]);
@@ -233,16 +233,16 @@ public class Triangle {
 			otri1.brightness[0] = insideColor[0];
 			
 			// intersection of AB = B'
-			double t1 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[0]);
-			otri1.p[1] = Vector3d.intersectPlaneVector3d(insidePoints[0], outsidePoints[0], t1);
+			double t1 = Vector3.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[0]);
+			otri1.p[1] = Vector3.intersectPlaneVector3d(insidePoints[0], outsidePoints[0], t1);
 			otri1.t[1].u = t1 * (outsideTex[0].u - insideTex[0].u) + insideTex[0].u;
 			otri1.t[1].v = t1 * (outsideTex[0].v - insideTex[0].v) + insideTex[0].v;
 			otri1.t[1].w = t1 * (outsideTex[0].w - insideTex[0].w) + insideTex[0].w;
 			otri1.brightness[1] = new Color ((int) (t1 * (outsideColor[0].getRed() - insideColor[0].getRed()) + insideColor[0].getRed()), (int) (t1 * (outsideColor[0].getGreen() - insideColor[0].getGreen()) + insideColor[0].getGreen()), (int) (t1 * (outsideColor[0].getBlue() - insideColor[0].getBlue()) + insideColor[0].getBlue()));
 			
 			// intersection of AC = C'
-			double t2 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[1]);
-			otri1.p[2] = Vector3d.intersectPlaneVector3d(insidePoints[0], outsidePoints[1], t2);
+			double t2 = Vector3.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[1]);
+			otri1.p[2] = Vector3.intersectPlaneVector3d(insidePoints[0], outsidePoints[1], t2);
 			otri1.t[2].u = t2 * (outsideTex[1].u - insideTex[0].u) + insideTex[0].u;
 			otri1.t[2].v = t2 * (outsideTex[1].v - insideTex[0].v) + insideTex[0].v;
 			otri1.t[2].w = t2 * (outsideTex[1].w - insideTex[0].w) + insideTex[0].w;
@@ -271,8 +271,8 @@ public class Triangle {
 			otri1.brightness[1] = insideColor[1];
 			
 			// intersection of AC = A'
-			double t1 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[0]);
-			otri1.p[2] = Vector3d.intersectPlaneVector3d(insidePoints[0], outsidePoints[0], t1);
+			double t1 = Vector3.intersectPlaneDouble(pPlane, nPlane, insidePoints[0], outsidePoints[0]);
+			otri1.p[2] = Vector3.intersectPlaneVector3d(insidePoints[0], outsidePoints[0], t1);
 			otri1.t[2].u = t1 * (outsideTex[0].u - insideTex[0].u) + insideTex[0].u;
 			otri1.t[2].v = t1 * (outsideTex[0].v - insideTex[0].v) + insideTex[0].v;
 			otri1.t[2].w = t1 * (outsideTex[0].w - insideTex[0].w) + insideTex[0].w;
@@ -289,8 +289,8 @@ public class Triangle {
 			otri2.brightness[1] = insideColor[1];
 			
 			// intersection of BC = B'
-			double t2 = Vector3d.intersectPlaneDouble(pPlane, nPlane, insidePoints[1], outsidePoints[0]);
-			otri2.p[2] = Vector3d.intersectPlaneVector3d(insidePoints[1], outsidePoints[0], t2);
+			double t2 = Vector3.intersectPlaneDouble(pPlane, nPlane, insidePoints[1], outsidePoints[0]);
+			otri2.p[2] = Vector3.intersectPlaneVector3d(insidePoints[1], outsidePoints[0], t2);
 			otri2.t[2].u = t2 * (outsideTex[0].u - insideTex[1].u) + insideTex[1].u;
 			otri2.t[2].v = t2 * (outsideTex[0].v - insideTex[1].v) + insideTex[1].v;
 			otri2.t[2].w = t2 * (outsideTex[0].w - insideTex[1].w) + insideTex[1].w;
@@ -310,22 +310,22 @@ public class Triangle {
 		return null;
 	}
 	
-	public static Vector3d findFaceNormal(Vector3d v1, Vector3d v2, Vector3d v3) {
-		Vector3d normal, line1, line2;
-		line1 = Vector3d.subtract(v2, v1);
-		line2 = Vector3d.subtract(v3, v1);
+	public static Vector3 findFaceNormal(Vector3 v1, Vector3 v2, Vector3 v3) {
+		Vector3 normal, line1, line2;
+		line1 = Vector3.subtract(v2, v1);
+		line2 = Vector3.subtract(v3, v1);
 		//System.out.println(line1.x + " " + line1.y + " " + line1.z + " | " + line2.x + " " + line2.y + " " + line2.z);
 		
-		normal = Vector3d.crossProduct(line1, line2);
+		normal = Vector3.crossProduct(line1, line2);
 		//System.out.println(normal.x + " " + normal.y + " " + normal.z);
 		
-		return Vector3d.normalize(normal);
+		return Vector3.normalize(normal);
 	}
 	
 	// Project a list of triangles to screen view
-	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3d pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light, Color color) {
+	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3 pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light, Color color) {
 		Mat4x4 matWorld = Quaternion.generateMatrix(rot, pos);
-		Mat4x4 matRot = Quaternion.generateMatrix(rot, Vector3d.empty());
+		Mat4x4 matRot = Quaternion.generateMatrix(rot, Vector3.empty());
 		
 		for (Triangle tri : trianglesToRaster) {
 			//System.out.println(tri.p[0].x + " " + tri.p[0].y + " " + tri.p[0].z + " | " + tri.p[1].x + " " + tri.p[1].y + " " + tri.p[1].z + " | " + tri.p[2].x + " " + tri.p[2].y + " " + tri.p[2].z);
@@ -341,29 +341,29 @@ public class Triangle {
 			triTransformed.t[1] = tri.t[1];
 			triTransformed.t[2] = tri.t[2];
 			
-			Vector3d normal = Triangle.findFaceNormal(triTransformed.p[0], triTransformed.p[1], triTransformed.p[2]);
+			Vector3 normal = Triangle.findFaceNormal(triTransformed.p[0], triTransformed.p[1], triTransformed.p[2]);
 			
 			// Check if the triangle is facing towards the camera
-			Vector3d vCameraRay = Vector3d.subtract(triTransformed.p[0], camera.pos);
+			Vector3 vCameraRay = Vector3.subtract(triTransformed.p[0], camera.pos);
 			//System.out.println(vCameraRay.x + " " + vCameraRay.y + " " + vCameraRay.z + " normal: " + normal.x + " " + normal.y + " " + normal.z);
-			if (Vector3d.dotProduct(normal, vCameraRay) < 0) {
-				Vector3d lightDirection = light.getDirection();
+			if (Vector3.dotProduct(normal, vCameraRay) < 0) {
+				Vector3 lightDirection = light.getDirection();
 
 				double dp1, dp2, dp3;
 				boolean doNotGouraud = false;
 				if (tri.n[0] == null || doGouraud == false) doNotGouraud = true;
 				if (doNotGouraud) {
-					dp1 = Math.max(minimumBrightness, Vector3d.dotProduct(lightDirection, normal));
+					dp1 = Math.max(minimumBrightness, Vector3.dotProduct(lightDirection, normal));
 					dp2 = dp1;
 					dp3 = dp1;
 				} else {
-					Vector3d vec1 = Vector3d.mutiplyMatrixVector(matRot, tri.n[0]);
-					Vector3d vec2 = Vector3d.mutiplyMatrixVector(matRot, tri.n[1]);
-					Vector3d vec3 = Vector3d.mutiplyMatrixVector(matRot, tri.n[2]);
+					Vector3 vec1 = Vector3.mutiplyMatrixVector(matRot, tri.n[0]);
+					Vector3 vec2 = Vector3.mutiplyMatrixVector(matRot, tri.n[1]);
+					Vector3 vec3 = Vector3.mutiplyMatrixVector(matRot, tri.n[2]);
 					
-					dp1 = Math.max(minimumBrightness, Vector3d.dotProduct(lightDirection, vec1));
-					dp2 = Math.max(minimumBrightness, Vector3d.dotProduct(lightDirection, vec2));
-					dp3 = Math.max(minimumBrightness, Vector3d.dotProduct(lightDirection, vec3));
+					dp1 = Math.max(minimumBrightness, Vector3.dotProduct(lightDirection, vec1));
+					dp2 = Math.max(minimumBrightness, Vector3.dotProduct(lightDirection, vec2));
+					dp3 = Math.max(minimumBrightness, Vector3.dotProduct(lightDirection, vec3));
 				}
 				
 				if (lightingType == 0) {
@@ -405,7 +405,7 @@ public class Triangle {
 				triViewed.t[1] = triTransformed.t[1];
 				triViewed.t[2] = triTransformed.t[2];
 				
-				Triangle[] clipped = Triangle.clipAgainstPlane(camera.clippingPlane, new Vector3d(0, 0, 1), triViewed);
+				Triangle[] clipped = Triangle.clipAgainstPlane(camera.clippingPlane, new Vector3(0, 0, 1), triViewed);
 				int nClippedTriangles = 0; 
 				if (clipped[0] != null) nClippedTriangles++;
 				if (clipped[1] != null) nClippedTriangles++;
@@ -435,9 +435,9 @@ public class Triangle {
 					//System.out.println(triProjected.p[0].x + " " + triProjected.p[0].y + " | " + triProjected.p[1].x + " " + triProjected.p[1].y + " | " + triProjected.p[2].x + " " + triProjected.p[2].y);
 					//System.out.println(triProjected.p[0].w + " " + triProjected.p[1].w + " " + triProjected.p[2].w);
 	
-					triProjected.p[0] = Vector3d.divide(triProjected.p[0], triProjected.p[0].w);
-					triProjected.p[1] = Vector3d.divide(triProjected.p[1], triProjected.p[1].w);
-					triProjected.p[2] = Vector3d.divide(triProjected.p[2], triProjected.p[2].w);
+					triProjected.p[0] = Vector3.divide(triProjected.p[0], triProjected.p[0].w);
+					triProjected.p[1] = Vector3.divide(triProjected.p[1], triProjected.p[1].w);
+					triProjected.p[2] = Vector3.divide(triProjected.p[2], triProjected.p[2].w);
 	
 					triProjected.p[0].x *= -1;
 					triProjected.p[1].x *= -1;
@@ -446,10 +446,10 @@ public class Triangle {
 					triProjected.p[1].y *= -1;
 					triProjected.p[2].y *= -1;
 	
-					var offsetView = new Vector3d(1, 1, 0);
-					triProjected.p[0] = Vector3d.add(triProjected.p[0], offsetView);
-					triProjected.p[1] = Vector3d.add(triProjected.p[1], offsetView);
-					triProjected.p[2] = Vector3d.add(triProjected.p[2], offsetView);
+					var offsetView = new Vector3(1, 1, 0);
+					triProjected.p[0] = Vector3.add(triProjected.p[0], offsetView);
+					triProjected.p[1] = Vector3.add(triProjected.p[1], offsetView);
+					triProjected.p[2] = Vector3.add(triProjected.p[2], offsetView);
 					triProjected.p[0].x *= 0.5 * WIDTH;
 					triProjected.p[0].y *= 0.5 * HEIGHT;
 					triProjected.p[1].x *= 0.5 * WIDTH;
@@ -480,16 +480,16 @@ public class Triangle {
 					nNewTriangles--;
 					switch (p) {
 						case 0: 
-							clipped = Triangle.clipAgainstPlane(new Vector3d(0, 0, 0), new Vector3d(0, 1, 0), test); 
+							clipped = Triangle.clipAgainstPlane(new Vector3(0, 0, 0), new Vector3(0, 1, 0), test); 
 							break; //Top
 						case 1: 
-							clipped = Triangle.clipAgainstPlane(new Vector3d(0, HEIGHT-1, 0), new Vector3d(0, -1, 0), test); 
+							clipped = Triangle.clipAgainstPlane(new Vector3(0, HEIGHT-1, 0), new Vector3(0, -1, 0), test); 
 							break; //Bottom
 						case 2: 
-							clipped = Triangle.clipAgainstPlane(new Vector3d(0, 0, 0), new Vector3d(1, 0, 0), test); 
+							clipped = Triangle.clipAgainstPlane(new Vector3(0, 0, 0), new Vector3(1, 0, 0), test); 
 							break; //Right
 						case 3: 
-							clipped = Triangle.clipAgainstPlane(new Vector3d(WIDTH-1, 0, 0), new Vector3d(-1, 0, 0), test); 
+							clipped = Triangle.clipAgainstPlane(new Vector3(WIDTH-1, 0, 0), new Vector3(-1, 0, 0), test); 
 							break; //Left
 					}
 					
