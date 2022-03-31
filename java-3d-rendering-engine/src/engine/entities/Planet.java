@@ -1,4 +1,4 @@
-package engine.models;
+package engine.entities;
 
 import java.awt.Color;
 
@@ -12,15 +12,14 @@ import engine.vector.Vector3;
 
 public class Planet {
 	
-	public int resolution = 16;
+	public int resolution = 24;
 	public double radius = 1;
 	public double oceanRadius = 1;
-	public double roughness = 1;
-	public double strength = 0;
+	public double roughness = 5;
+	public double strength = 2;
 	private Triangle[] terrainFaces = new Triangle[(resolution-1) * (resolution-1) * 2 * 6];
 	
 	public Planet() {
-		
 		Vector3[] directions = { Vector3.up(), Vector3.down(), Vector3.left(), Vector3.right(), Vector3.forward(), Vector3.back() };
 		
 		for (int i = 0; i < 6; i++) {

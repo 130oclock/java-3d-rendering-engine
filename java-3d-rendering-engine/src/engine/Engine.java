@@ -10,7 +10,7 @@ import java.awt.image.DataBufferInt;
 import javax.swing.JFrame;
 
 import engine.camera.Camera;
-import engine.entities.Entity;
+import engine.entities.*;
 import engine.graphics.Screen;
 import engine.input.*;
 import engine.light.EnvironmentLight;
@@ -52,7 +52,7 @@ public class Engine extends Canvas implements Runnable {
 	
 	private UserInput userInput;
 	
-	//private static Planet planet = new Planet();
+	private static Planet planet = null;
 	
 	public Engine() {
 		// Generate Window
@@ -84,13 +84,14 @@ public class Engine extends Canvas implements Runnable {
 	
 	public static void loadEntities() {
 		// load models
-		objFileReader.loadDir("Models");
+		//objFileReader.loadDir("Models");
 		//objFileReader.load("Models/lowPolySphere.obj", "lowPolySphere");
 		
 		// initialize any entities
+		planet = new Planet();
 		
 		//new Entity(objFileReader.get("plane"), 0, 0, 0);
-		new Entity(Triangle.findSmoothTriangleNormals(objFileReader.get("cube")), 0, 0, 0);
+		//new Entity(Triangle.findSmoothTriangleNormals(objFileReader.get("cube")), 0, 0, 0);
 		//new Entity (objFileReader.get("octahedron"));
 		//new Entity(objFileReader.get("utahTeapot"));
 		//new Entity(objFileReader.get("boid"), 2, 2, 0);
@@ -166,7 +167,7 @@ public class Engine extends Canvas implements Runnable {
 			ent.project(camera, matView, matProj, WIDTH, HEIGHT, light);
 		}
 		
-		//planet.project(camera, matView, matProj, WIDTH, HEIGHT, light);
+		if (planet != null) planet.project(camera, matView, matProj, WIDTH, HEIGHT, light);
 		
 		Triangle.cullScreenEdges(WIDTH, HEIGHT);
 		Triangle.drawTriangles(screen.imageBufferData, pDepthBuffer, WIDTH, HEIGHT);
