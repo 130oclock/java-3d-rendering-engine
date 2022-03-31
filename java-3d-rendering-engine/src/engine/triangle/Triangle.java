@@ -1,7 +1,6 @@
 package engine.triangle;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class Triangle {
 	public static boolean doGouraud = true;
 	private static double minimumBrightness = 0.1;
 
-	private static boolean drawOutlines = true;
+	private static boolean drawOutlines = false;
 	
 	public static List<Triangle> triangleRaster = new ArrayList<Triangle>();
 	

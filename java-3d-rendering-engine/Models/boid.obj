@@ -1,7 +1,7 @@
 # Blender v2.79 (sub 0) OBJ File: ''
 # www.blender.org
 mtllib boid.mtl
-o Cube
+o boid
 v 0.000000 -0.353553 -1.250000
 v -0.000000 0.000000 1.250000
 v -1.414213 -0.000000 -1.250000

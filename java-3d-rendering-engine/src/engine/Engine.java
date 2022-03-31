@@ -1,14 +1,11 @@
 package engine;
 
 import java.awt.Canvas;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -18,8 +15,7 @@ import engine.graphics.Screen;
 import engine.input.*;
 import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
-import engine.models.Planet;
-import engine.models.objFileReader;
+import engine.models.*;
 import engine.quaternion.Quaternion;
 import engine.triangle.Triangle;
 import engine.vector.*;
@@ -88,25 +84,16 @@ public class Engine extends Canvas implements Runnable {
 	
 	public static void loadEntities() {
 		// load models
+		objFileReader.loadDir("Models");
+		
 		// initialize any entities
 		
-		//objFileReader.load("Models/plane.obj", "plane");
 		//new Entity(objFileReader.get("plane"), 0, 0, 0);
-		
-		//objFileReader.load("Models/cube.obj", "cube");
 		//new Entity(objFileReader.get("cube"), 0, 0, 0);
-		
-		//objFileReader.load("Models/octahedron.obj", "octahedron");
 		//new Entity (objFileReader.get("octahedron"));
-		
-		//objFileReader.load("Models/utahTeapot.obj", "teapot");
-		//new Entity(objFileReader.get("teapot"));
-		
-		//objFileReader.load("Models/lowPolySphere.obj", "sphere");
-		//new Entity(objFileReader.get("sphere"), 0, 0, 0);
-		
-		//objFileReader.load("Models/smoothBlenderMonkey.obj", "suzanne");
-		//new Entity(objFileReader.get("suzanne"), new Vector3d(0, 0, 0), Quaternion.localRotation(Vector3d.up(), Math.PI));
+		//new Entity(objFileReader.get("utahTeapot"));
+		new Entity(objFileReader.get("lowPolySphere"), 0, 0, 0);
+		//new Entity(objFileReader.get("smoothBlenderMonkey"), new Vector3d(0, 0, 0), Quaternion.localRotation(Vector3d.up(), Math.PI));
 	}
 	
 	public synchronized void start() {

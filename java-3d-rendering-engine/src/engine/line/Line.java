@@ -1,8 +1,5 @@
 package engine.line;
 
-import java.awt.Color;
-import java.awt.Graphics;
-
 public class Line {
 	
 	public static void drawline(int[] imageBufferData, int x0, int y0, int x1, int y1, int WIDTH, int color) {  

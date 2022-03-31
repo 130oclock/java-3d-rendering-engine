@@ -1,8 +1,6 @@
 package engine.models;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 import engine.camera.Camera;
 import engine.improvednoise.ImprovedNoise;
@@ -10,7 +8,6 @@ import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
 import engine.quaternion.Quaternion;
 import engine.triangle.Triangle;
-import engine.vector.Vector2;
 import engine.vector.Vector3;
 
 public class Planet {

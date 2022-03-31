@@ -3,9 +3,11 @@ package engine.models;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 import engine.triangle.Triangle;
 
@@ -19,7 +21,21 @@ public class objFileReader {
 		return models.get(index);
 	}
 	
-	public static Triangle[] load(String filename, String modelname) {
+	public static void loadDir(String directoryname) {
+		try (Stream<Path> paths = Files.walk(Paths.get(directoryname))) {
+			List<Path> files = paths.filter(Files::isRegularFile).toList();
+			for (int i = 0; i < files.size(); i++) {
+				Path filepath = files.get(i);
+				String filename = filepath.getFileName().toString();
+				objFileReader.load(filepath.toString(), filename.substring(0, filename.lastIndexOf(".")));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	}
+	
+	public static void load(String filename, String modelname) {
 		try {
 			FileInputStream inputStream = null;
 			Scanner scanner = null;
@@ -125,12 +141,13 @@ public class objFileReader {
 					}
 				}
 				
-				System.out.println("loaded " + title + " | " + vertexInd.size() + " vertices | " + num_faces + " triangles");
+				System.out.println("loaded " + modelname + " | " + vertexInd.size() + " vertices | " + num_faces + " triangles");
 			} finally {
 				if (inputStream != null) {
 					try {
 						inputStream.close();
 					} catch (IOException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -151,6 +168,5 @@ public class objFileReader {
 			System.out.println("Cound not find file " + filename);
 			e.printStackTrace();
 		}
-		return null;
 	}
 }

@@ -1,7 +1,7 @@
 # Blender v2.79 (sub 0) OBJ File: ''
 # www.blender.org
 mtllib lowPolySphere.mtl
-o Sphere
+o sphere
 v 0.000000 -1.000000 0.000000
 v 0.038060 0.980785 -0.191342
 v 0.074658 0.923880 -0.375330
