@@ -30,19 +30,19 @@ public class Entity {
 	}
 	
 	public Entity(Triangle[] model) {
-		this(model, Vector3.empty(), Quaternion.empty(), Color.WHITE);
+		this(model, new Vector3(), new Quaternion(), Color.WHITE);
 	}
 	
 	public Entity(Triangle[] model, double x, double y, double z) {
-		this(model, new Vector3(x, y, z), Quaternion.empty(), Color.WHITE);
+		this(model, new Vector3(x, y, z), new Quaternion(), Color.WHITE);
 	}
 	
 	public Entity(Triangle[] model, double x, double y, double z, Color color) {
-		this(model, new Vector3(x, y, z), Quaternion.empty(), color);
+		this(model, new Vector3(x, y, z), new Quaternion(), color);
 	}
 	
 	public Entity(Triangle[] model, Vector3 pos) {
-		this(model, pos, Quaternion.empty(), Color.WHITE);
+		this(model, pos, new Quaternion(), Color.WHITE);
 	}
 	
 	public void project(Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {

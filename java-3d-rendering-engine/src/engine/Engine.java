@@ -18,6 +18,7 @@ import engine.graphics.Screen;
 import engine.input.*;
 import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
+import engine.models.Planet;
 import engine.models.objFileReader;
 import engine.quaternion.Quaternion;
 import engine.triangle.Triangle;
@@ -36,8 +37,8 @@ public class Engine extends Canvas implements Runnable {
 
 	private static boolean running = false;
 	
-	private static final int WIDTH = 1000;
-	private static final int HEIGHT = 750;
+	private static final int WIDTH = 1600;
+	private static final int HEIGHT = 900;
 	private static double[] pDepthBuffer = new double[WIDTH * HEIGHT];
 	
 	private Screen screen;
@@ -47,13 +48,15 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final double fps = 60;
 	
-	private Camera camera = new Camera(0, 5, -10, 500);
+	private Camera camera = new Camera(0, 0, -10, 500);
 	private EnvironmentLight light = new EnvironmentLight(new Vector3(-1, 1, -2));
 	
 	private Mat4x4 matView;
 	private Mat4x4 matProj = Mat4x4.makeProjection(90, HEIGHT, WIDTH, 0.1, 1000);
 	
 	private UserInput userInput;
+	
+	//private static Planet planet = new Planet();
 	
 	public Engine() {
 		// Generate Window
@@ -87,11 +90,11 @@ public class Engine extends Canvas implements Runnable {
 		// load models
 		// initialize any entities
 		
-		objFileReader.load("Models/plane.obj", "plane");
-		new Entity(objFileReader.get("plane"), 0, 0, 0);
+		//objFileReader.load("Models/plane.obj", "plane");
+		//new Entity(objFileReader.get("plane"), 0, 0, 0);
 		
-		objFileReader.load("Models/cube.obj", "cube");
-		new Entity(objFileReader.get("cube"), 0, 5, 0);
+		//objFileReader.load("Models/cube.obj", "cube");
+		//new Entity(objFileReader.get("cube"), 0, 0, 0);
 		
 		//objFileReader.load("Models/octahedron.obj", "octahedron");
 		//new Entity (objFileReader.get("octahedron"));
@@ -173,6 +176,8 @@ public class Engine extends Canvas implements Runnable {
 		for (Entity ent : Entity.entities) {
 			ent.project(camera, matView, matProj, WIDTH, HEIGHT, light);
 		}
+		
+		//planet.project(camera, matView, matProj, WIDTH, HEIGHT, light);
 		
 		Triangle.cullScreenEdges(WIDTH, HEIGHT);
 		Triangle.drawTriangles(screen.imageBufferData, pDepthBuffer, WIDTH, HEIGHT);

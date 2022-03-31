@@ -1,10 +1,11 @@
 package engine.line;
 
+import java.awt.Color;
 import java.awt.Graphics;
 
 public class Line {
 	
-	private static void drawline(Graphics g, int x0, int y0, int x1, int y1) {  
+	public static void drawline(int[] imageBufferData, int x0, int y0, int x1, int y1, int WIDTH, int color) {  
 		int dx = Math.abs(x1 - x0);
         int dy = Math.abs(y1 - y0);
  
@@ -15,7 +16,8 @@ public class Line {
         int e2;
  
         while (true) {
-        	g.fillRect(x0, y0, 1, 1);
+			int d = (int) ((y0 * WIDTH) + x0);
+			imageBufferData[d] = color;
             if (x0 == x1 && y0 == y1) 
                 break;
  

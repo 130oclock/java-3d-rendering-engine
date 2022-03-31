@@ -7,6 +7,7 @@ import java.util.List;
 
 import engine.camera.Camera;
 import engine.light.EnvironmentLight;
+import engine.line.Line;
 import engine.matrix.Mat4x4;
 import engine.quaternion.Quaternion;
 import engine.vector.Vector2;
@@ -15,10 +16,12 @@ import engine.vector.Vector3;
 public class Triangle {
 	
 	private static boolean showClipping = false;
+	
 	private static int lightingType = 0;
 	public static boolean doGouraud = true;
 	private static double minimumBrightness = 0.1;
-	private static boolean showOutlines = true;
+
+	private static boolean drawOutlines = true;
 	
 	public static List<Triangle> triangleRaster = new ArrayList<Triangle>();
 	
@@ -39,42 +42,29 @@ public class Triangle {
 		this.n[1] = n1;
 		this.n[2] = n2;
 		
-		this.t[0] = t0;
-		this.t[1] = t1;
-		this.t[2] = t2;
+		if (t0 == null) {
+			this.t[0] = new Vector2(0, 0);
+			this.t[1] = new Vector2(0, 0);
+			this.t[2] = new Vector2(0, 0);
+		} else {
+			this.t[0] = t0;
+			this.t[1] = t1;
+			this.t[2] = t2;
+		}
 		
 		this.color = Color.WHITE;
 	}
 	
-	public Triangle(double[] v1, double[] v2, double[] v3) {
-		this.p[0] = new Vector3(v1[0], v1[1], v1[2]);
-		this.p[1] = new Vector3(v2[0], v2[1], v2[2]);
-		this.p[2] = new Vector3(v3[0], v3[1], v3[2]);
-		
-		this.n[0] = null;
-		this.n[1] = null;
-		this.n[2] = null;
-		
-		this.t[0] = new Vector2(0, 0);
-		this.t[1] = new Vector2(0, 0);
-		this.t[2] = new Vector2(0, 0);
-		
-		this.color = new Color(255, 255, 255);
+	public Triangle(Vector3 v1, Vector3 v2, Vector3 v3) {
+		this(v1, v2, v3, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), null, null, null);
 	}
+	
+	public Triangle(double[] v1, double[] v2, double[] v3) {
+		this(new Vector3(v1[0], v1[1], v1[2]), new Vector3(v2[0], v2[1], v2[2]), new Vector3(v3[0], v3[1], v3[2]), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), null, null, null);
+	}
+	
 	public Triangle(double[] v1, double[] v2, double[] v3, double[] vt1, double[] vt2, double[] vt3) {
-		this.p[0] = new Vector3(v1[0], v1[1], v1[2]);
-		this.p[1] = new Vector3(v2[0], v2[1], v2[2]);
-		this.p[2] = new Vector3(v3[0], v3[1], v3[2]);
-		
-		this.n[0] = null;
-		this.n[1] = null;
-		this.n[2] = null;
-		
-		this.t[0] = new Vector2(vt1[0], vt1[1]);
-		this.t[1] = new Vector2(vt2[0], vt2[1]);
-		this.t[2] = new Vector2(vt3[0], vt3[1]);
-		
-		this.color = new Color(255, 255, 255);
+		this(new Vector3(v1[0], v1[1], v1[2]), new Vector3(v2[0], v2[1], v2[2]), new Vector3(v3[0], v3[1], v3[2]), new Vector2(vt1[0], vt1[1]), new Vector2(vt2[0], vt2[1]), new Vector2(vt3[0], vt3[1]), null, null, null);
 	}
 	public Triangle(double[] v1, double[] v2, double[] v3, double[] vt1, double[] vt2, double[] vt3, double[] vn1, double[] vn2, double[] vn3) {
 		this.p[0] = new Vector3(v1[0], v1[1], v1[2]);
@@ -95,7 +85,7 @@ public class Triangle {
 			this.t[2] = new Vector2(vt3[0], vt3[1]);
 		}
 		
-		this.color = new Color(255, 255, 255);
+		this.color = Color.WHITE;
 	}
 	
 	// Create an empty Triangle
@@ -325,7 +315,7 @@ public class Triangle {
 	// Project a list of triangles to screen view
 	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3 pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light, Color color) {
 		Mat4x4 matWorld = Quaternion.generateMatrix(rot, pos);
-		Mat4x4 matRot = Quaternion.generateMatrix(rot, Vector3.empty());
+		Mat4x4 matRot = Quaternion.generateMatrix(rot, new Vector3());
 		
 		for (Triangle tri : trianglesToRaster) {
 			//System.out.println(tri.p[0].x + " " + tri.p[0].y + " " + tri.p[0].z + " | " + tri.p[1].x + " " + tri.p[1].y + " " + tri.p[1].z + " | " + tri.p[2].x + " " + tri.p[2].y + " " + tri.p[2].z);
@@ -822,6 +812,13 @@ public class Triangle {
 					}
 				}
 			}
+		}
+		
+		if (drawOutlines) {
+			int outline = Color.BLACK.getRGB();
+			Line.drawline(imageBufferData, (int) x1, (int) y1, (int) x2, (int) y2, WIDTH, outline);
+			Line.drawline(imageBufferData, (int) x1, (int) y1, (int) x3, (int) y3, WIDTH, outline);
+			Line.drawline(imageBufferData, (int) x2, (int) y2, (int) x3, (int) y3, WIDTH, outline);
 		}
 	}
 }

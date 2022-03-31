@@ -7,11 +7,16 @@ public class Vector3 {
 	public double x, y, z, w;
 	
 	// Constructor
+	
 	public Vector3(double x, double y, double z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.w = 1;
+	}
+	
+	public Vector3() {
+		this(0, 0, 0);
 	}
 	
 	// Project a 3d point to the screen
@@ -32,8 +37,24 @@ public class Vector3 {
 		return new Vector3(0, 1, 0);
 	}
 	
-	public static Vector3 empty() {
-		return new Vector3(0, 0, 0);
+	public static Vector3 down() {
+		return new Vector3(0, -1, 0);
+	}
+	
+	public static Vector3 left() {
+		return new Vector3(1, 0, 0);
+	}
+	
+	public static Vector3 right() {
+		return new Vector3(-1, 0, 0);
+	}
+	
+	public static Vector3 forward() {
+		return new Vector3(0, 0, 1);
+	}
+	
+	public static Vector3 back() {
+		return new Vector3(0, 0, -1);
 	}
 	
 	// Find the distance between two 3d points

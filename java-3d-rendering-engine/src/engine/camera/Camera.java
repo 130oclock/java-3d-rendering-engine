@@ -18,14 +18,14 @@ public class Camera {
 	
 	public Camera(Vector3 pos, double viewDistance) {
 		this.pos = pos;
-		this.rot = Quaternion.empty();
+		this.rot = new Quaternion();
 		this.viewDistance = viewDistance;
 		this.clippingPlane = new Vector3(0, 0, 0.1);
 	}
 	
 	public Camera(double x, double y, double z, double viewDistance) {
 		this.pos = new Vector3(x, y, z);
-		this.rot = Quaternion.empty();
+		this.rot = new Quaternion();
 		this.viewDistance = viewDistance;
 		this.clippingPlane = new Vector3(0, 0, 0.1);
 	}
@@ -95,7 +95,7 @@ public class Camera {
 		
 		if (keyb.getAnyKey(KeyEvent.VK_X)) {
 			this.pos = new Vector3(0, 5, -5);
-			this.rot = Quaternion.empty();
+			this.rot = new Quaternion();
 		}
 		
 		if (keyb.getAnyKey(KeyEvent.VK_O)) {

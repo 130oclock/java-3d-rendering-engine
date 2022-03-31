@@ -14,6 +14,10 @@ public class Quaternion {
 		this.z = z;
 	}
 	
+	public Quaternion() {
+		this(1, 0, 0, 0);
+	}
+	
 	public Vector3 getForwardVector() {
 		double x = 2 * ((this.x * this.z) + (this.w * this.y));
 		double y = 2 * ((this.y * this.z) - (this.w * this.x));
@@ -42,10 +46,6 @@ public class Quaternion {
 
 	public Quaternion copy() {
 		return new Quaternion(this.w, this.x, this.y, this.z);
-	}
-	
-	public static Quaternion empty() {
-		return new Quaternion(1, 0, 0, 0);
 	}
 	
 	public static double dotProduct(Quaternion q1, Quaternion q2) {
@@ -106,7 +106,7 @@ public class Quaternion {
 			return new Quaternion(Math.PI, 0, 1, 0);
 		}
 		if (Math.abs(dot - (1.0)) < 0.000001) {
-			return Quaternion.empty();
+			return new Quaternion();
 		}
 		
 		double angle = Math.acos(dot);
