@@ -1,8 +1,10 @@
 package engine.triangle;
 
 import java.awt.Color;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import engine.camera.Camera;
 import engine.light.EnvironmentLight;
@@ -309,6 +311,110 @@ public class Triangle {
 		//System.out.println(normal.x + " " + normal.y + " " + normal.z);
 		
 		return Vector3.normalize(normal);
+	}
+	
+	private static int findDuplicate(Vector3 v1, List<Vector3> arr) {
+		if (arr == null) return -1;
+		int index = 0;
+		int len = arr.size();
+		double x1 = v1.x, y1 = v1.y, z1 = v1.z;
+		while (index < len) {
+			Vector3 v2 = arr.get(index);
+			double x2 = v2.x, y2 = v2.y, z2 = v2.z;
+			
+			if (Math.abs(x1 - x2) < 0.0001 && Math.abs(y1 - y2) < 0.0001 && Math.abs(z1 - z2) < 0.0001) {
+				return index;
+			} else index++;
+		}
+		return -1;
+	}
+	
+	public static Triangle[] findSmoothTriangleNormals(Triangle[] triangles) {
+		List<Vector3> vertices = new ArrayList<Vector3>(); // list of all vertices
+		List<Vector3> normals = new ArrayList<Vector3>(); // list of all normals corresponding to a vertex
+		//List<ArrayList<Integer> > triangleInds = new ArrayList<ArrayList<Integer> >(); // a list for each vertex of all the triangle indices that share that vertex
+		int[][] vertexInds = new int[triangles.length][]; // list of the vertex indices to reconstruct the triangles
+		Vector3[] triNormals = new Vector3[triangles.length]; // list of all triangle face normals
+		//List<Triangle> smoothTriangles = new ArrayList<Triangle>(); // list of all triangles with smoothed normals
+		
+		for (int i = 0; i < triangles.length; i++) {
+			Triangle tri = triangles[i];
+			Vector3 v1 = tri.p[0], v2 = tri.p[1], v3 = tri.p[2];
+			
+			Vector3 normal = findFaceNormal(v1, v2, v3);
+			triNormals[i] = normal;
+			
+			int[] indices = new int[3];
+			
+			int i1 = findDuplicate(v1, vertices);
+			if (i1 == -1) { // vertex doesn't exist yet
+				// add new vertex
+				vertices.add(v1);
+				// add normal to list
+				normals.add(normal);
+				// log the index of the vertex for later reconstruction
+				indices[0] = vertices.size() - 1;
+			} else { // vertex already exists
+				// get the normal
+				Vector3 norm = normals.get(i1);
+				// sum the normals
+				normals.set(i1, Vector3.add(norm, normal));
+				// log the index of the vertex for later reconstruction
+				indices[0] = i1;
+			}
+			
+			int i2 = findDuplicate(v2, vertices);
+			if (i2 == -1) { // vertex doesn't exist yet
+				// add new vertex
+				vertices.add(v2);
+				// add normal to list
+				normals.add(normal);
+				// log the index of the vertex for later reconstruction
+				indices[1] = vertices.size() - 1;
+			} else { // vertex already exists
+				// get the normal
+				Vector3 norm = normals.get(i2);
+				// sum the normals
+				normals.set(i2, Vector3.add(norm, normal));
+				// log the index of the vertex for later reconstruction
+				indices[1] = i2;
+			}
+			
+			int i3 = findDuplicate(v3, vertices);
+			if (i3 == -1) { // vertex doesn't exist yet
+				// add new vertex
+				vertices.add(v3);
+				// add normal to list
+				normals.add(normal);
+				// log the index of the vertex for later reconstruction
+				indices[2] = vertices.size() - 1;
+			} else { // vertex already exists
+				// get the normal
+				Vector3 norm = normals.get(i3);
+				// sum the normals
+				normals.set(i3, Vector3.add(norm, normal));
+				// log the index of the vertex for later reconstruction
+				indices[2] = i3;
+			}
+			
+			vertexInds[i] = indices;
+		}
+		
+		for (int n = 0; n < normals.size(); n++) {
+			Vector3 norm = normals.get(n);
+			normals.set(n, Vector3.normalize(norm));
+		}
+
+		for (int i = 0; i < triangles.length; i++) {
+			Triangle tri = triangles[i];
+			int[] indices = vertexInds[i];
+			Vector3 n1 = normals.get(indices[0]), n2 = normals.get(indices[1]), n3 = normals.get(indices[2]);
+			tri.n[0] = n1;
+			tri.n[1] = n2;
+			tri.n[2] = n3;
+		}
+		
+		return triangles;
 	}
 	
 	// Project a list of triangles to screen view

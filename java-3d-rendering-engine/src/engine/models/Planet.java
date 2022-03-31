@@ -17,7 +17,7 @@ public class Planet {
 	public double oceanRadius = 1;
 	public double roughness = 1;
 	public double strength = 0;
-	private Triangle[][] terrainFaces = new Triangle[6][];
+	private Triangle[] terrainFaces = new Triangle[(resolution-1) * (resolution-1) * 2 * 6];
 	
 	public Planet() {
 		
@@ -25,21 +25,15 @@ public class Planet {
 		
 		for (int i = 0; i < 6; i++) {
 			Triangle[] triangles = terrainFace(resolution, directions[i]);
-			terrainFaces[i] = triangles;
+			for (int j = 0; j < triangles.length; j++) 
+				terrainFaces[j + i * (resolution-1) * (resolution-1) * 2] = triangles[j];
 		}
 		
-		// 1 -> 3, 1 -> 4, 1 -> 5, 1 -> 6, 2 -> 3, 2 -> 4, 2 -> 5, 2 -> 6, 3 -> 5, 3 -> 6, 4 -> 5, 4 -> 6
-		/*Triangle[] list = terrainFaces[0];
-		for (int i = 0; i < list.length; i++) {
-			int x = i % (resolution - 1);
-			int y = i / (resolution - 1);
-			//if ()
-		}*/
+		Triangle.findSmoothTriangleNormals(terrainFaces);
 	}
 	
 	public void project(Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
-		for (int i = 0; i < 6; i++)
-			Triangle.projectTriangles(this.terrainFaces[i], new Vector3(), new Quaternion(), camera, matView, matProj, WIDTH, HEIGHT, light, Color.WHITE);
+		Triangle.projectTriangles(this.terrainFaces, new Vector3(), new Quaternion(), camera, matView, matProj, WIDTH, HEIGHT, light, Color.WHITE);
 	}
 	
 	private Triangle[] terrainFace(int resolution, Vector3 localup) {
