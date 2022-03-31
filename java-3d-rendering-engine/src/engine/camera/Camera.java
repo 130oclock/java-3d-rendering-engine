@@ -10,6 +10,7 @@ import engine.vector.Vector3;
 public class Camera {
 	
 	public Vector3 pos;
+	private Vector3 startPos;
 	public Quaternion rot;
 	public double viewDistance;
 	public double moveSpeed = 0.2;
@@ -18,16 +19,14 @@ public class Camera {
 	
 	public Camera(Vector3 pos, double viewDistance) {
 		this.pos = pos;
+		this.startPos = pos.copy();
 		this.rot = new Quaternion();
 		this.viewDistance = viewDistance;
 		this.clippingPlane = new Vector3(0, 0, 0.1);
 	}
 	
 	public Camera(double x, double y, double z, double viewDistance) {
-		this.pos = new Vector3(x, y, z);
-		this.rot = new Quaternion();
-		this.viewDistance = viewDistance;
-		this.clippingPlane = new Vector3(0, 0, 0.1);
+		this(new Vector3(x, y, z), viewDistance);
 	}
 	
 	public void translate(Vector3 vec) {
@@ -94,7 +93,9 @@ public class Camera {
 		}
 		
 		if (keyb.getAnyKey(KeyEvent.VK_X)) {
-			this.pos = new Vector3(0, 5, -5);
+			this.pos.x = this.startPos.x;
+			this.pos.y = this.startPos.y;
+			this.pos.z = this.startPos.z;
 			this.rot = new Quaternion();
 		}
 		

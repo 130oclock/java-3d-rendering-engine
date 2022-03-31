@@ -18,6 +18,7 @@ public class objFileReader {
 	
 	public static Triangle[] get(String modelname) {
 		int index = modelnames.indexOf(modelname);
+		if (index == -1) return null;
 		return models.get(index);
 	}
 	

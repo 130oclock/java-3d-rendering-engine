@@ -44,7 +44,7 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final double fps = 60;
 	
-	private Camera camera = new Camera(0, 0, -10, 500);
+	private Camera camera = new Camera(0, 5, -10, 500);
 	private EnvironmentLight light = new EnvironmentLight(new Vector3(-1, 1, -1));
 	
 	private Mat4x4 matView;
@@ -85,13 +85,13 @@ public class Engine extends Canvas implements Runnable {
 	public static void loadEntities() {
 		// load models
 		//objFileReader.loadDir("Models");
-		//objFileReader.load("Models/lowPolySphere.obj", "lowPolySphere");
+		//objFileReader.load("Models/plane.obj", "plane");
 		
 		// initialize any entities
-		planet = new Planet();
+		planet = new Planet(0, 5, 0);
 		
 		//new Entity(objFileReader.get("plane"), 0, 0, 0);
-		//new Entity(Triangle.findSmoothTriangleNormals(objFileReader.get("cube")), 0, 0, 0);
+		//new Entity(objFileReader.get("cube"), 0, 0, 0);
 		//new Entity (objFileReader.get("octahedron"));
 		//new Entity(objFileReader.get("utahTeapot"));
 		//new Entity(objFileReader.get("boid"), 2, 2, 0);

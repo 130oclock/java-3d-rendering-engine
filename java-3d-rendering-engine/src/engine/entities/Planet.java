@@ -12,14 +12,18 @@ import engine.vector.Vector3;
 
 public class Planet {
 	
-	public int resolution = 24;
+	public int resolution = 16;
 	public double radius = 1;
-	public double oceanRadius = 1;
-	public double roughness = 5;
-	public double strength = 2;
+	public double oceanRadius = 1.7;
+	public double roughness = 3;
+	public double strength = 3;
 	private Triangle[] terrainFaces = new Triangle[(resolution-1) * (resolution-1) * 2 * 6];
 	
-	public Planet() {
+	private Vector3 pos;
+	
+	public Planet(Vector3 pos) {
+		this.pos = pos;
+		
 		Vector3[] directions = { Vector3.up(), Vector3.down(), Vector3.left(), Vector3.right(), Vector3.forward(), Vector3.back() };
 		
 		for (int i = 0; i < 6; i++) {
@@ -29,10 +33,20 @@ public class Planet {
 		}
 		
 		Triangle.findSmoothTriangleNormals(terrainFaces);
+		
+		System.out.println("loaded planet | " + terrainFaces.length + " triangles");
+	}
+	
+	public Planet() {
+		this(new Vector3());
+	}
+	
+	public Planet(double x, double y, double z) {
+		this(new Vector3(x, y, z));
 	}
 	
 	public void project(Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
-		Triangle.projectTriangles(this.terrainFaces, new Vector3(), new Quaternion(), camera, matView, matProj, WIDTH, HEIGHT, light, Color.WHITE);
+		Triangle.projectTriangles(this.terrainFaces, this.pos, new Quaternion(), camera, matView, matProj, WIDTH, HEIGHT, light, Color.WHITE);
 	}
 	
 	private Triangle[] terrainFace(int resolution, Vector3 localup) {
@@ -119,10 +133,18 @@ public class Planet {
 			Vector3 n3 = normals[triangleInds[index + 2]];
 			
 			Triangle tri = new Triangle(v1, v2, v3, null, null, null, n1, n2, n3);
+			
+			Vector3[] vs = { v1, v2, v3 };
+			
+			for (int c = 0; c < 3; c++) {
+				double color1 = ((Vector3.length(vs[c]) - oceanRadius) / 0.5) * 255;
+				color1 = Math.min(255, color1);
+				tri.color[c] = new Color((int) color1, (int) color1, 255);
+			}
+			
 			triangles[i] = tri;
 		}
 
-		System.out.println("loaded terrain face | " + vertices.length + " vertices | " + triangles.length + " triangles");
 		return triangles;
 	}
 }
