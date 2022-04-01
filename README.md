@@ -14,6 +14,7 @@ A java based 3d rendering engine loosely based on javidx9's 3d rendering YouTube
 * Java
 
 ## Inspiration / Credits
+These youtube channels helped guide me throughout the project
 * [javidx9](https://www.youtube.com/channel/UC-yuWVUplUJZvieEligKBkA) (OneLoneCoder)
 * [The Coding Train](https://www.youtube.com/channel/UCvjgXvBlbQiydffZU7m1_aw)
 
