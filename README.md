@@ -19,7 +19,7 @@ A java based 3d rendering engine loosely based on javidx9's 3d rendering YouTube
 
 ## Images
 <details>
-<summary>This is a screenshot of a textured cube.</summary>
+<summary>This is a screenshot of a textured cube next to a flat shaded octahedron.</summary>
 <br>
 <img src="./texturedCubeWithGouraudLighting.png">
 </details>
