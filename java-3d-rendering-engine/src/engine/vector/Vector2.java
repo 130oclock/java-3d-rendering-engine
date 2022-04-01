@@ -13,6 +13,8 @@ public class Vector2 {
 	
 	// Make a duplicate object
 	public Vector2 copy() {
-		return new Vector2(this.u, this.v);
+		Vector2 v = new Vector2(this.u, this.v);
+		v.w = this.w;
+		return v;
 	}
 }

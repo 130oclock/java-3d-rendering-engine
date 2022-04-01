@@ -13,6 +13,7 @@ import engine.matrix.Mat4x4;
 import engine.quaternion.Quaternion;
 import engine.vector.Vector2;
 import engine.vector.Vector3;
+import engine.models.*;
 
 public class Triangle {
 	
@@ -30,6 +31,8 @@ public class Triangle {
 	private Vector3[] n = new Vector3[3];
 	
 	private Vector2[] t = new Vector2[3];
+	
+	public int modelIndex = -1;
 	
 	private Color[] brightness = new Color[3];
 	public Color[] color = new Color[3];
@@ -153,6 +156,8 @@ public class Triangle {
 		
 		copy.brightness = this.brightness;
 		copy.color = this.color;
+		
+		copy.modelIndex = this.modelIndex;
 		return copy;
 	}
 	
@@ -185,30 +190,30 @@ public class Triangle {
 		
 		if (d0 >= 0) {
 			insidePoints[nInsidePoints++] = tri.p[0];
-			insideColor[nInsideColor++] = tri.brightness[0];
 			insideTex[nInsideTex++] = tri.t[0];
+			insideColor[nInsideColor++] = tri.brightness[0];
 		} else {
 			outsidePoints[nOutsidePoints++] = tri.p[0];
-			outsideColor[nOutsideColor++] = tri.brightness[0];
 			outsideTex[nOutsideTex++] = tri.t[0];
+			outsideColor[nOutsideColor++] = tri.brightness[0];
 		}
 		if (d1 >= 0) {
 			insidePoints[nInsidePoints++] = tri.p[1];
-			insideColor[nInsideColor++] = tri.brightness[1];
 			insideTex[nInsideTex++] = tri.t[1];
+			insideColor[nInsideColor++] = tri.brightness[1];
 		} else {
 			outsidePoints[nOutsidePoints++] = tri.p[1];
-			outsideColor[nOutsideColor++] = tri.brightness[1];
 			outsideTex[nOutsideTex++] = tri.t[1];
+			outsideColor[nOutsideColor++] = tri.brightness[1];
 		}
 		if (d2 >= 0) {
 			insidePoints[nInsidePoints++] = tri.p[2];
-			insideColor[nInsideColor++] = tri.brightness[2];
 			insideTex[nInsideTex++] = tri.t[2];
+			insideColor[nInsideColor++] = tri.brightness[2];
 		} else {
 			outsidePoints[nOutsidePoints++] = tri.p[2];
-			outsideColor[nOutsideColor++] = tri.brightness[2];
 			outsideTex[nOutsideTex++] = tri.t[2];
+			outsideColor[nOutsideColor++] = tri.brightness[2];
 		}
 		
 		// if there are no points on the screen
@@ -222,6 +227,7 @@ public class Triangle {
 		// if one point is on the screen and two are not on the screen
 		if (nInsidePoints == 1 && nOutsidePoints == 2) { // A ; B, C
 			Triangle otri1 = Triangle.empty();
+			otri1.modelIndex = tri.modelIndex;
 			
 			// A
 			otri1.p[0] = insidePoints[0];
@@ -255,6 +261,8 @@ public class Triangle {
 		// if two points are on the screen and one is not on the screen
 		if (nInsidePoints == 2 && nOutsidePoints == 1) { // A, B ; C
 			Triangle otri1 = Triangle.empty(), otri2 = Triangle.empty();
+			otri1.modelIndex = tri.modelIndex;
+			otri2.modelIndex = tri.modelIndex;
 			
 			// A
 			otri1.p[0] = insidePoints[0];
@@ -518,9 +526,6 @@ public class Triangle {
 					triProjected.t[0].w = 1 / triProjected.p[0].w;
 					triProjected.t[1].w = 1 / triProjected.p[1].w;
 					triProjected.t[2].w = 1 / triProjected.p[2].w;
-					
-					//System.out.println(triProjected.p[0].x + " " + triProjected.p[0].y + " | " + triProjected.p[1].x + " " + triProjected.p[1].y + " | " + triProjected.p[2].x + " " + triProjected.p[2].y);
-					//System.out.println(triProjected.p[0].w + " " + triProjected.p[1].w + " " + triProjected.p[2].w);
 	
 					triProjected.p[0] = Vector3.divide(triProjected.p[0], triProjected.p[0].w);
 					triProjected.p[1] = Vector3.divide(triProjected.p[1], triProjected.p[1].w);
@@ -543,6 +548,8 @@ public class Triangle {
 					triProjected.p[1].y *= 0.5 * HEIGHT;
 					triProjected.p[2].x *= 0.5 * WIDTH;
 					triProjected.p[2].y *= 0.5 * HEIGHT;
+					
+					triProjected.modelIndex = tri.modelIndex;
 					
 					//System.out.println(triProjected.p[0].x + " " + triProjected.p[0].y + " | " + triProjected.p[1].x + " " + triProjected.p[1].y + " | " + triProjected.p[2].x + " " + triProjected.p[2].y);
 					triangleRaster.add(triProjected);
@@ -602,22 +609,293 @@ public class Triangle {
 	public static void drawTriangles(int[] imageBufferData, double[] pDepthBuffer, int WIDTH, int HEIGHT) {
 		for (int i = 0; i < triangleRaster.size(); i++) {
 			Triangle tri = triangleRaster.get(i);
+			int modelIndex = tri.modelIndex;
 			float[][] colors = new float[3][3];
 			for (int j = 0; j < tri.brightness.length; j++) {
 				Color c = tri.brightness[j];
 				Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), colors[j]);
 			}
-			texturedTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, 
-															tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, 
-															tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, 
+			if (modelIndex != -1) {
+				Model model = ModelFileReader.models.get(modelIndex);
+				texturedTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, 
+																tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, 
+																tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, 
+																WIDTH, HEIGHT, colors[0], colors[1], colors[2], model.getTexture(), model.getTexWidth(), i);
+			} else {
+				fillTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].w, 
+															tri.p[1].x, tri.p[1].y, tri.t[1].w, 
+															tri.p[2].x, tri.p[2].y, tri.t[2].w, 
 															WIDTH, HEIGHT, colors[0], colors[1], colors[2]);
+			}
+		}
+	}
+	
+	private static void fillTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double w1, 
+																				   double x2, double y2, double w2, 
+																				   double x3, double y3, double w3, 
+																				   int WIDTH, int HEIGHT, float[] color1, float[] color2, float[] color3) {
+		x1 = (int) x1;
+		y1 = (int) y1;
+		x2 = (int) x2;
+		y2 = (int) y2;
+		x3 = (int) x3;
+		y3 = (int) y3;
+		
+		// sort variables by y value: y0 <= y1 <= y2
+		double temp;
+		float[] tempc;
+		if (y2 < y1) {
+			temp = y1;
+			y1 = y2;
+			y2 = temp;
+
+			temp = x1;
+			x1 = x2;
+			x2 = temp;
+
+			temp = w1;
+			w1 = w2;
+			w2 = temp;
+			
+			tempc = color1;
+			color1 = color2;
+			color2 = tempc;
+		}
+		if (y3 < y1) {
+			temp = y1;
+			y1 = y3;
+			y3 = temp;
+
+			temp = x1;
+			x1 = x3;
+			x3 = temp;
+
+			temp = w1;
+			w1 = w3;
+			w3 = temp;
+
+			tempc = color1;
+			color1 = color3;
+			color3 = tempc;
+		}
+		if (y3 < y2) {
+			temp = y2;
+			y2 = y3;
+			y3 = temp;
+
+			temp = x2;
+			x2 = x3;
+			x3 = temp;
+
+			temp = w2;
+			w2 = w3;
+			w3 = temp;
+			
+			tempc = color2;
+			color2 = color3;
+			color3 = tempc;
+		}
+
+		// find the slope components of the first line of triangle
+		double dy1 = y2 - y1;
+		double dx1 = x2 - x1;
+
+		double dh1 = color2[0] - color1[0];
+		double ds1 = color2[1] - color1[1];
+		double dc1 = color2[2] - color1[2];
+		
+		double dw1 = w2 - w1;
+		
+		// find the slope components of the second line of triangle
+		double dy2 = y3 - y1;
+		double dx2 = x3 - x1;
+
+		double dh2 = color3[0] - color1[0];
+		double ds2 = color3[1] - color1[1];
+		double dc2 = color3[2] - color1[2];
+		
+		double dw2 = w3 - w1;
+		
+		double c_h, c_c, c_s, tex_w;
+
+		// step distances of the line
+		double dax_step = 0, dbx_step = 0,
+				dw1_step = 0, dw2_step = 0;
+		
+		if (dy1 != 0) {
+			double absdy1 = Math.abs(dy1);
+			dax_step = dx1 / absdy1;
+			dw1_step = dw1 / absdy1;
+		}
+
+		if (dy2 != 0) {
+			double absdy2 = Math.abs(dy2);
+			dbx_step = dx2 / absdy2;
+			dw2_step = dw2 / absdy2;
+		}
+		
+		if (dy1 != 0) {
+			for (int y = (int) y1; y <= (int) y2; y++) { // raws until it hits the flat bottom or middle of the triangle.
+				// interpolate the x start and end values 
+				double ax = (x1 + (y - y1) * dax_step);
+				double bx = (x1 + (y - y1) * dbx_step);
+				// start point
+				double tex_sw = w1 + (y - y1) * dw1_step;
+				// end point
+				double tex_ew = w1 + (y - y1) * dw2_step;
+				// color
+				double sh = ((y - y1) / dy1) * dh1 + color1[0];
+				double eh = ((y - y1) / dy2) * dh2 + color1[0];
+				double ss = ((y - y1) / dy1) * ds1 + color1[1];
+				double es = ((y - y1) / dy2) * ds2 + color1[1];
+				double sc = ((y - y1) / dy1) * dc1 + color1[2];
+				double ec = ((y - y1) / dy2) * dc2 + color1[2];
+
+				if (ax > bx) {
+					double temp1 = ax;
+					ax = bx;
+					bx = temp1;
+					
+					temp1 = tex_sw;
+					tex_sw = tex_ew;
+					tex_ew = temp1;
+
+					temp1 = ss;
+					ss = es;
+					es = temp1;
+
+					temp1 = sh;
+					sh = eh;
+					eh = temp1;
+					
+					temp1 = sc;
+					sc = ec;
+					ec = temp1;
+				}
+				
+				// always make tex_su come first
+				c_h = sh;
+				c_s = ss;
+				c_c = sc;
+				
+				tex_w = tex_sw;
+
+				double tstep = 1 / (bx - ax);
+				double t = 0;
+				
+				double xStart = ax;
+				double xEnd = bx;
+
+				for (int x = (int) xStart; x < (int) xEnd; x++) {
+					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
+						c_h = (((x - xStart) / (xEnd - xStart)) * (eh - sh)) + sh;
+						c_s = (((x - xStart) / (xEnd - xStart)) * (es - ss)) + ss;
+						c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
+						
+						tex_w = (1 - t) * tex_sw + t * tex_ew;
+
+						int d = (int) ((y * WIDTH) + x);
+						if (tex_w > pDepthBuffer[d]) {
+							imageBufferData[d] = Color.HSBtoRGB((float) c_h, (float) c_s, (float) c_c);
+							pDepthBuffer[d] = tex_w;
+						}
+						t += tstep;
+					}
+				}
+			}
+		}
+		
+		dy1 = y3 - y2;
+		dx1 = x3 - x2;
+
+		dh1 = color3[0] - color2[0];
+		ds1 = color3[1] - color2[1];
+		dc1 = color3[2] - color2[2];
+		
+		dw1 = w3 - w2;
+
+		if (dy1 != 0) {
+			double absdy1 = Math.abs(dy1);
+			dax_step = dx1 / absdy1;
+			dw1_step = dw1 / absdy1;
+		}
+		
+		if (dy2 != 0) dbx_step = dx2 / Math.abs(dy2);
+
+		if (dy1 != 0) {
+			for (int y = (int) y2; y < (int) y3; y++) { // raws until it hits the flat top or middle of the triangle.
+				// interpolate the x start and end values 
+				double ax = (x2 + (y - y2) * dax_step);
+				double bx = (x1 + (y - y1) * dbx_step);
+				// start point
+				double tex_sw = w2 + (y - y2) * dw1_step;
+				// end point
+				double tex_ew = w1 + (y - y1) * dw2_step;
+				// color
+				double sh = ((y - y2) / dy1) * dh1 + color2[0];
+				double eh = ((y - y1) / dy2) * dh2 + color1[0];
+				double ss = ((y - y2) / dy1) * ds1 + color2[1];
+				double es = ((y - y1) / dy2) * ds2 + color1[1];
+				double sc = ((y - y2) / dy1) * dc1 + color2[2];
+				double ec = ((y - y1) / dy2) * dc2 + color1[2];
+				
+				if (ax > bx) {
+					double temp1 = ax;
+					ax = bx;
+					bx = temp1;
+					
+					temp1 = tex_sw;
+					tex_sw = tex_ew;
+					tex_ew = temp1;
+
+					temp1 = ss;
+					ss = es;
+					es = temp1;
+
+					temp1 = sh;
+					sh = eh;
+					eh = temp1;
+					
+					temp1 = sc;
+					sc = ec;
+					ec = temp1;
+				}
+
+				c_h = sh;
+				c_s = ss;
+				c_c = sc;	
+				
+				tex_w = tex_sw;
+
+				double tstep = 1 / (double) (bx - ax);
+				double t = 0;
+				
+				double xStart = ax;
+				double xEnd = bx;
+				
+				for (int x = (int) xStart; x < (int) xEnd; x++) {
+					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
+						c_h = (((x - xStart) / (xEnd - xStart)) * (eh - sh)) + sh;
+						c_s = (((x - xStart) / (xEnd - xStart)) * (es - ss)) + ss;
+						c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
+						
+						tex_w = (1 - t) * tex_sw + t * tex_ew;
+						int d = (int) ((y * WIDTH) + x);
+						if (tex_w > pDepthBuffer[d]) {
+							imageBufferData[d] = Color.HSBtoRGB((float) c_h, (float) c_s, (float) c_c);
+							pDepthBuffer[d] = tex_w;
+						}
+						t += tstep;
+					}
+				}
+			}
 		}
 	}
 	
 	private static void texturedTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double u1, double v1, double w1, 
 																					   double x2, double y2, double u2, double v2, double w2, 
 																					   double x3, double y3, double u3, double v3, double w3, 
-																					   int WIDTH, int HEIGHT, float[] color1, float[] color2, float[] color3) {
+																					   int WIDTH, int HEIGHT, float[] color1, float[] color2, float[] color3, int[] image, int texWidth, int number) {
 		x1 = (int) x1;
 		y1 = (int) y1;
 		x2 = (int) x2;
@@ -707,33 +985,29 @@ public class Triangle {
 		// find the slope components of the first line of triangle
 		double dy1 = y2 - y1;
 		double dx1 = x2 - x1;
-
-		double dh1 = color2[0] - color1[0];
-		double ds1 = color2[1] - color1[1];
-		double dc1 = color2[2] - color1[2];
 		
 		double dv1 = v2 - v1;
 		double du1 = u2 - u1;
 		double dw1 = w2 - w1;
+
+		double dc1 = color2[2] - color1[2];
 		
 		// find the slope components of the second line of triangle
 		double dy2 = y3 - y1;
 		double dx2 = x3 - x1;
-
-		double dh2 = color3[0] - color1[0];
-		double ds2 = color3[1] - color1[1];
-		double dc2 = color3[2] - color1[2];
 		
 		double dv2 = v3 - v1;
 		double du2 = u3 - u1;
 		double dw2 = w3 - w1;
+
+		double dc2 = color3[2] - color1[2];
 		
-		double c_h, c_c, c_s, tex_u, tex_v, tex_w;
+		double c_c, tex_u, tex_v, tex_w;
 
 		// step distances of the line
 		double dax_step = 0, dbx_step = 0,
-				du1_step = 0, dv1_step = 0,
-				du2_step = 0, dv2_step = 0,
+				du1_step = 0, du2_step = 0, 
+				dv1_step = 0, dv2_step = 0,
 				dw1_step = 0, dw2_step = 0;
 		
 		if (dy1 != 0) {
@@ -766,10 +1040,6 @@ public class Triangle {
 				double tex_ev = v1 + (y - y1) * dv2_step;
 				double tex_ew = w1 + (y - y1) * dw2_step;
 				// color
-				double sh = ((y - y1) / dy1) * dh1 + color1[0];
-				double eh = ((y - y1) / dy2) * dh2 + color1[0];
-				double ss = ((y - y1) / dy1) * ds1 + color1[1];
-				double es = ((y - y1) / dy2) * ds2 + color1[1];
 				double sc = ((y - y1) / dy1) * dc1 + color1[2];
 				double ec = ((y - y1) / dy2) * dc2 + color1[2];
 
@@ -789,14 +1059,6 @@ public class Triangle {
 					temp1 = tex_sw;
 					tex_sw = tex_ew;
 					tex_ew = temp1;
-
-					temp1 = ss;
-					ss = es;
-					es = temp1;
-
-					temp1 = sh;
-					sh = eh;
-					eh = temp1;
 					
 					temp1 = sc;
 					sc = ec;
@@ -804,8 +1066,6 @@ public class Triangle {
 				}
 				
 				// always make tex_su come first
-				c_h = sh;
-				c_s = ss;
 				c_c = sc;
 				
 				tex_u = tex_su;
@@ -814,23 +1074,22 @@ public class Triangle {
 
 				double tstep = 1 / (bx - ax);
 				double t = 0;
-				
-				double xStart = ax;
-				double xEnd = bx;
 
-				for (int x = (int) xStart; x < (int) xEnd; x++) {
+				for (int x = (int) ax; x < (int) bx; x++) {
 					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
-						c_h = (((x - xStart) / (xEnd - xStart)) * (eh - sh)) + sh;
-						c_s = (((x - xStart) / (xEnd - xStart)) * (es - ss)) + ss;
-						c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
+						c_c = (((x - ax) / (bx - ax)) * (ec - sc)) + sc;
 						
 						tex_u = (1 - t) * tex_su + t * tex_eu;
 						tex_v = (1 - t) * tex_sv + t * tex_ev;
 						tex_w = (1 - t) * tex_sw + t * tex_ew;
 
 						int d = (int) ((y * WIDTH) + x);
+						int t1 = (int) (Math.round((tex_v / tex_w) * (texWidth)) * texWidth + Math.round((tex_u / tex_w) * (texWidth)));
+						t1 = Math.min(texWidth * texWidth - 1, t1);
 						if (tex_w > pDepthBuffer[d]) {
-							imageBufferData[d] = Color.HSBtoRGB((float) c_h, (float) c_s, (float) c_c);
+							int rgb = image[t1];
+							float[] hsb = Color.RGBtoHSB((rgb>>16)&0xFF, (rgb>>8)&0xFF, rgb&0xFF, null);
+							imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], (float) c_c + hsb[2] / 2);
 							pDepthBuffer[d] = tex_w;
 						}
 						t += tstep;
@@ -841,14 +1100,12 @@ public class Triangle {
 		
 		dy1 = y3 - y2;
 		dx1 = x3 - x2;
-
-		dh1 = color3[0] - color2[0];
-		ds1 = color3[1] - color2[1];
-		dc1 = color3[2] - color2[2];
 		
 		dv1 = v3 - v2;
 		du1 = u3 - u2;
 		dw1 = w3 - w2;
+		
+		dc1 = color3[2] - color2[2];
 		
 		du1_step = 0; 
 		dv1_step = 0;
@@ -877,10 +1134,6 @@ public class Triangle {
 				double tex_ev = v1 + (y - y1) * dv2_step;
 				double tex_ew = w1 + (y - y1) * dw2_step;
 				// color
-				double sh = ((y - y2) / dy1) * dh1 + color2[0];
-				double eh = ((y - y1) / dy2) * dh2 + color1[0];
-				double ss = ((y - y2) / dy1) * ds1 + color2[1];
-				double es = ((y - y1) / dy2) * ds2 + color1[1];
 				double sc = ((y - y2) / dy1) * dc1 + color2[2];
 				double ec = ((y - y1) / dy2) * dc2 + color1[2];
 				
@@ -900,22 +1153,12 @@ public class Triangle {
 					temp1 = tex_sw;
 					tex_sw = tex_ew;
 					tex_ew = temp1;
-
-					temp1 = ss;
-					ss = es;
-					es = temp1;
-
-					temp1 = sh;
-					sh = eh;
-					eh = temp1;
 					
 					temp1 = sc;
 					sc = ec;
 					ec = temp1;
 				}
 
-				c_h = sh;
-				c_s = ss;
 				c_c = sc;	
 				
 				tex_u = tex_su;
@@ -924,22 +1167,21 @@ public class Triangle {
 
 				double tstep = 1 / (double) (bx - ax);
 				double t = 0;
-				
-				double xStart = ax;
-				double xEnd = bx;
-				
-				for (int x = (int) xStart; x < (int) xEnd; x++) {
+
+				for (int x = (int) ax; x < (int) bx; x++) {
 					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
-						c_h = (((x - xStart) / (xEnd - xStart)) * (eh - sh)) + sh;
-						c_s = (((x - xStart) / (xEnd - xStart)) * (es - ss)) + ss;
-						c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
+						c_c = (((x - ax) / (bx - ax)) * (ec - sc)) + sc;
 						
 						tex_u = (1 - t) * tex_su + t * tex_eu;
 						tex_v = (1 - t) * tex_sv + t * tex_ev;
 						tex_w = (1 - t) * tex_sw + t * tex_ew;
 						int d = (int) ((y * WIDTH) + x);
+						int t1 = (int) (Math.round((tex_v / tex_w) * (texWidth)) * texWidth + Math.round((tex_u / tex_w) * (texWidth)));
+						t1 = Math.min(texWidth * texWidth - 1, t1);
 						if (tex_w > pDepthBuffer[d]) {
-							imageBufferData[d] = Color.HSBtoRGB((float) c_h, (float) c_s, (float) c_c);
+							int rgb = image[t1];
+							float[] hsb = Color.RGBtoHSB((rgb>>16)&0xFF, (rgb>>8)&0xFF, rgb&0xFF, null);
+							imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], (float) c_c + hsb[2] / 2);
 							pDepthBuffer[d] = tex_w;
 						}
 						t += tstep;

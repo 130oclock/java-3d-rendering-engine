@@ -16,6 +16,7 @@ import engine.input.*;
 import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
 import engine.models.*;
+import engine.planets.Planet;
 import engine.quaternion.Quaternion;
 import engine.triangle.Triangle;
 import engine.vector.*;
@@ -44,7 +45,7 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final double fps = 60;
 	
-	private Camera camera = new Camera(0, 5, -10, 500);
+	private Camera camera = new Camera(0, 0, -9, 500);
 	private EnvironmentLight light = new EnvironmentLight(new Vector3(-1, 1, -1));
 	
 	private Mat4x4 matView;
@@ -84,19 +85,19 @@ public class Engine extends Canvas implements Runnable {
 	
 	public static void loadEntities() {
 		// load models
-		//objFileReader.loadDir("Models");
-		//objFileReader.load("Models/plane.obj", "plane");
+		ModelFileReader.loadDir("Models", "Textures");
+		//ModelFileReader.loadObj("Models/plane.obj", "plane");
 		
 		// initialize any entities
-		planet = new Planet(0, 5, 0);
+		//planet = new Planet(0, 5, 0);
 		
-		//new Entity(objFileReader.get("plane"), 0, 0, 0);
-		//new Entity(objFileReader.get("cube"), 0, 0, 0);
-		//new Entity (objFileReader.get("octahedron"));
-		//new Entity(objFileReader.get("utahTeapot"));
-		//new Entity(objFileReader.get("boid"), 2, 2, 0);
-		//new Entity(objFileReader.get("lowPolySphere"), 0, 0, 0);
-		//new Entity(objFileReader.get("smoothBlenderMonkey"), new Vector3d(0, 0, 0), Quaternion.localRotation(Vector3d.up(), Math.PI));
+		//new Entity(ModelFileReader.get("plane"), 0, 0, 0);
+		new Entity(ModelFileReader.get("cube"), 0, 0, 0);
+		new Entity (ModelFileReader.get("octahedron"), 3, 0, 0);
+		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals());
+		//new Entity(ModelFileReader.get("boid"), 2, 2, 0);
+		//new Entity(ModelFileReader.get("lowPolySphere"), 0, 0, 0);
+		//new Entity(ModelFileReader.get("smoothBlenderMonkey"), new Vector3d(0, 0, 0), Quaternion.localRotation(Vector3d.up(), Math.PI));
 	}
 	
 	public synchronized void start() {

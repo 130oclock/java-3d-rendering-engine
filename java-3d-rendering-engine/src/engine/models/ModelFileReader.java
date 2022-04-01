@@ -1,5 +1,8 @@
 package engine.models;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,26 +12,36 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Stream;
 
+import javax.imageio.ImageIO;
+
 import engine.triangle.Triangle;
 
-public class objFileReader {
+public class ModelFileReader {
 	
 	public static List<String> modelnames = new ArrayList<String>();
-	public static List<Triangle[]> models = new ArrayList<Triangle[]>();
+	public static List<Model> models = new ArrayList<Model>();
 	
-	public static Triangle[] get(String modelname) {
+	public static Model get(String modelname) {
 		int index = modelnames.indexOf(modelname);
 		if (index == -1) return null;
 		return models.get(index);
 	}
 	
-	public static void loadDir(String directoryname) {
+	public static void loadDir(String directoryname, String texturedirname) {
 		try (Stream<Path> paths = Files.walk(Paths.get(directoryname))) {
 			List<Path> files = paths.filter(Files::isRegularFile).toList();
 			for (int i = 0; i < files.size(); i++) {
 				Path filepath = files.get(i);
 				String filename = filepath.getFileName().toString();
-				objFileReader.load(filepath.toString(), filename.substring(0, filename.lastIndexOf(".")));
+				filename = filename.substring(0, filename.lastIndexOf("."));
+				
+				String texturename = texturedirname + "/" + filename + ".png";
+				File file = new File(texturename);
+				boolean exists = file.exists() && !file.isDirectory();
+				if (exists) ModelFileReader.loadObj(filepath.toString(), filename, texturename);
+				else ModelFileReader.loadObj(filepath.toString(), filename, null);
+				
+				
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -36,15 +49,32 @@ public class objFileReader {
 		} 
 	}
 	
-	public static void load(String filename, String modelname) {
+	public static void loadObj(String filename, String modelname, String texturepath) {
 		try {
 			FileInputStream inputStream = null;
 			Scanner scanner = null;
+			
+			int[] imageBufferData = null;
+			int imageBufferWidth = 0;
+			boolean hasTexture = false;
+			if (texturepath != null) {
+				hasTexture = true;
+				try {
+					BufferedImage image = ImageIO.read(new File(texturepath));
+					BufferedImage convertedImg = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+					convertedImg.getGraphics().drawImage(image, 0, 0, null);
+					imageBufferWidth = convertedImg.getWidth();
+					imageBufferData = ((DataBufferInt) convertedImg.getRaster().getDataBuffer()).getData();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 			
 			List<double[]> vertexInd = null;
 			List<double[]> vertexTextInd = null;
 			List<double[]> vertexNormInd = null;
 			List<Triangle> triangles = null;
+			
 			int num_faces = 0;
 			try {
 				inputStream = new FileInputStream(filename);
@@ -110,14 +140,18 @@ public class objFileReader {
 							v2 = vertexInd.get(verticesIndex[index2]);
 							v3 = vertexInd.get(verticesIndex[index3]);
 							if (format == 1) {
-								triangles.add(new Triangle(v1, v2, v3));
+								Triangle tri = new Triangle(v1, v2, v3);
+								if (hasTexture) tri.modelIndex = models.size();
+								triangles.add(tri);
 							}
 							if (format == 2) {
 								// The values of the face's texture vertices
 								vt1 = vertexTextInd.get(textureIndex[index1]);
 								vt2 = vertexTextInd.get(textureIndex[index2]);
 								vt3 = vertexTextInd.get(textureIndex[index3]);
-								triangles.add(new Triangle(v1, v2, v3, vt1, vt2, vt3));
+								Triangle tri = new Triangle(v1, v2, v3, vt1, vt2, vt3);
+								if (hasTexture) tri.modelIndex = models.size();
+								triangles.add(tri);
 							}
 							if (format == 3) {
 								// The values of the face's texture vertices
@@ -128,21 +162,25 @@ public class objFileReader {
 								vn1 = vertexNormInd.get(normalsIndex[index1]);
 								vn2 = vertexNormInd.get(normalsIndex[index2]);
 								vn3 = vertexNormInd.get(normalsIndex[index3]);
-								triangles.add(new Triangle(v1, v2, v3, vt1, vt2, vt3, vn1, vn2, vn3));
+								Triangle tri = new Triangle(v1, v2, v3, vt1, vt2, vt3, vn1, vn2, vn3);
+								if (hasTexture) tri.modelIndex = models.size();
+								triangles.add(tri);
 							}
 							if (format == 4) {
 								// The values of the face's normal vectors
 								vn1 = vertexNormInd.get(normalsIndex[index1]);
 								vn2 = vertexNormInd.get(normalsIndex[index2]);
 								vn3 = vertexNormInd.get(normalsIndex[index3]);
-								triangles.add(new Triangle(v1, v2, v3, null, null, null, vn1, vn2, vn3));
+								Triangle tri = new Triangle(v1, v2, v3, null, null, null, vn1, vn2, vn3);
+								if (hasTexture) tri.modelIndex = models.size();
+								triangles.add(tri);
 							}
 						}
 						break;
 					}
 				}
 				
-				System.out.println("loaded " + modelname + " | " + vertexInd.size() + " vertices | " + num_faces + " triangles");
+				System.out.println("loaded model: " + modelname + " | " + vertexInd.size() + " vertices | " + num_faces + " triangles");
 			} finally {
 				if (inputStream != null) {
 					try {
@@ -159,8 +197,12 @@ public class objFileReader {
 			
 			Triangle[] trianglesArray = triangles.toArray(new Triangle[0]);
 			
+			Model model;
+			if (hasTexture) model = new Model(trianglesArray, imageBufferData, imageBufferWidth);
+			else model = new Model(trianglesArray);
+			
 			modelnames.add(modelname);
-			models.add(trianglesArray);
+			models.add(model);
 			/*String[] tempsArray = vertices.toArray(new String[0]);
 			for (String s : tempsArray) {
 				System.out.println(s);
