@@ -88,7 +88,7 @@ public class Engine extends Canvas implements Runnable {
 		// load models
 		//ModelFileReader.loadDir("Models", "Textures");
 		//ModelFileReader.loadObj("Models/plane.obj", "plane");
-		ModelFileReader.loadObj("Models/plane.obj", "plane", "Textures/UV_Grid_Sm.jpg");
+		//ModelFileReader.loadObj("Models/plane.obj", "plane", "Textures/UV_Grid_Sm.jpg");
 		//ModelFileReader.loadObj("Models/octahedron.obj", "octahedron");
 		//ModelFileReader.loadObj("Models/cube.obj", "cube", "Textures/UV_Grid_Sm.jpg");
 		ModelFileReader.loadObj("Models/cube.obj", "cube", "Textures/cardboard.jpg");
@@ -96,7 +96,7 @@ public class Engine extends Canvas implements Runnable {
 		// initialize any entities
 		//planet = new Planet(0, 5, 0);
 		
-		new Entity(ModelFileReader.get("plane"), 0, 0, 0);
+		//new Entity(ModelFileReader.get("plane"), 0, 0, 0);
 		new Entity(ModelFileReader.get("cube").recalcNormals(), 0, 2, 0);
 		//new Entity (ModelFileReader.get("octahedron"), 3, 0, 0);
 		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals());
@@ -178,7 +178,8 @@ public class Engine extends Canvas implements Runnable {
 		Triangle.cullScreenEdges(WIDTH, HEIGHT);
 		Triangle.drawTriangles(screen.imageBufferData, pDepthBuffer, WIDTH, HEIGHT);
 		
-		for (int i = 0; i < imageBufferData.length; i++) {
+		int length = imageBufferData.length;
+		for (int i = 0; i < length; i++) {
 			imageBufferData[i] = screen.imageBufferData[i];
 			pDepthBuffer[i] = 0;
 		}

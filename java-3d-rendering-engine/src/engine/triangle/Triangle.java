@@ -350,7 +350,8 @@ public class Triangle {
 		Vector3[] triNormals = new Vector3[triangles.length]; // list of all triangle face normals
 		//List<Triangle> smoothTriangles = new ArrayList<Triangle>(); // list of all triangles with smoothed normals
 		
-		for (int i = 0; i < triangles.length; i++) {
+		int triLength = triangles.length;
+		for (int i = 0; i < triLength; i++) {
 			Triangle tri = triangles[i];
 			Vector3 v1 = tri.p[0], v2 = tri.p[1], v3 = tri.p[2];
 			
@@ -413,12 +414,13 @@ public class Triangle {
 			vertexInds[i] = indices;
 		}
 		
-		for (int n = 0; n < normals.size(); n++) {
+		int normalLength = normals.size();
+		for (int n = 0; n < normalLength; n++) {
 			Vector3 norm = normals.get(n);
 			normals.set(n, Vector3.normalize(norm));
 		}
 
-		for (int i = 0; i < triangles.length; i++) {
+		for (int i = 0; i < triLength; i++) {
 			Triangle tri = triangles[i];
 			int[] indices = vertexInds[i];
 			Vector3 n1 = normals.get(indices[0]), n2 = normals.get(indices[1]), n3 = normals.get(indices[2]);
@@ -587,7 +589,8 @@ public class Triangle {
 							break; //Left
 					}
 					
-					for (var w = 0; w < clipped.length; w++) {
+					int clippedLength = clipped.length;
+					for (var w = 0; w < clippedLength; w++) {
 						if (clipped[w] == null) continue;
 						listTriangles.add(clipped[w]);
 					}
@@ -607,11 +610,12 @@ public class Triangle {
 	}
 	
 	public static void drawTriangles(int[] imageBufferData, double[] pDepthBuffer, int WIDTH, int HEIGHT) {
-		for (int i = 0; i < triangleRaster.size(); i++) {
+		int rasterLength = triangleRaster.size();
+		for (int i = 0; i < rasterLength; i++) {
 			Triangle tri = triangleRaster.get(i);
 			int modelIndex = tri.modelIndex;
 			float[][] colors = new float[3][3];
-			for (int j = 0; j < tri.brightness.length; j++) {
+			for (int j = 0; j < 3; j++) {
 				Color c = tri.brightness[j];
 				Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), colors[j]);
 			}

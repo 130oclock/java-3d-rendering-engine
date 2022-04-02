@@ -30,7 +30,8 @@ public class ModelFileReader {
 	public static void loadDir(String directoryname, String texturedirname) {
 		try (Stream<Path> paths = Files.walk(Paths.get(directoryname))) {
 			List<Path> files = paths.filter(Files::isRegularFile).toList();
-			for (int i = 0; i < files.size(); i++) {
+			int fileLength = files.size();
+			for (int i = 0; i < fileLength; i++) {
 				Path filepath = files.get(i);
 				String filename = filepath.getFileName().toString();
 				filename = filename.substring(0, filename.lastIndexOf("."));
