@@ -620,7 +620,7 @@ public class Triangle {
 				texturedTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, 
 																tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, 
 																tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, 
-																WIDTH, HEIGHT, colors[0], colors[1], colors[2], model.getTexture(), model.getTexWidth(), i);
+																WIDTH, HEIGHT, colors[0][2], colors[1][2], colors[2][2], model.getTexture(), model.getTexWidth(), i);
 			} else {
 				fillTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].w, 
 															tri.p[1].x, tri.p[1].y, tri.t[1].w, 
@@ -895,7 +895,7 @@ public class Triangle {
 	private static void texturedTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double u1, double v1, double w1, 
 																					   double x2, double y2, double u2, double v2, double w2, 
 																					   double x3, double y3, double u3, double v3, double w3, 
-																					   int WIDTH, int HEIGHT, float[] color1, float[] color2, float[] color3, int[] image, int texWidth, int number) {
+																					   int WIDTH, int HEIGHT, float value1, float value2, float value3, int[] image, int texWidth, int number) {
 		x1 = (int) x1;
 		y1 = (int) y1;
 		x2 = (int) x2;
@@ -905,7 +905,7 @@ public class Triangle {
 		
 		// sort variables by y value: y0 <= y1 <= y2
 		double temp;
-		float[] tempc;
+		float tempc;
 		if (y2 < y1) {
 			temp = y1;
 			y1 = y2;
@@ -927,9 +927,9 @@ public class Triangle {
 			w1 = w2;
 			w2 = temp;
 			
-			tempc = color1;
-			color1 = color2;
-			color2 = tempc;
+			tempc = value1;
+			value1 = value2;
+			value2 = tempc;
 		}
 		if (y3 < y1) {
 			temp = y1;
@@ -952,9 +952,9 @@ public class Triangle {
 			w1 = w3;
 			w3 = temp;
 
-			tempc = color1;
-			color1 = color3;
-			color3 = tempc;
+			tempc = value1;
+			value1 = value3;
+			value3 = tempc;
 		}
 		if (y3 < y2) {
 			temp = y2;
@@ -977,9 +977,9 @@ public class Triangle {
 			w2 = w3;
 			w3 = temp;
 			
-			tempc = color2;
-			color2 = color3;
-			color3 = tempc;
+			tempc = value2;
+			value2 = value3;
+			value3 = tempc;
 		}
 
 		// find the slope components of the first line of triangle
@@ -990,7 +990,7 @@ public class Triangle {
 		double du1 = u2 - u1;
 		double dw1 = w2 - w1;
 
-		double dc1 = color2[2] - color1[2];
+		double dc1 = value2 - value1;
 		
 		// find the slope components of the second line of triangle
 		double dy2 = y3 - y1;
@@ -1000,7 +1000,7 @@ public class Triangle {
 		double du2 = u3 - u1;
 		double dw2 = w3 - w1;
 
-		double dc2 = color3[2] - color1[2];
+		double dc2 = value3 - value1;
 		
 		double c_c, tex_u, tex_v, tex_w;
 
@@ -1040,8 +1040,8 @@ public class Triangle {
 				double tex_ev = v1 + (y - y1) * dv2_step;
 				double tex_ew = w1 + (y - y1) * dw2_step;
 				// color
-				double sc = ((y - y1) / dy1) * dc1 + color1[2];
-				double ec = ((y - y1) / dy2) * dc2 + color1[2];
+				double sc = ((y - y1) / dy1) * dc1 + value1;
+				double ec = ((y - y1) / dy2) * dc2 + value1;
 
 				if (ax > bx) {
 					double temp1 = ax;
@@ -1088,8 +1088,9 @@ public class Triangle {
 						t1 = Math.min(texWidth * texWidth - 1, t1);
 						if (tex_w > pDepthBuffer[d]) {
 							int rgb = image[t1];
-							float[] hsb = Color.RGBtoHSB((rgb>>16)&0xFF, (rgb>>8)&0xFF, rgb&0xFF, null);
-							imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], (float) c_c + hsb[2] / 2);
+							int adjustedRGB = rgb;
+							float[] hsb = Color.RGBtoHSB((adjustedRGB>>16)&0xFF, (adjustedRGB>>8)&0xFF, adjustedRGB&0xFF, null);
+							imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], Math.min(1, (float) c_c + hsb[2] / 2));
 							pDepthBuffer[d] = tex_w;
 						}
 						t += tstep;
@@ -1105,7 +1106,7 @@ public class Triangle {
 		du1 = u3 - u2;
 		dw1 = w3 - w2;
 		
-		dc1 = color3[2] - color2[2];
+		dc1 = value3 - value2;
 		
 		du1_step = 0; 
 		dv1_step = 0;
@@ -1134,8 +1135,8 @@ public class Triangle {
 				double tex_ev = v1 + (y - y1) * dv2_step;
 				double tex_ew = w1 + (y - y1) * dw2_step;
 				// color
-				double sc = ((y - y2) / dy1) * dc1 + color2[2];
-				double ec = ((y - y1) / dy2) * dc2 + color1[2];
+				double sc = ((y - y2) / dy1) * dc1 + value2;
+				double ec = ((y - y1) / dy2) * dc2 + value1;
 				
 				if (ax > bx) {
 					double temp1 = ax;
@@ -1180,8 +1181,9 @@ public class Triangle {
 						t1 = Math.min(texWidth * texWidth - 1, t1);
 						if (tex_w > pDepthBuffer[d]) {
 							int rgb = image[t1];
-							float[] hsb = Color.RGBtoHSB((rgb>>16)&0xFF, (rgb>>8)&0xFF, rgb&0xFF, null);
-							imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], (float) c_c + hsb[2] / 2);
+							int adjustedRGB = rgb;
+							float[] hsb = Color.RGBtoHSB((adjustedRGB>>16)&0xFF, (adjustedRGB>>8)&0xFF, adjustedRGB&0xFF, null);
+							imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], Math.min(1, (float) c_c + hsb[2] / 2));
 							pDepthBuffer[d] = tex_w;
 						}
 						t += tstep;
@@ -1190,11 +1192,11 @@ public class Triangle {
 			}
 		}
 		
-		if (drawOutlines) {
+		/*if (drawOutlines) {
 			int outline = Color.BLACK.getRGB();
 			Line.drawline(imageBufferData, (int) x1, (int) y1, (int) x2, (int) y2, WIDTH, outline);
 			Line.drawline(imageBufferData, (int) x1, (int) y1, (int) x3, (int) y3, WIDTH, outline);
 			Line.drawline(imageBufferData, (int) x2, (int) y2, (int) x3, (int) y3, WIDTH, outline);
-		}
+		}*/
 	}
 }
