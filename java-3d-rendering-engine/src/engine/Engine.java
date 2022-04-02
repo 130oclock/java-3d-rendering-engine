@@ -46,7 +46,7 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final double fps = 60;
 	
-	private Camera camera = new Camera(0, 0, -9, 500);
+	private Camera camera = new Camera(0, 2, -10, 500);
 	private EnvironmentLight light = new EnvironmentLight(new Vector3(-1, 1, -1), Color.WHITE);
 	
 	private Mat4x4 matView;
@@ -88,6 +88,7 @@ public class Engine extends Canvas implements Runnable {
 		// load models
 		//ModelFileReader.loadDir("Models", "Textures");
 		//ModelFileReader.loadObj("Models/plane.obj", "plane");
+		ModelFileReader.loadObj("Models/plane.obj", "plane", "Textures/UV_Grid_Sm.jpg");
 		//ModelFileReader.loadObj("Models/octahedron.obj", "octahedron");
 		//ModelFileReader.loadObj("Models/cube.obj", "cube", "Textures/UV_Grid_Sm.jpg");
 		ModelFileReader.loadObj("Models/cube.obj", "cube", "Textures/cardboard.jpg");
@@ -95,8 +96,8 @@ public class Engine extends Canvas implements Runnable {
 		// initialize any entities
 		//planet = new Planet(0, 5, 0);
 		
-		//new Entity(ModelFileReader.get("plane"), 0, 0, 0);
-		new Entity(ModelFileReader.get("cube").recalcNormals(), 0, 0, 0);
+		new Entity(ModelFileReader.get("plane"), 0, 0, 0);
+		new Entity(ModelFileReader.get("cube").recalcNormals(), 0, 2, 0);
 		//new Entity (ModelFileReader.get("octahedron"), 3, 0, 0);
 		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals());
 		//new Entity(ModelFileReader.get("boid"), 2, 2, 0);

@@ -230,8 +230,8 @@ public class Triangle {
 			otri1.modelIndex = tri.modelIndex;
 			
 			// A
-			otri1.p[0] = insidePoints[0];
-			otri1.t[0] = insideTex[0];
+			otri1.p[0] = insidePoints[0].copy();
+			otri1.t[0] = insideTex[0].copy();
 			otri1.brightness[0] = insideColor[0];
 			
 			// intersection of AB = B'
@@ -265,13 +265,13 @@ public class Triangle {
 			otri2.modelIndex = tri.modelIndex;
 			
 			// A
-			otri1.p[0] = insidePoints[0];
-			otri1.t[0] = insideTex[0];
+			otri1.p[0] = insidePoints[0].copy();
+			otri1.t[0] = insideTex[0].copy();
 			otri1.brightness[0] = insideColor[0];
 			
 			// B
-			otri1.p[1] = insidePoints[1];
-			otri1.t[1] = insideTex[1];
+			otri1.p[1] = insidePoints[1].copy();
+			otri1.t[1] = insideTex[1].copy();
 			otri1.brightness[1] = insideColor[1];
 			
 			// intersection of AC = A'
@@ -283,13 +283,13 @@ public class Triangle {
 			otri1.brightness[2] = new Color ((int) (t1 * (outsideColor[0].getRed() - insideColor[0].getRed()) + insideColor[0].getRed()), (int) (t1 * (outsideColor[0].getGreen() - insideColor[0].getGreen()) + insideColor[0].getGreen()), (int) (t1 * (outsideColor[0].getBlue() - insideColor[0].getBlue()) + insideColor[0].getBlue()));
 			
 			// A'
-			otri2.p[0] = otri1.p[2];
-			otri2.t[0] = otri1.t[2];
+			otri2.p[0] = otri1.p[2].copy();
+			otri2.t[0] = otri1.t[2].copy();
 			otri2.brightness[0] = otri1.brightness[2];
 			
 			// B
-			otri2.p[1] = insidePoints[1];
-			otri2.t[1] = insideTex[1];
+			otri2.p[1] = insidePoints[1].copy();
+			otri2.t[1] = insideTex[1].copy();
 			otri2.brightness[1] = insideColor[1];
 			
 			// intersection of BC = B'
