@@ -30,3 +30,9 @@ These youtube channels helped guide me throughout the project
 <br>
 <img src="./Suzanne.png">
 </details>
+
+<details>
+<summary>This is a screenshot of the skybox and textured objects.</summary>
+<br>
+<img src="./Skybox.png">
+</details>
