@@ -1,19 +1,17 @@
-package engine.triangle;
+package engine.graphics.triangle;
 
 import java.awt.Color;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import engine.camera.Camera;
-import engine.light.EnvironmentLight;
-import engine.line.Line;
+import engine.graphics.Screen;
+import engine.graphics.environment.EnvironmentLight;
+import engine.graphics.models.*;
 import engine.matrix.Mat4x4;
 import engine.quaternion.Quaternion;
 import engine.vector.Vector2;
 import engine.vector.Vector3;
-import engine.models.*;
 
 public class Triangle {
 	
@@ -22,8 +20,6 @@ public class Triangle {
 	private static int lightingType = 0;
 	public static boolean doGouraud = true;
 	private static double minimumBrightness = 0.1;
-
-	private static boolean drawOutlines = false;
 	
 	public static List<Triangle> triangleRaster = new ArrayList<Triangle>();
 	
@@ -360,55 +356,24 @@ public class Triangle {
 			
 			int[] indices = new int[3];
 			
-			int i1 = findDuplicate(v1, vertices);
-			if (i1 == -1) { // vertex doesn't exist yet
-				// add new vertex
-				vertices.add(v1);
-				// add normal to list
-				normals.add(normal);
-				// log the index of the vertex for later reconstruction
-				indices[0] = vertices.size() - 1;
-			} else { // vertex already exists
-				// get the normal
-				Vector3 norm = normals.get(i1);
-				// sum the normals
-				normals.set(i1, Vector3.add(norm, normal));
-				// log the index of the vertex for later reconstruction
-				indices[0] = i1;
-			}
-			
-			int i2 = findDuplicate(v2, vertices);
-			if (i2 == -1) { // vertex doesn't exist yet
-				// add new vertex
-				vertices.add(v2);
-				// add normal to list
-				normals.add(normal);
-				// log the index of the vertex for later reconstruction
-				indices[1] = vertices.size() - 1;
-			} else { // vertex already exists
-				// get the normal
-				Vector3 norm = normals.get(i2);
-				// sum the normals
-				normals.set(i2, Vector3.add(norm, normal));
-				// log the index of the vertex for later reconstruction
-				indices[1] = i2;
-			}
-			
-			int i3 = findDuplicate(v3, vertices);
-			if (i3 == -1) { // vertex doesn't exist yet
-				// add new vertex
-				vertices.add(v3);
-				// add normal to list
-				normals.add(normal);
-				// log the index of the vertex for later reconstruction
-				indices[2] = vertices.size() - 1;
-			} else { // vertex already exists
-				// get the normal
-				Vector3 norm = normals.get(i3);
-				// sum the normals
-				normals.set(i3, Vector3.add(norm, normal));
-				// log the index of the vertex for later reconstruction
-				indices[2] = i3;
+			for (int j = 0; j < 3; j++) {
+				Vector3 v = tri.p[j];
+				int i1 = findDuplicate(v, vertices);
+				if (i1 == -1) { // vertex doesn't exist yet
+					// add new vertex
+					vertices.add(v);
+					// add normal to list
+					normals.add(normal);
+					// log the index of the vertex for later reconstruction
+					indices[j] = vertices.size() - 1;
+				} else { // vertex already exists
+					// get the normal
+					Vector3 norm = normals.get(i1);
+					// sum the normals
+					normals.set(i1, Vector3.add(norm, normal));
+					// log the index of the vertex for later reconstruction
+					indices[j] = i1;
+				}
 			}
 			
 			vertexInds[i] = indices;
@@ -560,6 +525,88 @@ public class Triangle {
 		}
 	}
 	
+	public static void projectSkybox(Triangle[] trianglesToRaster, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light, Color color) {
+		Mat4x4 matWorld = Quaternion.generateMatrix(new Quaternion(), camera.pos);
+		
+		for (Triangle tri : trianglesToRaster) {
+			Triangle triTransformed = Triangle.empty();
+			Triangle triViewed = Triangle.empty();
+			
+			triTransformed.p = Triangle.multiplyMatrixTriangle(matWorld, tri);
+			triTransformed.t[0] = tri.t[0].copy();
+			triTransformed.t[1] = tri.t[1].copy();
+			triTransformed.t[2] = tri.t[2].copy();
+			
+			Vector3 normal = Triangle.findFaceNormal(triTransformed.p[0], triTransformed.p[1], triTransformed.p[2]);
+			
+			// Check if the triangle is facing towards the camera
+			Vector3 vCameraRay = Vector3.subtract(triTransformed.p[0], camera.pos);
+			if (Vector3.dotProduct(normal, vCameraRay) < 0) {
+				triViewed.brightness = new Color[] { Color.GRAY, Color.GRAY, Color.GRAY };
+				
+				triViewed.p = Triangle.multiplyMatrixTriangle(matView, triTransformed);
+				triViewed.t[0] = triTransformed.t[0];
+				triViewed.t[1] = triTransformed.t[1];
+				triViewed.t[2] = triTransformed.t[2];
+				
+				Triangle[] clipped = Triangle.clipAgainstPlane(camera.clippingPlane, new Vector3(0, 0, 1), triViewed);
+				int nClippedTriangles = 0; 
+				if (clipped[0] != null) nClippedTriangles++;
+				if (clipped[1] != null) nClippedTriangles++;
+				
+				for (int n = 0; n < nClippedTriangles; n++) {
+					Triangle triProjected = Triangle.empty();
+					triProjected.p = Triangle.multiplyMatrixTriangle(matProj, clipped[n]);
+					
+					triProjected.brightness = clipped[n].brightness;
+					
+					triProjected.t[0] = clipped[n].t[0];
+					triProjected.t[1] = clipped[n].t[1];
+					triProjected.t[2] = clipped[n].t[2];
+					
+					triProjected.t[0].u = triProjected.t[0].u / triProjected.p[0].w;
+					triProjected.t[1].u = triProjected.t[1].u / triProjected.p[1].w;
+					triProjected.t[2].u = triProjected.t[2].u / triProjected.p[2].w;
+					
+					triProjected.t[0].v = triProjected.t[0].v / triProjected.p[0].w;
+					triProjected.t[1].v = triProjected.t[1].v / triProjected.p[1].w;
+					triProjected.t[2].v = triProjected.t[2].v / triProjected.p[2].w;
+					
+					triProjected.t[0].w = 1 / triProjected.p[0].w;
+					triProjected.t[1].w = 1 / triProjected.p[1].w;
+					triProjected.t[2].w = 1 / triProjected.p[2].w;
+	
+					triProjected.p[0] = Vector3.divide(triProjected.p[0], triProjected.p[0].w);
+					triProjected.p[1] = Vector3.divide(triProjected.p[1], triProjected.p[1].w);
+					triProjected.p[2] = Vector3.divide(triProjected.p[2], triProjected.p[2].w);
+	
+					triProjected.p[0].x *= -1;
+					triProjected.p[1].x *= -1;
+					triProjected.p[2].x *= -1;
+					triProjected.p[0].y *= -1;
+					triProjected.p[1].y *= -1;
+					triProjected.p[2].y *= -1;
+	
+					var offsetView = new Vector3(1, 1, 0);
+					triProjected.p[0] = Vector3.add(triProjected.p[0], offsetView);
+					triProjected.p[1] = Vector3.add(triProjected.p[1], offsetView);
+					triProjected.p[2] = Vector3.add(triProjected.p[2], offsetView);
+					triProjected.p[0].x *= 0.5 * WIDTH;
+					triProjected.p[0].y *= 0.5 * HEIGHT;
+					triProjected.p[1].x *= 0.5 * WIDTH;
+					triProjected.p[1].y *= 0.5 * HEIGHT;
+					triProjected.p[2].x *= 0.5 * WIDTH;
+					triProjected.p[2].y *= 0.5 * HEIGHT;
+					
+					triProjected.modelIndex = tri.modelIndex;
+					
+					//System.out.println(triProjected.p[0].x + " " + triProjected.p[0].y + " | " + triProjected.p[1].x + " " + triProjected.p[1].y + " | " + triProjected.p[2].x + " " + triProjected.p[2].y);
+					triangleRaster.add(triProjected);
+				}
+			}
+		}
+	}
+	
 	public static void cullScreenEdges(int WIDTH, int HEIGHT) {
 		List<Triangle> allTriangles = new ArrayList<Triangle>();
 		for (Triangle tri : triangleRaster) {
@@ -609,7 +656,10 @@ public class Triangle {
 		triangleRaster.clear();
 	}
 	
-	public static void drawTriangles(int[] imageBufferData, double[] pDepthBuffer, int WIDTH, int HEIGHT) {
+	public static void drawTriangles(Screen screen, EnvironmentLight light) {
+		int WIDTH = screen.WIDTH, HEIGHT = screen.HEIGHT;
+		int[] imageBufferData = new int[screen.length];
+		double[] pDepthBuffer = new double[screen.length];
 		int rasterLength = triangleRaster.size();
 		for (int i = 0; i < rasterLength; i++) {
 			Triangle tri = triangleRaster.get(i);
@@ -624,7 +674,7 @@ public class Triangle {
 				texturedTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].u, tri.t[0].v, tri.t[0].w, 
 																tri.p[1].x, tri.p[1].y, tri.t[1].u, tri.t[1].v, tri.t[1].w, 
 																tri.p[2].x, tri.p[2].y, tri.t[2].u, tri.t[2].v, tri.t[2].w, 
-																WIDTH, HEIGHT, colors[0][2], colors[1][2], colors[2][2], model.getTexture(), model.getTexWidth(), i);
+																WIDTH, HEIGHT, colors[0][2], colors[1][2], colors[2][2], model.getTexture(), model.getTexWidth(), model.getTexHeight(), light.color.getRGB());
 			} else {
 				fillTriangle(imageBufferData, pDepthBuffer, tri.p[0].x, tri.p[0].y, tri.t[0].w, 
 															tri.p[1].x, tri.p[1].y, tri.t[1].w, 
@@ -632,7 +682,160 @@ public class Triangle {
 															WIDTH, HEIGHT, colors[0], colors[1], colors[2]);
 			}
 		}
+		
+		screen.imageBufferData = imageBufferData;
+		screen.pDepthBuffer = pDepthBuffer;
 	}
+	
+	private static void fillBottomFlatTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double x2, double y2, double x3, double y3,
+												double dy1, double dy2, double dc1, double dc2, double dax_step, double dbx_step, 
+												double dh1, double dh2, double w1, double dw1_step, 
+												double ds1, double ds2, double w2, double dw2_step, 
+												int WIDTH, int HEIGHT, float[] color1, float[] color2, float[] color3) {
+		double c_h, c_c, c_s, tex_w;
+		for (int y = (int) y1; y <= (int) y2; y++) { // raws until it hits the flat bottom or middle of the triangle.
+			// interpolate the x start and end values 
+			double ax = (x1 + (y - y1) * dax_step);
+			double bx = (x1 + (y - y1) * dbx_step);
+			// start point
+			double tex_sw = w1 + (y - y1) * dw1_step;
+			// end point
+			double tex_ew = w1 + (y - y1) * dw2_step;
+			// color
+			double sh = ((y - y1) / dy1) * dh1 + color1[0];
+			double eh = ((y - y1) / dy2) * dh2 + color1[0];
+			double ss = ((y - y1) / dy1) * ds1 + color1[1];
+			double es = ((y - y1) / dy2) * ds2 + color1[1];
+			double sc = ((y - y1) / dy1) * dc1 + color1[2];
+			double ec = ((y - y1) / dy2) * dc2 + color1[2];
+
+			if (ax > bx) {
+				double temp1 = ax;
+				ax = bx;
+				bx = temp1;
+				
+				temp1 = tex_sw;
+				tex_sw = tex_ew;
+				tex_ew = temp1;
+
+				temp1 = ss;
+				ss = es;
+				es = temp1;
+
+				temp1 = sh;
+				sh = eh;
+				eh = temp1;
+				
+				temp1 = sc;
+				sc = ec;
+				ec = temp1;
+			}
+			
+			// always make tex_su come first
+			c_h = sh;
+			c_s = ss;
+			c_c = sc;
+			
+			tex_w = tex_sw;
+
+			double tstep = 1 / (bx - ax);
+			double t = 0;
+			
+			double xStart = ax;
+			double xEnd = bx;
+
+			for (int x = (int) xStart; x < (int) xEnd; x++) {
+				if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
+					c_h = (((x - xStart) / (xEnd - xStart)) * (eh - sh)) + sh;
+					c_s = (((x - xStart) / (xEnd - xStart)) * (es - ss)) + ss;
+					c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
+					
+					tex_w = (1 - t) * tex_sw + t * tex_ew;
+
+					int d = (int) ((y * WIDTH) + x);
+					if (tex_w > pDepthBuffer[d]) {
+						imageBufferData[d] = Color.HSBtoRGB((float) c_h, (float) c_s, (float) c_c);
+						pDepthBuffer[d] = tex_w;
+					}
+					t += tstep;
+				}
+			}
+		}
+	}
+	
+	private static void fillTopFlatTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double x2, double y2, double x3, double y3,
+											double dy1, double dy2, double dc1, double dc2, double dax_step, double dbx_step, 
+											double dh1, double dh2, double w1, double dw1_step, 
+											double ds1, double ds2, double w2, double dw2_step, 
+											int WIDTH, int HEIGHT, float[] color1, float[] color2, float[] color3) {
+		double c_h, c_c, c_s, tex_w;
+		for (int y = (int) y2; y < (int) y3; y++) { // raws until it hits the flat top or middle of the triangle.
+			// interpolate the x start and end values 
+			double ax = (x2 + (y - y2) * dax_step);
+			double bx = (x1 + (y - y1) * dbx_step);
+			// start point
+			double tex_sw = w2 + (y - y2) * dw1_step;
+			// end point
+			double tex_ew = w1 + (y - y1) * dw2_step;
+			// color
+			double sh = ((y - y2) / dy1) * dh1 + color2[0];
+			double eh = ((y - y1) / dy2) * dh2 + color1[0];
+			double ss = ((y - y2) / dy1) * ds1 + color2[1];
+			double es = ((y - y1) / dy2) * ds2 + color1[1];
+			double sc = ((y - y2) / dy1) * dc1 + color2[2];
+			double ec = ((y - y1) / dy2) * dc2 + color1[2];
+			
+			if (ax > bx) {
+				double temp1 = ax;
+				ax = bx;
+				bx = temp1;
+				
+				temp1 = tex_sw;
+				tex_sw = tex_ew;
+				tex_ew = temp1;
+
+				temp1 = ss;
+				ss = es;
+				es = temp1;
+
+				temp1 = sh;
+				sh = eh;
+				eh = temp1;
+				
+				temp1 = sc;
+				sc = ec;
+				ec = temp1;
+			}
+
+			c_h = sh;
+			c_s = ss;
+			c_c = sc;	
+			
+			tex_w = tex_sw;
+
+			double tstep = 1 / (double) (bx - ax);
+			double t = 0;
+			
+			double xStart = ax;
+			double xEnd = bx;
+			
+			for (int x = (int) xStart; x < (int) xEnd; x++) {
+				if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
+					c_h = (((x - xStart) / (xEnd - xStart)) * (eh - sh)) + sh;
+					c_s = (((x - xStart) / (xEnd - xStart)) * (es - ss)) + ss;
+					c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
+					
+					tex_w = (1 - t) * tex_sw + t * tex_ew;
+					int d = (int) ((y * WIDTH) + x);
+					if (tex_w > pDepthBuffer[d]) {
+						imageBufferData[d] = Color.HSBtoRGB((float) c_h, (float) c_s, (float) c_c);
+						pDepthBuffer[d] = tex_w;
+					}
+					t += tstep;
+				}
+			}
+		}
+}
 	
 	private static void fillTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double w1, 
 																				   double x2, double y2, double w2, 
@@ -720,7 +923,6 @@ public class Triangle {
 		
 		double dw2 = w3 - w1;
 		
-		double c_h, c_c, c_s, tex_w;
 
 		// step distances of the line
 		double dax_step = 0, dbx_step = 0,
@@ -739,74 +941,11 @@ public class Triangle {
 		}
 		
 		if (dy1 != 0) {
-			for (int y = (int) y1; y <= (int) y2; y++) { // raws until it hits the flat bottom or middle of the triangle.
-				// interpolate the x start and end values 
-				double ax = (x1 + (y - y1) * dax_step);
-				double bx = (x1 + (y - y1) * dbx_step);
-				// start point
-				double tex_sw = w1 + (y - y1) * dw1_step;
-				// end point
-				double tex_ew = w1 + (y - y1) * dw2_step;
-				// color
-				double sh = ((y - y1) / dy1) * dh1 + color1[0];
-				double eh = ((y - y1) / dy2) * dh2 + color1[0];
-				double ss = ((y - y1) / dy1) * ds1 + color1[1];
-				double es = ((y - y1) / dy2) * ds2 + color1[1];
-				double sc = ((y - y1) / dy1) * dc1 + color1[2];
-				double ec = ((y - y1) / dy2) * dc2 + color1[2];
-
-				if (ax > bx) {
-					double temp1 = ax;
-					ax = bx;
-					bx = temp1;
-					
-					temp1 = tex_sw;
-					tex_sw = tex_ew;
-					tex_ew = temp1;
-
-					temp1 = ss;
-					ss = es;
-					es = temp1;
-
-					temp1 = sh;
-					sh = eh;
-					eh = temp1;
-					
-					temp1 = sc;
-					sc = ec;
-					ec = temp1;
-				}
-				
-				// always make tex_su come first
-				c_h = sh;
-				c_s = ss;
-				c_c = sc;
-				
-				tex_w = tex_sw;
-
-				double tstep = 1 / (bx - ax);
-				double t = 0;
-				
-				double xStart = ax;
-				double xEnd = bx;
-
-				for (int x = (int) xStart; x < (int) xEnd; x++) {
-					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
-						c_h = (((x - xStart) / (xEnd - xStart)) * (eh - sh)) + sh;
-						c_s = (((x - xStart) / (xEnd - xStart)) * (es - ss)) + ss;
-						c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
-						
-						tex_w = (1 - t) * tex_sw + t * tex_ew;
-
-						int d = (int) ((y * WIDTH) + x);
-						if (tex_w > pDepthBuffer[d]) {
-							imageBufferData[d] = Color.HSBtoRGB((float) c_h, (float) c_s, (float) c_c);
-							pDepthBuffer[d] = tex_w;
-						}
-						t += tstep;
-					}
-				}
-			}
+			fillBottomFlatTriangle(imageBufferData, pDepthBuffer, x1, y1, x2, y2, x3, y3,
+									dy1, dy2, dc1, dc2, dax_step, dbx_step, 
+									dh1, dh2, w1, dw1_step, 
+									ds1, ds2, w2, dw2_step, 
+									WIDTH, HEIGHT, color1, color2, color3);
 		}
 		
 		dy1 = y3 - y2;
@@ -827,70 +966,163 @@ public class Triangle {
 		if (dy2 != 0) dbx_step = dx2 / Math.abs(dy2);
 
 		if (dy1 != 0) {
-			for (int y = (int) y2; y < (int) y3; y++) { // raws until it hits the flat top or middle of the triangle.
-				// interpolate the x start and end values 
-				double ax = (x2 + (y - y2) * dax_step);
-				double bx = (x1 + (y - y1) * dbx_step);
-				// start point
-				double tex_sw = w2 + (y - y2) * dw1_step;
-				// end point
-				double tex_ew = w1 + (y - y1) * dw2_step;
-				// color
-				double sh = ((y - y2) / dy1) * dh1 + color2[0];
-				double eh = ((y - y1) / dy2) * dh2 + color1[0];
-				double ss = ((y - y2) / dy1) * ds1 + color2[1];
-				double es = ((y - y1) / dy2) * ds2 + color1[1];
-				double sc = ((y - y2) / dy1) * dc1 + color2[2];
-				double ec = ((y - y1) / dy2) * dc2 + color1[2];
+			fillTopFlatTriangle(imageBufferData, pDepthBuffer, x1, y1, x2, y2, x3, y3,
+								dy1, dy2, dc1, dc2, dax_step, dbx_step, 
+								dh1, dh2, w1, dw1_step, 
+								ds1, ds2, w2, dw2_step, 
+								WIDTH, HEIGHT, color1, color2, color3);
+		}
+	}
+	
+	private static void texturedBottomFlatTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double x2, double y2, double x3, double y3,
+													double dy1, double dy2, double dc1, double dc2, double dax_step, double dbx_step, 
+													double u1, double v1, double w1, double du1_step, double dv1_step, double dw1_step, 
+													double u2, double v2, double w2, double du2_step, double dv2_step, double dw2_step, 
+													int WIDTH, int HEIGHT, float value1, float value2, float value3, int[] image, int texWidth, int texHeight, int light) {
+		double c_c, tex_u, tex_v, tex_w;
+		for (int y = (int) y1; y <= (int) y2; y++) { // raws until it hits the flat bottom or middle of the triangle.
+			// interpolate the x start and end values 
+			double ax = (x1 + (y - y1) * dax_step);
+			double bx = (x1 + (y - y1) * dbx_step);
+			// start point
+			double tex_su = u1 + (y - y1) * du1_step;
+			double tex_sv = v1 + (y - y1) * dv1_step;
+			double tex_sw = w1 + (y - y1) * dw1_step;
+			// end point
+			double tex_eu = u1 + (y - y1) * du2_step;
+			double tex_ev = v1 + (y - y1) * dv2_step;
+			double tex_ew = w1 + (y - y1) * dw2_step;
+			// color
+			double sc = ((y - y1) / dy1) * dc1 + value1;
+			double ec = ((y - y1) / dy2) * dc2 + value1;
+
+			if (ax > bx) {
+				double temp1 = ax;
+				ax = bx;
+				bx = temp1;
 				
-				if (ax > bx) {
-					double temp1 = ax;
-					ax = bx;
-					bx = temp1;
+				temp1 = tex_su;
+				tex_su = tex_eu;
+				tex_eu = temp1;
+				
+				temp1 = tex_sv;
+				tex_sv = tex_ev;
+				tex_ev = temp1;
+				
+				temp1 = tex_sw;
+				tex_sw = tex_ew;
+				tex_ew = temp1;
+				
+				temp1 = sc;
+				sc = ec;
+				ec = temp1;
+			}
+			
+			// always make tex_su come first
+			c_c = sc;
+			
+			tex_u = tex_su;
+			tex_v = tex_sv;
+			tex_w = tex_sw;
+
+			double tstep = 1 / (bx - ax);
+			double t = 0;
+
+			for (int x = (int) ax; x < (int) bx; x++) {
+				if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
+					c_c = (((x - ax) / (bx - ax)) * (ec - sc)) + sc;
 					
-					temp1 = tex_sw;
-					tex_sw = tex_ew;
-					tex_ew = temp1;
+					tex_u = (1 - t) * tex_su + t * tex_eu;
+					tex_v = (1 - t) * tex_sv + t * tex_ev;
+					tex_w = (1 - t) * tex_sw + t * tex_ew;
 
-					temp1 = ss;
-					ss = es;
-					es = temp1;
-
-					temp1 = sh;
-					sh = eh;
-					eh = temp1;
-					
-					temp1 = sc;
-					sc = ec;
-					ec = temp1;
-				}
-
-				c_h = sh;
-				c_s = ss;
-				c_c = sc;	
-				
-				tex_w = tex_sw;
-
-				double tstep = 1 / (double) (bx - ax);
-				double t = 0;
-				
-				double xStart = ax;
-				double xEnd = bx;
-				
-				for (int x = (int) xStart; x < (int) xEnd; x++) {
-					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
-						c_h = (((x - xStart) / (xEnd - xStart)) * (eh - sh)) + sh;
-						c_s = (((x - xStart) / (xEnd - xStart)) * (es - ss)) + ss;
-						c_c = (((x - xStart) / (xEnd - xStart)) * (ec - sc)) + sc;
-						
-						tex_w = (1 - t) * tex_sw + t * tex_ew;
-						int d = (int) ((y * WIDTH) + x);
-						if (tex_w > pDepthBuffer[d]) {
-							imageBufferData[d] = Color.HSBtoRGB((float) c_h, (float) c_s, (float) c_c);
-							pDepthBuffer[d] = tex_w;
-						}
-						t += tstep;
+					int d = (int) ((y * WIDTH) + x);
+					int t1 = (int) (Math.round((tex_v / tex_w) * (texHeight)) * texWidth + Math.round((tex_u / tex_w) * (texWidth)));
+					t1 = Math.min(texWidth * texHeight - 1, t1);
+					if (tex_w > pDepthBuffer[d]) {
+						int rgb = image[t1];
+						int adjustedRGB = EnvironmentLight.blend(rgb, light).getRGB();
+						float[] hsb = Color.RGBtoHSB((adjustedRGB>>16)&0xFF, (adjustedRGB>>8)&0xFF, adjustedRGB&0xFF, null);
+						imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], Math.min(1, (float) c_c + hsb[2] / 2));
+						pDepthBuffer[d] = tex_w;
 					}
+					t += tstep;
+				}
+			}
+		}
+	}
+	
+	private static void texturedTopFlatTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double x2, double y2, double x3, double y3,
+												double dy1, double dy2, double dc1, double dc2, double dax_step, double dbx_step, 
+												double u1, double v1, double w1, double du1_step, double dv1_step, double dw1_step, 
+												double u2, double v2, double w2, double du2_step, double dv2_step, double dw2_step, 
+												int WIDTH, int HEIGHT, float value1, float value2, float value3, int[] image, int texWidth, int texHeight, int light) {
+		double c_c, tex_u, tex_v, tex_w;
+		for (int y = (int) y2; y < (int) y3; y++) { // raws until it hits the flat top or middle of the triangle.
+			// interpolate the x start and end values 
+			double ax = (x2 + (y - y2) * dax_step);
+			double bx = (x1 + (y - y1) * dbx_step);
+			// start point
+			double tex_su = u2 + (y - y2) * du1_step;
+			double tex_sv = v2 + (y - y2) * dv1_step;
+			double tex_sw = w2 + (y - y2) * dw1_step;
+			// end point
+			double tex_eu = u1 + (y - y1) * du2_step;
+			double tex_ev = v1 + (y - y1) * dv2_step;
+			double tex_ew = w1 + (y - y1) * dw2_step;
+			// color
+			double sc = ((y - y2) / dy1) * dc1 + value2;
+			double ec = ((y - y1) / dy2) * dc2 + value1;
+			
+			if (ax > bx) {
+				double temp1 = ax;
+				ax = bx;
+				bx = temp1;
+				
+				temp1 = tex_su;
+				tex_su = tex_eu;
+				tex_eu = temp1;
+				
+				temp1 = tex_sv;
+				tex_sv = tex_ev;
+				tex_ev = temp1;
+				
+				temp1 = tex_sw;
+				tex_sw = tex_ew;
+				tex_ew = temp1;
+				
+				temp1 = sc;
+				sc = ec;
+				ec = temp1;
+			}
+
+			c_c = sc;	
+			
+			tex_u = tex_su;
+			tex_v = tex_sv;
+			tex_w = tex_sw;
+
+			double tstep = 1 / (double) (bx - ax);
+			double t = 0;
+
+			for (int x = (int) ax; x < (int) bx; x++) {
+				if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
+					c_c = (((x - ax) / (bx - ax)) * (ec - sc)) + sc;
+					
+					tex_u = (1 - t) * tex_su + t * tex_eu;
+					tex_v = (1 - t) * tex_sv + t * tex_ev;
+					tex_w = (1 - t) * tex_sw + t * tex_ew;
+					int d = (int) ((y * WIDTH) + x);
+					int t1 = (int) (Math.round((tex_v / tex_w) * (texHeight)) * texWidth + Math.round((tex_u / tex_w) * (texWidth)));
+					t1 = Math.min(texWidth * texHeight - 1, t1);
+					if (tex_w > pDepthBuffer[d]) {
+						int rgb = image[t1];
+						int adjustedRGB = EnvironmentLight.blend(rgb, light).getRGB();
+						float[] hsb = Color.RGBtoHSB((adjustedRGB>>16)&0xFF, (adjustedRGB>>8)&0xFF, adjustedRGB&0xFF, null);
+						imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], Math.min(1, (float) c_c + hsb[2] / 2));
+						pDepthBuffer[d] = tex_w;
+					}
+					t += tstep;
 				}
 			}
 		}
@@ -899,7 +1131,7 @@ public class Triangle {
 	private static void texturedTriangle(int[] imageBufferData, double[] pDepthBuffer, double x1, double y1, double u1, double v1, double w1, 
 																					   double x2, double y2, double u2, double v2, double w2, 
 																					   double x3, double y3, double u3, double v3, double w3, 
-																					   int WIDTH, int HEIGHT, float value1, float value2, float value3, int[] image, int texWidth, int number) {
+																					   int WIDTH, int HEIGHT, float value1, float value2, float value3, int[] image, int texWidth, int texHeight, int light) {
 		x1 = (int) x1;
 		y1 = (int) y1;
 		x2 = (int) x2;
@@ -1005,8 +1237,6 @@ public class Triangle {
 		double dw2 = w3 - w1;
 
 		double dc2 = value3 - value1;
-		
-		double c_c, tex_u, tex_v, tex_w;
 
 		// step distances of the line
 		double dax_step = 0, dbx_step = 0,
@@ -1031,76 +1261,11 @@ public class Triangle {
 		}
 		
 		if (dy1 != 0) {
-			for (int y = (int) y1; y <= (int) y2; y++) { // raws until it hits the flat bottom or middle of the triangle.
-				// interpolate the x start and end values 
-				double ax = (x1 + (y - y1) * dax_step);
-				double bx = (x1 + (y - y1) * dbx_step);
-				// start point
-				double tex_su = u1 + (y - y1) * du1_step;
-				double tex_sv = v1 + (y - y1) * dv1_step;
-				double tex_sw = w1 + (y - y1) * dw1_step;
-				// end point
-				double tex_eu = u1 + (y - y1) * du2_step;
-				double tex_ev = v1 + (y - y1) * dv2_step;
-				double tex_ew = w1 + (y - y1) * dw2_step;
-				// color
-				double sc = ((y - y1) / dy1) * dc1 + value1;
-				double ec = ((y - y1) / dy2) * dc2 + value1;
-
-				if (ax > bx) {
-					double temp1 = ax;
-					ax = bx;
-					bx = temp1;
-					
-					temp1 = tex_su;
-					tex_su = tex_eu;
-					tex_eu = temp1;
-					
-					temp1 = tex_sv;
-					tex_sv = tex_ev;
-					tex_ev = temp1;
-					
-					temp1 = tex_sw;
-					tex_sw = tex_ew;
-					tex_ew = temp1;
-					
-					temp1 = sc;
-					sc = ec;
-					ec = temp1;
-				}
-				
-				// always make tex_su come first
-				c_c = sc;
-				
-				tex_u = tex_su;
-				tex_v = tex_sv;
-				tex_w = tex_sw;
-
-				double tstep = 1 / (bx - ax);
-				double t = 0;
-
-				for (int x = (int) ax; x < (int) bx; x++) {
-					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
-						c_c = (((x - ax) / (bx - ax)) * (ec - sc)) + sc;
-						
-						tex_u = (1 - t) * tex_su + t * tex_eu;
-						tex_v = (1 - t) * tex_sv + t * tex_ev;
-						tex_w = (1 - t) * tex_sw + t * tex_ew;
-
-						int d = (int) ((y * WIDTH) + x);
-						int t1 = (int) (Math.round((tex_v / tex_w) * (texWidth)) * texWidth + Math.round((tex_u / tex_w) * (texWidth)));
-						t1 = Math.min(texWidth * texWidth - 1, t1);
-						if (tex_w > pDepthBuffer[d]) {
-							int rgb = image[t1];
-							int adjustedRGB = rgb;
-							float[] hsb = Color.RGBtoHSB((adjustedRGB>>16)&0xFF, (adjustedRGB>>8)&0xFF, adjustedRGB&0xFF, null);
-							imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], Math.min(1, (float) c_c + hsb[2] / 2));
-							pDepthBuffer[d] = tex_w;
-						}
-						t += tstep;
-					}
-				}
-			}
+			texturedBottomFlatTriangle(imageBufferData, pDepthBuffer, x1, y1, x2, y2, x3, y3,
+										dy1, dy2, dc1, dc2, dax_step, dbx_step, 
+										u1, v1, w1, du1_step, dv1_step, dw1_step, 
+										u2, v2, w2, du2_step, dv2_step, dw2_step, 
+										WIDTH, HEIGHT, value1, value2, value3, image, texWidth, texHeight, light);
 		}
 		
 		dy1 = y3 - y2;
@@ -1126,81 +1291,11 @@ public class Triangle {
 		if (dy2 != 0) dbx_step = dx2 / Math.abs(dy2);
 
 		if (dy1 != 0) {
-			for (int y = (int) y2; y < (int) y3; y++) { // raws until it hits the flat top or middle of the triangle.
-				// interpolate the x start and end values 
-				double ax = (x2 + (y - y2) * dax_step);
-				double bx = (x1 + (y - y1) * dbx_step);
-				// start point
-				double tex_su = u2 + (y - y2) * du1_step;
-				double tex_sv = v2 + (y - y2) * dv1_step;
-				double tex_sw = w2 + (y - y2) * dw1_step;
-				// end point
-				double tex_eu = u1 + (y - y1) * du2_step;
-				double tex_ev = v1 + (y - y1) * dv2_step;
-				double tex_ew = w1 + (y - y1) * dw2_step;
-				// color
-				double sc = ((y - y2) / dy1) * dc1 + value2;
-				double ec = ((y - y1) / dy2) * dc2 + value1;
-				
-				if (ax > bx) {
-					double temp1 = ax;
-					ax = bx;
-					bx = temp1;
-					
-					temp1 = tex_su;
-					tex_su = tex_eu;
-					tex_eu = temp1;
-					
-					temp1 = tex_sv;
-					tex_sv = tex_ev;
-					tex_ev = temp1;
-					
-					temp1 = tex_sw;
-					tex_sw = tex_ew;
-					tex_ew = temp1;
-					
-					temp1 = sc;
-					sc = ec;
-					ec = temp1;
-				}
-
-				c_c = sc;	
-				
-				tex_u = tex_su;
-				tex_v = tex_sv;
-				tex_w = tex_sw;
-
-				double tstep = 1 / (double) (bx - ax);
-				double t = 0;
-
-				for (int x = (int) ax; x < (int) bx; x++) {
-					if (y > 0 && y < HEIGHT && x > 0 && x < WIDTH) {
-						c_c = (((x - ax) / (bx - ax)) * (ec - sc)) + sc;
-						
-						tex_u = (1 - t) * tex_su + t * tex_eu;
-						tex_v = (1 - t) * tex_sv + t * tex_ev;
-						tex_w = (1 - t) * tex_sw + t * tex_ew;
-						int d = (int) ((y * WIDTH) + x);
-						int t1 = (int) (Math.round((tex_v / tex_w) * (texWidth)) * texWidth + Math.round((tex_u / tex_w) * (texWidth)));
-						t1 = Math.min(texWidth * texWidth - 1, t1);
-						if (tex_w > pDepthBuffer[d]) {
-							int rgb = image[t1];
-							int adjustedRGB = rgb;
-							float[] hsb = Color.RGBtoHSB((adjustedRGB>>16)&0xFF, (adjustedRGB>>8)&0xFF, adjustedRGB&0xFF, null);
-							imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], Math.min(1, (float) c_c + hsb[2] / 2));
-							pDepthBuffer[d] = tex_w;
-						}
-						t += tstep;
-					}
-				}
-			}
+			texturedTopFlatTriangle(imageBufferData, pDepthBuffer, x1, y1, x2, y2, x3, y3,
+					dy1, dy2, dc1, dc2, dax_step, dbx_step, 
+					u1, v1, w1, du1_step, dv1_step, dw1_step, 
+					u2, v2, w2, du2_step, dv2_step, dw2_step, 
+					WIDTH, HEIGHT, value1, value2, value3, image, texWidth, texHeight, light);
 		}
-		
-		/*if (drawOutlines) {
-			int outline = Color.BLACK.getRGB();
-			Line.drawline(imageBufferData, (int) x1, (int) y1, (int) x2, (int) y2, WIDTH, outline);
-			Line.drawline(imageBufferData, (int) x1, (int) y1, (int) x3, (int) y3, WIDTH, outline);
-			Line.drawline(imageBufferData, (int) x2, (int) y2, (int) x3, (int) y3, WIDTH, outline);
-		}*/
 	}
 }

@@ -1,4 +1,4 @@
-package engine.light;
+package engine.graphics.environment;
 
 import java.awt.Color;
 

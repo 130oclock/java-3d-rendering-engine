@@ -1,4 +1,4 @@
-package engine.models;
+package engine.graphics.models;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
-import engine.triangle.Triangle;
+import engine.graphics.triangle.Triangle;
 
 public class ModelFileReader {
 	
@@ -57,11 +57,13 @@ public class ModelFileReader {
 			
 			int[] imageBufferData = null;
 			int imageBufferWidth = 0;
+			int imageBufferHeight = 0;
 			try {
 				BufferedImage image = ImageIO.read(new File(texturepath));
 				BufferedImage convertedImg = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
 				convertedImg.getGraphics().drawImage(image, 0, 0, null);
 				imageBufferWidth = convertedImg.getWidth();
+				imageBufferHeight = convertedImg.getHeight();
 				imageBufferData = ((DataBufferInt) convertedImg.getRaster().getDataBuffer()).getData();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -194,7 +196,7 @@ public class ModelFileReader {
 			
 			Triangle[] trianglesArray = triangles.toArray(new Triangle[0]);
 			
-			Model model = new Model(trianglesArray, imageBufferData, imageBufferWidth);
+			Model model = new Model(trianglesArray, imageBufferData, imageBufferWidth, imageBufferHeight);
 			
 			modelnames.add(modelname);
 			models.add(model);

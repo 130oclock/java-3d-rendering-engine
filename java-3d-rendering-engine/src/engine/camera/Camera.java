@@ -2,9 +2,11 @@ package engine.camera;
 
 import java.awt.event.KeyEvent;
 
+import engine.graphics.triangle.Triangle;
 import engine.input.Keyboard;
+import engine.input.MouseInput;
+import engine.input.UserInput;
 import engine.quaternion.Quaternion;
-import engine.triangle.Triangle;
 import engine.vector.Vector3;
 
 public class Camera {
@@ -16,17 +18,23 @@ public class Camera {
 	public double moveSpeed = 0.2;
 	public double rotSpeed = Math.PI/64;
 	public Vector3 clippingPlane;
+	private int WIDTH = 0;
+	private int HEIGHT = 0;
+	private int SCALE = 1;
 	
-	public Camera(Vector3 pos, double viewDistance) {
+	public Camera(Vector3 pos, double viewDistance, int WIDTH, int HEIGHT, int SCALE) {
 		this.pos = pos;
 		this.startPos = pos.copy();
 		this.rot = new Quaternion();
 		this.viewDistance = viewDistance;
 		this.clippingPlane = new Vector3(0, 0, 0.1);
+		this.WIDTH = WIDTH;
+		this.HEIGHT = HEIGHT;
+		this.SCALE = SCALE;
 	}
 	
-	public Camera(double x, double y, double z, double viewDistance) {
-		this(new Vector3(x, y, z), viewDistance);
+	public Camera(double x, double y, double z, double viewDistance, int WIDTH, int HEIGHT, int SCALE) {
+		this(new Vector3(x, y, z), viewDistance, WIDTH, HEIGHT, SCALE);
 	}
 	
 	public void translate(Vector3 vec) {
@@ -39,7 +47,10 @@ public class Camera {
 		this.rot = Quaternion.rotate(this.rot, axis, angle);
 	}
 	
-	public void keyboard(Keyboard keyb, double deltaTime) {
+	public void input(UserInput input, double deltaTime) {
+		Keyboard keyb = input.keyboard;
+		MouseInput mouse = input.mouse;
+		
 		Vector3 vUp = this.rot.getUpVector();
 		Vector3 vForward = this.rot.getForwardVector();
 		Vector3 vRight = this.rot.getRightVector();
@@ -83,6 +94,9 @@ public class Camera {
 		if (keyb.getKLeft() == true) {
 			this.rotate(vUp, rotSpeed);                    
 		}
+		
+		/*double change = (double) mouse.getChangeX() / WIDTH;
+		this.rotate(vUp, -change);*/
 		
 		if (keyb.getKRRight() == true) {
 			this.rotate(vForward, rotSpeed);

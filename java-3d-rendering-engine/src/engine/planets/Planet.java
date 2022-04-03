@@ -3,11 +3,11 @@ package engine.planets;
 import java.awt.Color;
 
 import engine.camera.Camera;
+import engine.graphics.environment.EnvironmentLight;
+import engine.graphics.triangle.Triangle;
 import engine.improvednoise.ImprovedNoise;
-import engine.light.EnvironmentLight;
 import engine.matrix.Mat4x4;
 import engine.quaternion.Quaternion;
-import engine.triangle.Triangle;
 import engine.vector.Vector3;
 
 public class Planet {

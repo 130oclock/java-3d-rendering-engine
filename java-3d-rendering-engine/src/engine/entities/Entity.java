@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import engine.camera.Camera;
-import engine.light.EnvironmentLight;
+import engine.graphics.environment.EnvironmentLight;
+import engine.graphics.models.Model;
+import engine.graphics.triangle.Triangle;
 import engine.matrix.Mat4x4;
-import engine.models.Model;
 import engine.quaternion.Quaternion;
-import engine.triangle.Triangle;
 import engine.vector.Vector3;
 
 public class Entity {
@@ -17,7 +17,7 @@ public class Entity {
 	public static List<Entity> entities = new ArrayList<Entity>();
 	
 	private Model model;
-	private Vector3 pos;
+	public Vector3 pos;
 	private Quaternion rot;
 	private Color color;
 	
