@@ -498,9 +498,9 @@ public class Triangle {
 					triProjected.p[1] = Vector3.divide(triProjected.p[1], triProjected.p[1].w);
 					triProjected.p[2] = Vector3.divide(triProjected.p[2], triProjected.p[2].w);
 	
-					triProjected.p[0].x *= -1;
-					triProjected.p[1].x *= -1;
-					triProjected.p[2].x *= -1;
+					//triProjected.p[0].x *= -1;
+					//triProjected.p[1].x *= -1;
+					//triProjected.p[2].x *= -1;
 					triProjected.p[0].y *= -1;
 					triProjected.p[1].y *= -1;
 					triProjected.p[2].y *= -1;
@@ -525,7 +525,7 @@ public class Triangle {
 		}
 	}
 	
-	public static void projectSkybox(Triangle[] trianglesToRaster, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light, Color color) {
+	public static void projectSkybox(Triangle[] trianglesToRaster, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, Color color) {
 		Mat4x4 matWorld = Quaternion.generateMatrix(new Quaternion(), camera.pos);
 		
 		for (Triangle tri : trianglesToRaster) {
@@ -542,7 +542,7 @@ public class Triangle {
 			// Check if the triangle is facing towards the camera
 			Vector3 vCameraRay = Vector3.subtract(triTransformed.p[0], camera.pos);
 			if (Vector3.dotProduct(normal, vCameraRay) < 0) {
-				triViewed.brightness = new Color[] { Color.GRAY, Color.GRAY, Color.GRAY };
+				triViewed.brightness = new Color[] { color, color, color }; 
 				
 				triViewed.p = Triangle.multiplyMatrixTriangle(matView, triTransformed);
 				triViewed.t[0] = triTransformed.t[0];
@@ -580,9 +580,9 @@ public class Triangle {
 					triProjected.p[1] = Vector3.divide(triProjected.p[1], triProjected.p[1].w);
 					triProjected.p[2] = Vector3.divide(triProjected.p[2], triProjected.p[2].w);
 	
-					triProjected.p[0].x *= -1;
-					triProjected.p[1].x *= -1;
-					triProjected.p[2].x *= -1;
+					//triProjected.p[0].x *= -1;
+					//triProjected.p[1].x *= -1;
+					//triProjected.p[2].x *= -1;
 					triProjected.p[0].y *= -1;
 					triProjected.p[1].y *= -1;
 					triProjected.p[2].y *= -1;
@@ -1041,7 +1041,7 @@ public class Triangle {
 					t1 = Math.min(texWidth * texHeight - 1, t1);
 					if (tex_w > pDepthBuffer[d]) {
 						int rgb = image[t1];
-						int adjustedRGB = EnvironmentLight.blend(rgb, light).getRGB();
+						int adjustedRGB = rgb; //EnvironmentLight.blend(rgb, light).getRGB();
 						float[] hsb = Color.RGBtoHSB((adjustedRGB>>16)&0xFF, (adjustedRGB>>8)&0xFF, adjustedRGB&0xFF, null);
 						imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], Math.min(1, (float) c_c + hsb[2] / 2));
 						pDepthBuffer[d] = tex_w;
@@ -1117,7 +1117,7 @@ public class Triangle {
 					t1 = Math.min(texWidth * texHeight - 1, t1);
 					if (tex_w > pDepthBuffer[d]) {
 						int rgb = image[t1];
-						int adjustedRGB = EnvironmentLight.blend(rgb, light).getRGB();
+						int adjustedRGB = rgb; //EnvironmentLight.blend(rgb, light).getRGB();
 						float[] hsb = Color.RGBtoHSB((adjustedRGB>>16)&0xFF, (adjustedRGB>>8)&0xFF, adjustedRGB&0xFF, null);
 						imageBufferData[d] = Color.HSBtoRGB(hsb[0], hsb[1], Math.min(1, (float) c_c + hsb[2] / 2));
 						pDepthBuffer[d] = tex_w;

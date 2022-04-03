@@ -1,4 +1,4 @@
-package engine.line;
+package engine.graphics.line;
 
 public class Line {
 	

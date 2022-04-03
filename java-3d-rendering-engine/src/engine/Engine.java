@@ -42,7 +42,7 @@ public class Engine extends Canvas implements Runnable {
 
 	private static boolean running = false;
 	
-	private static final int WIDTH = 800;
+	private static final int WIDTH = 600;
 	private static final int HEIGHT = WIDTH / 16 * 9;
 	private static final int SCALE = 2;
 	
@@ -53,7 +53,7 @@ public class Engine extends Canvas implements Runnable {
 	
 	private static final double fps = 60;
 	
-	private Camera camera = new Camera(0, 2, -10, 500, WIDTH, HEIGHT, SCALE);
+	private Camera camera = new Camera(0, 4, -10, 500, WIDTH, HEIGHT, SCALE);
 	private EnvironmentLight light = new EnvironmentLight(new Vector3(-1, 1, -1), new Color(0, 0, 0, 0));
 	
 	private Mat4x4 matView;
@@ -113,7 +113,7 @@ public class Engine extends Canvas implements Runnable {
 		//planet = new Planet(0, 5, 0);
 		
 		new Entity(ModelFileReader.get("carpet"), 0, 0, 0);
-		new Entity(ModelFileReader.get("cube").recalcNormals(), 3, 1.05, 2);
+		new Entity(ModelFileReader.get("cube").recalcNormals(), -3, 1.05, 2).rig.setAcc(0, -9.8, 0);
 		//new Entity (ModelFileReader.get("octahedron"), 3, 0, 0);
 		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals(), 5, 2, 0);
 		//new Entity(ModelFileReader.get("boid"), 2, 2, 0);

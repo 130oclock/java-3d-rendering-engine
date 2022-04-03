@@ -9,6 +9,7 @@ import engine.graphics.environment.EnvironmentLight;
 import engine.graphics.models.Model;
 import engine.graphics.triangle.Triangle;
 import engine.matrix.Mat4x4;
+import engine.physics.RigidBody;
 import engine.quaternion.Quaternion;
 import engine.vector.Vector3;
 
@@ -21,11 +22,15 @@ public class Entity {
 	private Quaternion rot;
 	private Color color;
 	
+	public RigidBody rig;
+	
 	public Entity(Model model, Vector3 pos, Quaternion rot, Color color) {
 		this.model = model;
-		this.pos = pos;
-		this.rot = rot;
 		this.color = color;
+		
+		this.rig = new RigidBody(pos, rot);
+		this.pos = this.rig.getPos();
+		this.rot = this.rig.getRot();
 		
 		entities.add(this);
 	}
@@ -51,6 +56,6 @@ public class Entity {
 	}
 	
 	public void update(double deltaTime) {
-		//this.rot = Quaternion.rotate(this.rot, Vector3d.normalize(new Vector3d(1, 1, 1)), -0.05 * deltaTime);
+		this.rig.update(deltaTime);
 	}
 }

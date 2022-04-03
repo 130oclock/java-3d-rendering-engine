@@ -64,11 +64,11 @@ public class Camera {
 		}
 		
 		if (keyb.getRight() == true) {
-			this.translate(Vector3.multiply(vRight, -this.moveSpeed));
+			this.translate(Vector3.multiply(vRight, this.moveSpeed));
 		}
 		
 		if (keyb.getLeft() == true) {
-			this.translate(Vector3.multiply(vRight, this.moveSpeed));
+			this.translate(Vector3.multiply(vRight, -this.moveSpeed));
 		}
 
 		if (keyb.getForward() == true) {
@@ -88,22 +88,22 @@ public class Camera {
 		}
 		
 		if (keyb.getKRight() == true) {
-			this.rotate(vUp, -rotSpeed);
+			this.rotate(vUp, rotSpeed);
 		}
 		
 		if (keyb.getKLeft() == true) {
-			this.rotate(vUp, rotSpeed);                    
+			this.rotate(vUp, -rotSpeed);                    
 		}
 		
 		/*double change = (double) mouse.getChangeX() / WIDTH;
 		this.rotate(vUp, -change);*/
 		
 		if (keyb.getKRRight() == true) {
-			this.rotate(vForward, rotSpeed);
+			this.rotate(vForward, -rotSpeed);
 		}
 		
 		if (keyb.getKRLeft() == true) {
-			this.rotate(vForward, -rotSpeed);                    
+			this.rotate(vForward, rotSpeed);                    
 		}
 		
 		if (keyb.getAnyKey(KeyEvent.VK_X)) {
