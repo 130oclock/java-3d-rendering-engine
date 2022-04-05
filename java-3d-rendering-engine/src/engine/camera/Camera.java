@@ -37,17 +37,17 @@ public class Camera {
 		this(new Vector3(x, y, z), viewDistance, WIDTH, HEIGHT, SCALE);
 	}
 	
-	public void translate(Vector3 vec) {
+	public void translate(Vector3 vec) { // move the camera
 		this.pos.x += vec.x;
 		this.pos.y += vec.y;
 		this.pos.z += vec.z;
 	}
 	
-	public void rotate(Vector3 axis, double angle) {
+	public void rotate(Vector3 axis, double angle) { // rotate the camera
 		this.rot = Quaternion.rotate(this.rot, axis, angle);
 	}
 	
-	public void input(UserInput input, double deltaTime) {
+	public void input(UserInput input, double deltaTime) { // update the camera based on the current inputs
 		Keyboard keyb = input.keyboard;
 		MouseInput mouse = input.mouse;
 		
@@ -55,69 +55,69 @@ public class Camera {
 		Vector3 vForward = this.rot.getForwardVector();
 		Vector3 vRight = this.rot.getRightVector();
 		
-		if (keyb.getUp() == true) {
+		if (keyb.getUp() == true) { // Space
 			this.translate(Vector3.multiply(vUp, this.moveSpeed));
 		}
 		
-		if (keyb.getDown() == true) {
+		if (keyb.getDown() == true) { // Shift
 			this.translate(Vector3.multiply(vUp, -this.moveSpeed));
 		}
 		
-		if (keyb.getRight() == true) {
+		if (keyb.getRight() == true) { // D
 			this.translate(Vector3.multiply(vRight, this.moveSpeed));
 		}
 		
-		if (keyb.getLeft() == true) {
+		if (keyb.getLeft() == true) { // A
 			this.translate(Vector3.multiply(vRight, -this.moveSpeed));
 		}
 
-		if (keyb.getForward() == true) {
+		if (keyb.getForward() == true) { // W
 			this.translate(Vector3.multiply(vForward, this.moveSpeed));
 		}
 		
-		if (keyb.getBackward() == true) {
+		if (keyb.getBackward() == true) { // S
 			this.translate(Vector3.multiply(vForward, -this.moveSpeed));
 		}
 		
-		if (keyb.getKUp() == true) {
+		if (keyb.getKUp() == true) { // Key_up
 			this.rotate(vRight, -rotSpeed);
 		}
 		
-		if (keyb.getKDown() == true) {
+		if (keyb.getKDown() == true) { // Key_down
 			this.rotate(vRight, rotSpeed);
 		}
 		
-		if (keyb.getKRight() == true) {
+		if (keyb.getKRight() == true) { // Key_right
 			this.rotate(vUp, rotSpeed);
 		}
 		
-		if (keyb.getKLeft() == true) {
+		if (keyb.getKLeft() == true) { // Key_left
 			this.rotate(vUp, -rotSpeed);                    
 		}
 		
 		/*double change = (double) mouse.getChangeX() / WIDTH;
 		this.rotate(vUp, -change);*/
 		
-		if (keyb.getKRRight() == true) {
+		if (keyb.getKRRight() == true) { // E
 			this.rotate(vForward, -rotSpeed);
 		}
 		
-		if (keyb.getKRLeft() == true) {
+		if (keyb.getKRLeft() == true) { // Q
 			this.rotate(vForward, rotSpeed);                    
 		}
 		
-		if (keyb.getAnyKey(KeyEvent.VK_X)) {
+		if (keyb.getAnyKey(KeyEvent.VK_X)) { // X, reset position
 			this.pos.x = this.startPos.x;
 			this.pos.y = this.startPos.y;
 			this.pos.z = this.startPos.z;
 			this.rot = new Quaternion();
 		}
 		
-		if (keyb.getAnyKey(KeyEvent.VK_O)) {
+		if (keyb.getAnyKey(KeyEvent.VK_O)) { // O, change lighting mode
 			Triangle.doGouraud = false;
 		}
 		
-		if (keyb.getAnyKey(KeyEvent.VK_L)) {
+		if (keyb.getAnyKey(KeyEvent.VK_L)) { // L, change lighting mode
 			Triangle.doGouraud = true;
 		}
 	}

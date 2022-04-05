@@ -17,7 +17,6 @@ public class Triangle {
 	
 	private static boolean showClipping = false;
 	
-	private static int lightingType = 0;
 	public static boolean doGouraud = true;
 	private static double minimumBrightness = 0.1;
 	
@@ -93,14 +92,8 @@ public class Triangle {
 	}
 	
 	// Create an empty Triangle
-	public static Triangle empty() {
-		Vector3 v1 = new Vector3(0, 0, 0);
-		Vector3 v2 = new Vector3(0, 0, 0);
-		Vector3 v3 = new Vector3(0, 0, 0);
-		Vector2 v4 = new Vector2(0, 0);
-		Vector2 v5 = new Vector2(0, 0);
-		Vector2 v6 = new Vector2(0, 0);
-		return new Triangle(v1, v2, v3, v4, v5, v6, null, null, null);
+	public Triangle() {
+		this(new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), null, null, null);
 	}
 	
 	// Return the nth point on the triangle
@@ -109,8 +102,8 @@ public class Triangle {
 	}
 	
 	// Make a duplicate object
-	public Triangle copy() {
-		Triangle copy = Triangle.empty();
+	public Triangle copy() { // copy the triangle object
+		Triangle copy = new Triangle();
 		copy.p[0].x = this.p[0].x;
 		copy.p[0].y = this.p[0].y;
 		copy.p[0].z = this.p[0].z;
@@ -222,7 +215,7 @@ public class Triangle {
 		}
 		// if one point is on the screen and two are not on the screen
 		if (nInsidePoints == 1 && nOutsidePoints == 2) { // A ; B, C
-			Triangle otri1 = Triangle.empty();
+			Triangle otri1 = new Triangle();
 			otri1.modelIndex = tri.modelIndex;
 			
 			// A
@@ -256,7 +249,7 @@ public class Triangle {
 		}
 		// if two points are on the screen and one is not on the screen
 		if (nInsidePoints == 2 && nOutsidePoints == 1) { // A, B ; C
-			Triangle otri1 = Triangle.empty(), otri2 = Triangle.empty();
+			Triangle otri1 = new Triangle(), otri2 = new Triangle();
 			otri1.modelIndex = tri.modelIndex;
 			otri2.modelIndex = tri.modelIndex;
 			
@@ -397,30 +390,39 @@ public class Triangle {
 		return triangles;
 	}
 	
+	public static void calcTriangleMax(Vector3[] points, Vector3 max) {
+		double maxX = 0, maxY = 0, maxZ = 0;
+		
+		for (Vector3 p : points) {
+			maxX = Math.max(Math.abs(p.x), maxX);
+			maxY = Math.max(Math.abs(p.y), maxY);
+			maxZ = Math.max(Math.abs(p.z), maxZ);
+		}
+		
+		max.x = maxX;
+		max.y = maxY;
+		max.z = maxZ;
+	}
+	
 	// Project a list of triangles to screen view
 	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3 pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light, Color color) {
-		Mat4x4 matWorld = Quaternion.generateMatrix(rot, pos);
-		Mat4x4 matRot = Quaternion.generateMatrix(rot, new Vector3());
+		Mat4x4 matWorld = Quaternion.generateMatrix(rot, pos); // Create a matrix based on the object's position and rotation
+		Mat4x4 matRot = Quaternion.generateMatrix(rot, new Vector3()); // Create a matrix based on only the object's rotation, used for normal calculation
 		
 		for (Triangle tri : trianglesToRaster) {
-			//System.out.println(tri.p[0].x + " " + tri.p[0].y + " " + tri.p[0].z + " | " + tri.p[1].x + " " + tri.p[1].y + " " + tri.p[1].z + " | " + tri.p[2].x + " " + tri.p[2].y + " " + tri.p[2].z);
+			Triangle triTransformed = new Triangle();
+			Triangle triViewed = new Triangle();
 			
-			Triangle triTransformed = Triangle.empty();
-			Triangle triViewed = Triangle.empty();
+			triTransformed.p = Triangle.multiplyMatrixTriangle(matWorld, tri); // rotate and translate all points in the model to world space
 			
-			triTransformed.p = Triangle.multiplyMatrixTriangle(matWorld, tri);
-			
-			//System.out.println("Transformed" + triTransformed.p[0].x + " " + triTransformed.p[0].y + " " + triTransformed.p[0].z + " | " + triTransformed.p[1].x + " " + triTransformed.p[1].y + " " + triTransformed.p[1].z + " | " + triTransformed.p[2].x + " " + triTransformed.p[2].y + " " + triTransformed.p[2].z);
-			
-			triTransformed.t[0] = tri.t[0].copy();
+			triTransformed.t[0] = tri.t[0].copy(); // copy the texture coordinates
 			triTransformed.t[1] = tri.t[1].copy();
 			triTransformed.t[2] = tri.t[2].copy();
 			
-			Vector3 normal = Triangle.findFaceNormal(triTransformed.p[0], triTransformed.p[1], triTransformed.p[2]);
+			Vector3 normal = Triangle.findFaceNormal(triTransformed.p[0], triTransformed.p[1], triTransformed.p[2]); // find the normal of this triangle
 			
 			// Check if the triangle is facing towards the camera
-			Vector3 vCameraRay = Vector3.subtract(triTransformed.p[0], camera.pos);
-			//System.out.println(vCameraRay.x + " " + vCameraRay.y + " " + vCameraRay.z + " normal: " + normal.x + " " + normal.y + " " + normal.z);
+			Vector3 vCameraRay = Vector3.subtract(triTransformed.p[0], camera.pos); 
 			if (Vector3.dotProduct(normal, vCameraRay) < 0) {
 				Vector3 lightDirection = light.getDirection();
 
@@ -436,45 +438,39 @@ public class Triangle {
 					}
 				}
 				
-				if (lightingType == 0) {
-					Color adjustedColor = EnvironmentLight.blend(light.color, color);
-					if (doNotGouraud) {
-						adjustedColor = EnvironmentLight.blend(adjustedColor, tri.color[0]);
-						int red1	= (int) ((dp[0] * 255) * ((double) adjustedColor.getRed() / 255));
-						int green1	= (int) ((dp[0] * 255) * ((double) adjustedColor.getGreen() / 255));
-						int blue1	= (int) ((dp[0] * 255) * ((double) adjustedColor.getBlue() / 255));
-						triViewed.brightness[0] = new Color(red1, green1, blue1);
-						triViewed.brightness[1] = new Color(red1, green1, blue1);
-						triViewed.brightness[2] = new Color(red1, green1, blue1);
-					} else {
-						for (int i = 0; i < 3; i++) {
-							Color adjustedColor1 = EnvironmentLight.blend(adjustedColor, tri.color[i]);
-							int red1	= (int) ((dp[i] * 255) * ((double) adjustedColor1.getRed() / 255));
-							int green1	= (int) ((dp[i] * 255) * ((double) adjustedColor1.getGreen() / 255));
-							int blue1	= (int) ((dp[i] * 255) * ((double) adjustedColor1.getBlue() / 255));
-							triViewed.brightness[i] = new Color(red1, green1, blue1);
-						}
+				Color adjustedColor = EnvironmentLight.blend(light.color, color);
+				if (doNotGouraud) { // calculate flat lighting
+					adjustedColor = EnvironmentLight.blend(adjustedColor, tri.color[0]);
+					int red1	= (int) ((dp[0] * 255) * ((double) adjustedColor.getRed() / 255));
+					int green1	= (int) ((dp[0] * 255) * ((double) adjustedColor.getGreen() / 255));
+					int blue1	= (int) ((dp[0] * 255) * ((double) adjustedColor.getBlue() / 255));
+					triViewed.brightness[0] = new Color(red1, green1, blue1);
+					triViewed.brightness[1] = new Color(red1, green1, blue1);
+					triViewed.brightness[2] = new Color(red1, green1, blue1);
+				} else { // calculate a brightness for each vertex of the triangle
+					for (int i = 0; i < 3; i++) {
+						Color adjustedColor1 = EnvironmentLight.blend(adjustedColor, tri.color[i]);
+						int red1	= (int) ((dp[i] * 255) * ((double) adjustedColor1.getRed() / 255));
+						int green1	= (int) ((dp[i] * 255) * ((double) adjustedColor1.getGreen() / 255));
+						int blue1	= (int) ((dp[i] * 255) * ((double) adjustedColor1.getBlue() / 255));
+						triViewed.brightness[i] = new Color(red1, green1, blue1);
 					}
-				} else {
-					triViewed.brightness = tri.color;
 				}
 				
-				triViewed.p = Triangle.multiplyMatrixTriangle(matView, triTransformed);
+				triViewed.p = Triangle.multiplyMatrixTriangle(matView, triTransformed); // convert the triangles to view space
 				
-				//System.out.println("triViewed" + triViewed.p[0].x + " " + triViewed.p[0].y + " " + triViewed.p[0].z + " | " + triViewed.p[1].x + " " + triViewed.p[1].y + " " + triViewed.p[1].z + " | " + triViewed.p[2].x + " " + triViewed.p[2].y + " " + triViewed.p[2].z);
-				
-				triViewed.t[0] = triTransformed.t[0];
+				triViewed.t[0] = triTransformed.t[0]; // copy the texture coordinates
 				triViewed.t[1] = triTransformed.t[1];
 				triViewed.t[2] = triTransformed.t[2];
 				
-				Triangle[] clipped = Triangle.clipAgainstPlane(camera.clippingPlane, new Vector3(0, 0, 1), triViewed);
+				Triangle[] clipped = Triangle.clipAgainstPlane(camera.clippingPlane, new Vector3(0, 0, 1), triViewed); // clip triangles against the screen
 				int nClippedTriangles = 0; 
 				if (clipped[0] != null) nClippedTriangles++;
 				if (clipped[1] != null) nClippedTriangles++;
 				
-				for (int n = 0; n < nClippedTriangles; n++) {
-					Triangle triProjected = Triangle.empty();
-					triProjected.p = Triangle.multiplyMatrixTriangle(matProj, clipped[n]);
+				for (int n = 0; n < nClippedTriangles; n++) { // project each of the clipped triangles
+					Triangle triProjected = new Triangle();
+					triProjected.p = Triangle.multiplyMatrixTriangle(matProj, clipped[n]); // project them to screen space
 					
 					triProjected.brightness = clipped[n].brightness;
 					
@@ -501,7 +497,7 @@ public class Triangle {
 					//triProjected.p[0].x *= -1;
 					//triProjected.p[1].x *= -1;
 					//triProjected.p[2].x *= -1;
-					triProjected.p[0].y *= -1;
+					triProjected.p[0].y *= -1; // flip vertical components
 					triProjected.p[1].y *= -1;
 					triProjected.p[2].y *= -1;
 	
@@ -518,8 +514,7 @@ public class Triangle {
 					
 					triProjected.modelIndex = tri.modelIndex;
 					
-					//System.out.println(triProjected.p[0].x + " " + triProjected.p[0].y + " | " + triProjected.p[1].x + " " + triProjected.p[1].y + " | " + triProjected.p[2].x + " " + triProjected.p[2].y);
-					triangleRaster.add(triProjected);
+					triangleRaster.add(triProjected); // add triangle to raster
 				}
 			}
 		}
@@ -529,8 +524,8 @@ public class Triangle {
 		Mat4x4 matWorld = Quaternion.generateMatrix(new Quaternion(), camera.pos);
 		
 		for (Triangle tri : trianglesToRaster) {
-			Triangle triTransformed = Triangle.empty();
-			Triangle triViewed = Triangle.empty();
+			Triangle triTransformed = new Triangle();
+			Triangle triViewed = new Triangle();
 			
 			triTransformed.p = Triangle.multiplyMatrixTriangle(matWorld, tri);
 			triTransformed.t[0] = tri.t[0].copy();
@@ -542,7 +537,7 @@ public class Triangle {
 			// Check if the triangle is facing towards the camera
 			Vector3 vCameraRay = Vector3.subtract(triTransformed.p[0], camera.pos);
 			if (Vector3.dotProduct(normal, vCameraRay) < 0) {
-				triViewed.brightness = new Color[] { color, color, color }; 
+				triViewed.brightness = new Color[] { color, color, color }; // the sky box always has the same light
 				
 				triViewed.p = Triangle.multiplyMatrixTriangle(matView, triTransformed);
 				triViewed.t[0] = triTransformed.t[0];
@@ -555,7 +550,7 @@ public class Triangle {
 				if (clipped[1] != null) nClippedTriangles++;
 				
 				for (int n = 0; n < nClippedTriangles; n++) {
-					Triangle triProjected = Triangle.empty();
+					Triangle triProjected = new Triangle();
 					triProjected.p = Triangle.multiplyMatrixTriangle(matProj, clipped[n]);
 					
 					triProjected.brightness = clipped[n].brightness;
@@ -609,13 +604,14 @@ public class Triangle {
 	
 	public static void cullScreenEdges(int WIDTH, int HEIGHT) {
 		List<Triangle> allTriangles = new ArrayList<Triangle>();
+		Vector3[] planes = new Vector3[] { new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(0, HEIGHT, 0), new Vector3(0, -1, 0), new Vector3(0, 0, 0), new Vector3(1, 0, 0), new Vector3(WIDTH, 0, 0), new Vector3(-1, 0, 0) };
+		
 		for (Triangle tri : triangleRaster) {
 			List<Triangle> listTriangles = new ArrayList<Triangle>();
 			
 			listTriangles.add(tri);
 			int nNewTriangles = 1;
 			Triangle[] clipped = null;
-			// Draw Triangles
 			for (int p = 0; p < 4; p++) {
 				//System.out.println(p);
 				while (nNewTriangles > 0) {
@@ -623,16 +619,16 @@ public class Triangle {
 					nNewTriangles--;
 					switch (p) {
 						case 0: 
-							clipped = Triangle.clipAgainstPlane(new Vector3(0, 0, 0), new Vector3(0, 1, 0), test); 
+							clipped = Triangle.clipAgainstPlane(planes[0], planes[1], test); 
 							break; //Top
 						case 1: 
-							clipped = Triangle.clipAgainstPlane(new Vector3(0, HEIGHT-1, 0), new Vector3(0, -1, 0), test); 
+							clipped = Triangle.clipAgainstPlane(planes[2], planes[3], test); 
 							break; //Bottom
 						case 2: 
-							clipped = Triangle.clipAgainstPlane(new Vector3(0, 0, 0), new Vector3(1, 0, 0), test); 
+							clipped = Triangle.clipAgainstPlane(planes[4], planes[5], test); 
 							break; //Right
 						case 3: 
-							clipped = Triangle.clipAgainstPlane(new Vector3(WIDTH-1, 0, 0), new Vector3(-1, 0, 0), test); 
+							clipped = Triangle.clipAgainstPlane(planes[6], planes[7], test); 
 							break; //Left
 					}
 					

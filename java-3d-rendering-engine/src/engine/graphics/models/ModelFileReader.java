@@ -179,7 +179,7 @@ public class ModelFileReader {
 					}
 				}
 				
-				System.out.println("loaded model: " + modelname + " | " + vertexInd.size() + " vertices | " + num_faces + " triangles");
+				System.out.println("loaded model: " + modelname + " | " + vertexInd.size() + " vertices | " + num_faces + " triangles | " + texturepath);
 			} finally {
 				if (inputStream != null) {
 					try {

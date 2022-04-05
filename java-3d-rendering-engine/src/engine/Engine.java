@@ -25,6 +25,7 @@ import engine.graphics.models.*;
 import engine.graphics.triangle.Triangle;
 import engine.input.*;
 import engine.matrix.Mat4x4;
+import engine.physics.PhysicsWorld;
 import engine.planets.Planet;
 import engine.quaternion.Quaternion;
 import engine.vector.*;
@@ -45,25 +46,25 @@ public class Engine extends Canvas implements Runnable {
 	private static final int WIDTH = 600;
 	private static final int HEIGHT = WIDTH / 16 * 9;
 	private static final int SCALE = 2;
-	
+
+	// Graphics
 	private Screen screen;
 	
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 	private int[] imageBufferData = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 	
 	private static final double fps = 60;
-	
 	private Camera camera = new Camera(0, 4, -10, 500, WIDTH, HEIGHT, SCALE);
 	private EnvironmentLight light = new EnvironmentLight(new Vector3(-1, 1, -1), new Color(0, 0, 0, 0));
+	private Skybox skybox = null;
 	
 	private Mat4x4 matView;
 	private Mat4x4 matProj = Mat4x4.makeProjection(90, HEIGHT, WIDTH, 0.1, 1000);
 	
+	// Input
 	private UserInput userInput;
 	
 	private static Planet planet = null;
-	
-	private Skybox skybox = null;
 	
 	public Engine() {
 		// Generate Window
@@ -81,9 +82,9 @@ public class Engine extends Canvas implements Runnable {
 	}
 	
 	public static void main(String[] args) {
-		loadEntities();
+		loadEntities(); // load model and texture files into memory
 		
-		Engine engine = new Engine();
+		Engine engine = new Engine(); 
 		engine.frame.setTitle(title);
 		engine.frame.add(engine);
 		engine.frame.pack();
@@ -92,9 +93,9 @@ public class Engine extends Canvas implements Runnable {
 		engine.frame.setResizable(false);
 		engine.frame.setVisible(true);
 
-		engine.skybox = new Skybox(ModelFileReader.get("sky_box"));
+		engine.skybox = new Skybox(ModelFileReader.get("sky_box")); // instantiate the sky box
 		
-		engine.start();
+		engine.start(); // start the engine
 	}
 	
 	public static void loadEntities() {
@@ -105,16 +106,18 @@ public class Engine extends Canvas implements Runnable {
 		//ModelFileReader.loadObj("Models/plane.obj", "plane");
 		//ModelFileReader.loadObj("Models/utahTeapot.obj", "utahTeapot");
 		ModelFileReader.loadObj("Models/plane.obj", "carpet", "Textures/carpet.jpg");
-		//ModelFileReader.loadObj("Models/octahedron.obj", "octahedron");
+		ModelFileReader.loadObj("Models/octahedron.obj", "octahedron");
 		//ModelFileReader.loadObj("Models/cube.obj", "cube", "Textures/UV_Grid_Sm.jpg");
+		ModelFileReader.loadObj("Models/cube.obj", "cube1", "Textures/crate.png");
 		ModelFileReader.loadObj("Models/cube.obj", "cube", "Textures/cardboard.jpg");
 		
 		// initialize any entities
 		//planet = new Planet(0, 5, 0);
 		
-		new Entity(ModelFileReader.get("carpet"), 0, 0, 0);
-		new Entity(ModelFileReader.get("cube").recalcNormals(), -3, 1.05, 2).rig.setAcc(0, -9.8, 0);
-		//new Entity (ModelFileReader.get("octahedron"), 3, 0, 0);
+		new Entity(ModelFileReader.get("carpet"), 0, 0, 0, 10000).rig.setStatic();
+		//new Entity (ModelFileReader.get("octahedron"), 0, 20, 0, 1);
+		new Entity(ModelFileReader.get("cube"), 0, 10, 0, 1.6);
+		new Entity(ModelFileReader.get("cube1"), 0, 3, 0, 3);
 		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals(), 5, 2, 0);
 		//new Entity(ModelFileReader.get("boid"), 2, 2, 0);
 		//new Entity(ModelFileReader.get("lowPolySphere"), 0, 0, 0);
@@ -147,14 +150,14 @@ public class Engine extends Canvas implements Runnable {
 		
 		while(running) {
 			long now = System.nanoTime();
-			double deltaTime = (now - lastTime) / ns;
-			delta += deltaTime;
+			double deltaTime = (now - lastTime);
+			delta += deltaTime / ns;
 			lastTime = now;
 			
-			render();
+			render(); // draw to the screen as many times as it can
 			frames++;
 			
-			while(delta >= 1) {
+			while(delta >= 1) { // update the physics at a fixed rate
 				update(deltaTime);
 				
 				delta--;
@@ -178,52 +181,54 @@ public class Engine extends Canvas implements Runnable {
 			return;
 		}
 		
+		// calculate a rotation and translation matrix that is the inverse of the camera's position and rotation
 		Quaternion.normalize(camera.rot);
 		Mat4x4 matRot = Quaternion.generateMatrix(camera.rot, null);
 		Mat4x4 matTrans = Mat4x4.translationMatrix(camera.pos.x, camera.pos.y, camera.pos.z);
 		matTrans = Mat4x4.quickInverse(matTrans);
 		matView = Mat4x4.multiplyMatrix(matTrans, matRot);
 		
-		for (Entity ent : Entity.entities) {
+		for (Entity ent : Entity.entities) { // project all triangles in all objects to screen space and store them in the list of triangles
 			ent.project(camera, matView, matProj, WIDTH, HEIGHT, light);
 		}
 		
-		skybox.project(camera, matView, matProj, WIDTH, HEIGHT, light);
+		skybox.project(camera, matView, matProj, WIDTH, HEIGHT, light); // project all triangles in the sky box to screen space and store them in the list of triangles
 		
 		if (planet != null) planet.project(camera, matView, matProj, WIDTH, HEIGHT, light);
 		
-		Triangle.cullScreenEdges(WIDTH, HEIGHT);
-		Triangle.drawTriangles(screen, light);
+		Triangle.cullScreenEdges(WIDTH, HEIGHT); // cull all triangles not on the screen and clip all triangles intersected by the edges of the screen
+		Triangle.drawTriangles(screen, light); // draw all triangles to the screen
 		
 		int length = imageBufferData.length;
-		for (int i = 0; i < length; i++) {
+		for (int i = 0; i < length; i++) { // copy all pixels from the image buffer to the screen
 			imageBufferData[i] = screen.imageBufferData[i];
 		}
 		
 		Graphics g = bs.getDrawGraphics();
 		
-		g.drawImage(image, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null);
+		g.drawImage(image, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null); // draw the image to the screen
 		
 		g.dispose();
 		bs.show();
-		
+		// clear the list of triangles
 		Triangle.clearRaster();
 	}
 	
-	private void update(double deltaTime) {
+	private void update(double dt) {
+		
+		dt = dt * 0.000000001; // change in time between each update. 1/60 s
+		
 		Keyboard keyb = this.userInput.keyboard;
-		keyb.update();
+		keyb.update(); // update the keyboard to the current inputs
 
-		this.camera.input(this.userInput, deltaTime);
+		this.camera.input(this.userInput, dt); // send the inputs to the camera
 		
-		for (Entity ent : Entity.entities) {
-			ent.update(deltaTime);
-		}
+		PhysicsWorld.update(dt); // update the physics
 		
-		if (keyb.getAnyKey(KeyEvent.VK_ESCAPE)) {
+		if (keyb.getAnyKey(KeyEvent.VK_ESCAPE)) { // if the user presses "escape" then close the window
 			this.frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 		}
 		
-		this.userInput.mouse.update();
+		this.userInput.mouse.update(); // update the mouse input
 	}
 }

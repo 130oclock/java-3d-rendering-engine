@@ -12,11 +12,11 @@ import engine.vector.Vector3;
 
 public class Planet {
 	
-	public int resolution = 24;
-	public double radius = 1;
-	public double oceanRadius = 1.7;
-	public double roughness = 2;
-	public double strength = 3;
+	public int resolution = 70;
+	public double radius = 20;
+	public double oceanRadius = 43;
+	public double roughness = 6;
+	public double strength = 4;
 	private Triangle[] terrainFaces = new Triangle[(resolution-1) * (resolution-1) * 2 * 6];
 	
 	private Vector3 pos;

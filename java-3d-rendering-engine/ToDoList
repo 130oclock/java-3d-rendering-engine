@@ -7,3 +7,11 @@ List
 * Texturing
 
 To Do
+* Physics
+* OBB Collision
+* GJK Algorithm Collision
+* Expanding Polygon Algorithm
+* Occlusion Culling
+
+Problem with collision being order dependent
+* Constraint Solver
