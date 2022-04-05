@@ -48,6 +48,7 @@ public class PhysicsWorld {
 		for (CollisionSolver col : collisions) {
 			col.solve(dt);
 		}
+		//System.out.println(collisions.size());
 		collisions.clear();
 	}
 }
