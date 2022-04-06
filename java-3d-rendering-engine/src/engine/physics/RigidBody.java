@@ -12,6 +12,8 @@ public class RigidBody {
 	// coefficient of restitution, the dampening of collision
 	private double restitution = 1;
 	
+	public double normalImpulse = 0;
+	
 	private boolean useGravity = true;
 	public boolean isStatic = false;
 	
