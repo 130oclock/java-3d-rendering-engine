@@ -23,9 +23,14 @@ public class CollisionSolver {
 		Vector3 relativeVelocity = Vector3.subtract(a.getVelocity(), b.getVelocity());
 		
 		// coefficient of restitution
-		double e = Math.min(a.getRestitution(), b.getRestitution());
+		//double e = Math.min(a.getRestitution(), b.getRestitution());
+		double e = a.getRestitution() * b.getRestitution();
 		// the impulse magnitude
 		double j = (-(1 + e) * Vector3.dotProduct(relativeVelocity, normal)) / (Vector3.dotProduct(normal, normal) * ((1 / amass) + (1 / bmass)));
+		
+		double newJ = Math.max(a.normalImpulse + j, 0);
+                j = newJ - a.normalImpulse;
+                a.normalImpulse = newJ;
 		
 		if (!aStatic && !bStatic) {
 			a.addPos(this.intersection.x / 2, this.intersection.y / 2, this.intersection.z / 2);
