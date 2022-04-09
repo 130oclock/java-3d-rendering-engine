@@ -391,17 +391,33 @@ public class Triangle {
 	}
 	
 	public static void calcTriangleMax(Vector3[] points, Vector3 max) {
-		double maxX = 0, maxY = 0, maxZ = 0;
+		double maxX = max.x, maxY = max.y, maxZ = max.z;
 		
 		for (Vector3 p : points) {
-			maxX = Math.max(Math.abs(p.x), maxX);
-			maxY = Math.max(Math.abs(p.y), maxY);
-			maxZ = Math.max(Math.abs(p.z), maxZ);
+			if (p.x > maxX) maxX = p.x;
+			if (p.y > maxY) maxY = p.y;
+			if (p.z > maxZ) maxZ = p.z;
 		}
+		//System.out.println("Max: " + max.x + " " + max.y + " " + max.z);
 		
 		max.x = maxX;
 		max.y = maxY;
 		max.z = maxZ;
+	}
+	
+	public static void calcTriangleMin(Vector3[] points, Vector3 min) {
+		double minX = min.x, minY = min.y, minZ = min.z;
+		
+		for (Vector3 p : points) {
+			if (p.x < minX) minX = p.x;
+			if (p.y < minY) minY = p.y;
+			if (p.z < minZ) minZ = p.z;
+		}
+		//System.out.println("Min: " + min.x + " " + min.y + " " + min.z);
+		
+		min.x = minX;
+		min.y = minY;
+		min.z = minZ;
 	}
 	
 	// Project a list of triangles to screen view

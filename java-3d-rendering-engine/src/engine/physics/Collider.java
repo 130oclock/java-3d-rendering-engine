@@ -5,9 +5,9 @@ import engine.vector.Vector3;
 public class Collider {
 	private Vector3 max, min;
 	
-	public Collider(Vector3 boundingBox) {
-		max = boundingBox;
-		min = Vector3.multiply(boundingBox, -1);
+	public Collider(Vector3 max, Vector3 min) {
+		this.max = max;
+		this.min = min;
 	}
 
 	public Vector3 getMax() {

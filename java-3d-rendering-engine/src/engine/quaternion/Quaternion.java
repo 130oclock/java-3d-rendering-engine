@@ -96,6 +96,13 @@ public class Quaternion {
 		return Quaternion.multiply(localRotation, q1);
 	}
 	
+	public static Vector3 rotateAround(Vector3 center, Vector3 point, Vector3 axis, double angle) {
+		Vector3 localPoint = Vector3.subtract(point, center);
+		Quaternion q = Quaternion.localRotation(axis, angle);
+		Mat4x4 worldMat = Quaternion.generateMatrix(q, center);
+		return Vector3.mutiplyMatrixVector(worldMat, localPoint);
+	}
+	
 	public static Quaternion lookAt(Vector3 pos, Vector3 target) {
 		Vector3 test = new Vector3(0, 0, 1);
 		Vector3 axis;
@@ -112,6 +119,41 @@ public class Quaternion {
 		double angle = Math.acos(dot);
 		axis = Vector3.normalize(Vector3.crossProduct(test, forward));
 		return Quaternion.normalize(Quaternion.localRotation(axis, angle));
+	}
+	
+	public static Quaternion slerp(Quaternion qfrom, Quaternion qto, double t) {
+		qfrom = Quaternion.normalize(qfrom.copy());
+		qto = Quaternion.normalize(qto.copy());
+		
+		double dot = Quaternion.dotProduct(qfrom, qto);
+		double w1 = qfrom.w, x1 = qfrom.x, y1 = qfrom.y, z1 = qfrom.z;
+		double w2 = qto.w, x2 = qto.x, y2 = qto.y, z2 = qto.z;
+		
+		if (dot < 0) {
+			w1 = -w1;
+			x1 = -x1;
+			y1 = -y1;
+			z1 = -z1;
+			dot = -dot;
+		}
+		
+		final double DOT_THRESHOLD = 0.9995;
+		if (dot > DOT_THRESHOLD) {
+			Quaternion result = new Quaternion(w1 + t * (w2 - w1), x1 + t * (x2 - x1), y1 + t * (y2 - y1), z1 + t * (z2 - z1));
+			return Quaternion.normalize(result);
+		}
+		
+		double theta_0 = Math.acos(dot);
+		double sin_theta_0 = Math.sin(theta_0);
+		
+		double theta = theta_0 * t;
+		double sin_theta = Math.sin(theta);
+		double cos_theta = Math.cos(theta);
+		
+		double s0 = cos_theta - dot * sin_theta / sin_theta_0;
+		double s1 = sin_theta / sin_theta_0;
+		
+		return new Quaternion(s0 * w1 + s1 * w2, s0 * x1 + s1 * x2, s0 * y1 + s1 * y2, s0 * z1 + s1 * z2);
 	}
 	
 	public static Mat4x4 generateMatrix(Quaternion q1, Vector3 pos) {

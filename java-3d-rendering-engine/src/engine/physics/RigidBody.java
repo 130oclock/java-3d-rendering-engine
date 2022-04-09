@@ -12,14 +12,12 @@ public class RigidBody {
 	// coefficient of restitution, the dampening of collision
 	private double restitution = 1;
 	
-	public Vector3 normalImpulse = new Vector3();
-	
 	private boolean useGravity = true;
 	public boolean isStatic = false;
 	
 	Collider collider;
 	
-	public RigidBody(Vector3 pos, Quaternion rot, double mass, Vector3 boundingBox) {
+	public RigidBody(Vector3 pos, Quaternion rot, double mass, Collider boundingBox) {
 		this.pos = pos.copy();
 		this.rot = rot.copy();
 		
@@ -27,7 +25,9 @@ public class RigidBody {
 		this.force = new Vector3();
 		
 		this.mass = mass;
-		this.collider = new Collider(boundingBox);
+		this.collider = boundingBox;
+		
+		//System.out.println("Max: " + boundingBox.getMax().x + " " + boundingBox.getMax().y + " " + boundingBox.getMax().z + " Min: " + boundingBox.getMin().x + " " + boundingBox.getMin().y + " " + boundingBox.getMin().z);
 		
 		PhysicsWorld.addObject(this);
 	}

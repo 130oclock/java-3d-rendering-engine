@@ -104,7 +104,7 @@ public class Engine extends Canvas implements Runnable {
 		//ModelFileReader.loadObj("Models/sky_box.obj", "sky_box", "Textures/UV_Grid_Sm.jpg");
 		//ModelFileReader.loadDir("Models", "Textures");
 		//ModelFileReader.loadObj("Models/plane.obj", "plane");
-		//ModelFileReader.loadObj("Models/utahTeapot.obj", "utahTeapot");
+		ModelFileReader.loadObj("Models/utahTeapot.obj", "utahTeapot");
 		ModelFileReader.loadObj("Models/plane.obj", "carpet", "Textures/carpet.jpg");
 		ModelFileReader.loadObj("Models/octahedron.obj", "octahedron");
 		//ModelFileReader.loadObj("Models/cube.obj", "cube", "Textures/UV_Grid_Sm.jpg");
@@ -115,10 +115,10 @@ public class Engine extends Canvas implements Runnable {
 		//planet = new Planet(0, 5, 0);
 		
 		new Entity(ModelFileReader.get("carpet"), 0, 0, 0, 10000).rig.setStatic();
-		//new Entity (ModelFileReader.get("octahedron"), 0, 20, 0, 1);
+		new Entity (ModelFileReader.get("octahedron"), 0, 20, 0, 100);
 		new Entity(ModelFileReader.get("cube"), 0, 10, 0, 1.6);
 		new Entity(ModelFileReader.get("cube1"), 0, 3, 0, 3);
-		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals(), 5, 2, 0);
+		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals(), 5, 30, 0, 20);
 		//new Entity(ModelFileReader.get("boid"), 2, 2, 0);
 		//new Entity(ModelFileReader.get("lowPolySphere"), 0, 0, 0);
 		//new Entity(ModelFileReader.get("smoothBlenderMonkey"), new Vector3d(0, 0, 0), Quaternion.localRotation(Vector3d.up(), Math.PI));
@@ -222,6 +222,7 @@ public class Engine extends Canvas implements Runnable {
 		keyb.update(); // update the keyboard to the current inputs
 
 		this.camera.input(this.userInput, dt); // send the inputs to the camera
+		//this.camera.lookAt(Entity.entities.get(3).pos, dt);
 		
 		PhysicsWorld.update(dt); // update the physics
 		

@@ -57,6 +57,10 @@ public class Vector3 {
 		return new Vector3(0, 0, -1);
 	}
 	
+	public static Vector3 round(Vector3 v) {
+		return new Vector3(Math.round(v.x), Math.round(v.y), Math.round(v.z));
+	}
+	
 	// Find the distance between two 3d points
 	public static double distance(Vector3 v1, Vector3 v2) {
 		double dx = v1.x - v2.x;

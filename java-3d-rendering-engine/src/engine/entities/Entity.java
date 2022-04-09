@@ -9,6 +9,7 @@ import engine.graphics.environment.EnvironmentLight;
 import engine.graphics.models.Model;
 import engine.graphics.triangle.Triangle;
 import engine.matrix.Mat4x4;
+import engine.physics.Collider;
 import engine.physics.RigidBody;
 import engine.quaternion.Quaternion;
 import engine.vector.Vector3;
@@ -55,13 +56,15 @@ public class Entity {
 		Triangle.projectTriangles(this.model.mesh, this.pos, this.rot, camera, matView, matProj, WIDTH, HEIGHT, light, this.color);
 	}
 	
-	public Vector3 calcBoundingBox(Quaternion rot) {
+	public Collider calcBoundingBox(Quaternion rot) {
 		Vector3 max = new Vector3();
+		Vector3 min = new Vector3();
 		Mat4x4 matRot = Quaternion.generateMatrix(rot, new Vector3());
 		for (Triangle tri : model.mesh) {
 			Vector3[] p = Triangle.multiplyMatrixTriangle(matRot, tri);
 			Triangle.calcTriangleMax(p, max);
+			Triangle.calcTriangleMin(p, min);
 		}
-		return max;
+		return new Collider(max, min);
 	}
 }

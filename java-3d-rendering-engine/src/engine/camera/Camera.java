@@ -47,6 +47,11 @@ public class Camera {
 		this.rot = Quaternion.rotate(this.rot, axis, angle);
 	}
 	
+	public void lookAt(Vector3 target, double dt) {
+		Quaternion rot = Quaternion.lookAt(pos, target);
+		this.rot = Quaternion.slerp(this.rot, rot, dt);
+	}
+	
 	public void input(UserInput input, double deltaTime) { // update the camera based on the current inputs
 		Keyboard keyb = input.keyboard;
 		MouseInput mouse = input.mouse;
