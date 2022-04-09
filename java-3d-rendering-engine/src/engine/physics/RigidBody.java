@@ -10,7 +10,7 @@ public class RigidBody {
 	private double density = 1;
 	private double mass = 1;
 	// coefficient of restitution, the dampening of collision
-	private double restitution = 1;
+	private double restitution = 0.9;
 	
 	private boolean useGravity = true;
 	public boolean isStatic = false;
@@ -99,6 +99,12 @@ public class RigidBody {
 		this.force.x += x;
 		this.force.y += y;
 		this.force.z += z;
+	}
+	
+	public void addForce(Vector3 force) {
+		this.force.x += force.x;
+		this.force.y += force.y;
+		this.force.z += force.z;
 	}
 	
 	public void setForce(double x, double y, double z) {

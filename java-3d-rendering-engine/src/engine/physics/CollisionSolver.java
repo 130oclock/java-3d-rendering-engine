@@ -29,21 +29,17 @@ public class CollisionSolver {
 		double j = (-(1 + e) * Vector3.dotProduct(relativeVelocity, normal)) / (Vector3.dotProduct(normal, normal) * ((1 / amass) + (1 / bmass)));
 		
 		if (!aStatic && !bStatic) {
-			a.addPos(this.intersection.x / 2, this.intersection.y / 2, this.intersection.z / 2);
-			b.addPos(-this.intersection.x / 2, -this.intersection.y / 2, -this.intersection.z / 2);
+			a.addPos(-this.intersection.x / 2, -this.intersection.y / 2, -this.intersection.z / 2);
+			b.addPos(this.intersection.x / 2, this.intersection.y / 2, this.intersection.z / 2);
 			a.addVel(Vector3.multiply(normal, j / amass));
 			b.addVel(Vector3.multiply(normal, -j / bmass));
 		}
-		if (!aStatic && bStatic) { // b is a static object
-			a.addPos(this.intersection.x, this.intersection.y, this.intersection.z);
-			//b.addPos(-this.intersection.x / 2, -this.intersection.y / 2, -this.intersection.z / 2);
+		if (!aStatic && bStatic) { // b is static
+			a.addPos(-this.intersection.x, -this.intersection.y, -this.intersection.z);
 			a.addVel(Vector3.multiply(normal, j / amass));
-			//b.addVel(Vector3.multiply(normal, -j / bmass));
 		}
-		if (aStatic && !bStatic) { // a is a static object
-			//a.addPos(this.intersection.x / 2, this.intersection.y / 2, this.intersection.z / 2);
-			b.addPos(-this.intersection.x, -this.intersection.y, -this.intersection.z);
-			//a.addVel(Vector3.multiply(normal, j / amass));
+		if (aStatic && !bStatic) { // a is static
+			b.addPos(this.intersection.x, this.intersection.y, this.intersection.z);
 			b.addVel(Vector3.multiply(normal, -j / bmass));
 		}
 	}

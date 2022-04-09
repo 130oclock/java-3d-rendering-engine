@@ -34,21 +34,25 @@ public class Collider {
 		boolean checkz = (bStatic && aMax.z <= bMax.z && aMin.z >= bMin.z) || (aStatic && aMax.z >= bMax.z && aMin.z <= bMin.z);*/
 		
 		if (check) {
-			double distance = 1000;
+			double magnitude = 1000;
+			double direction = 1;
 			int closestId = -1;
 			
 			double[] distances = new double[] { aMin.x - bMax.x, aMax.x - bMin.x, aMin.y - bMax.y, aMax.y - bMin.y, aMin.z - bMax.z, aMax.z - bMin.z };
 			for (int i = 0; i < 6; i++) {
 				double d = Math.abs(distances[i]);
-				if (d <= distance) {
-					distance = d;
+				if (d <= magnitude) {
+					magnitude = d;
 					closestId = i;
+					direction = distances[i];
 				}
 			}
 			
-			if (closestId == 0 || closestId == 1) axis.x = distance;
-			if (closestId == 2 || closestId == 3) axis.y = distance;
-			if (closestId == 4 || closestId == 5) axis.z = distance;
+			direction /= Math.abs(direction);
+			
+			if (closestId == 0 || closestId == 1) axis.x = magnitude * direction;
+			if (closestId == 2 || closestId == 3) axis.y = magnitude * direction;
+			if (closestId == 4 || closestId == 5) axis.z = magnitude * direction;
 			
 			/*double distancex = 1000, distancey = 1000, distancez = 1000;
 			
