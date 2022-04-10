@@ -44,6 +44,10 @@ public class Entity {
 		this(model, new Vector3(x, y, z), new Quaternion(), Color.WHITE, mass);
 	}
 	
+	public Entity(Model model, double x, double y, double z, Quaternion rot, double mass) {
+		this(model, new Vector3(x, y, z), rot, Color.WHITE, mass);
+	}
+	
 	public Entity(Model model, double x, double y, double z, double mass, Color color) {
 		this(model, new Vector3(x, y, z), new Quaternion(), color, mass);
 	}
@@ -57,11 +61,10 @@ public class Entity {
 	}
 	
 	public Collider calcBoundingBox(Quaternion rot) {
-		Vector3 max = new Vector3();
-		Vector3 min = new Vector3();
-		Mat4x4 matRot = Quaternion.generateMatrix(rot, new Vector3());
+		Vector3 max = new Vector3(Double.MIN_VALUE, Double.MIN_VALUE, Double.MIN_VALUE);
+		Vector3 min = new Vector3(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 		for (Triangle tri : model.mesh) {
-			Vector3[] p = Triangle.multiplyMatrixTriangle(matRot, tri);
+			Vector3[] p = tri.p;//Triangle.multiplyMatrixTriangle(matRot, tri);
 			Triangle.calcTriangleMax(p, max);
 			Triangle.calcTriangleMin(p, min);
 		}

@@ -1,5 +1,7 @@
 package engine.physics;
 
+import engine.matrix.Mat4x4;
+import engine.quaternion.Quaternion;
 import engine.vector.Vector3;
 
 public class CollisionSolver {
@@ -42,5 +44,142 @@ public class CollisionSolver {
 			b.addPos(this.intersection.x, this.intersection.y, this.intersection.z);
 			b.addVel(Vector3.multiply(normal, -j / bmass));
 		}
+	}
+	
+	public static boolean intersectAABB(RigidBody a, RigidBody b) {
+		Vector3 difference = Vector3.subtract(b.getPos(), a.getPos()); // a is always at 0,0,0
+		Vector3 aMax = a.collider.getMax();
+		Vector3 aMin = a.collider.getMin();
+		Vector3 bMax = Vector3.add(b.collider.getMax(), difference);
+		Vector3 bMin = Vector3.add(b.collider.getMin(), difference);
+		
+		boolean check = (aMin.x <= bMax.x && aMax.x >= bMin.x) && // check overlap on x axis
+						(aMin.y <= bMax.y && aMax.y >= bMin.y) && // check overlap on y axis
+						(aMin.z <= bMax.z && aMax.z >= bMin.z);   // check overlap on z axis
+		
+		/*if (check) {
+			double magnitude = 1000;
+			double direction = 1;
+			int closestId = -1;
+			
+			double[] distances = new double[] { aMin.x - bMax.x, aMax.x - bMin.x, aMin.y - bMax.y, aMax.y - bMin.y, aMin.z - bMax.z, aMax.z - bMin.z };
+			for (int i = 0; i < 6; i++) {
+				double d = Math.abs(distances[i]);
+				if (d <= magnitude) {
+					magnitude = d;
+					closestId = i;
+					direction = distances[i];
+				}
+			}
+			
+			direction /= Math.abs(direction);
+			
+			if (closestId == 0 || closestId == 1) axis.x = magnitude * direction;
+			if (closestId == 2 || closestId == 3) axis.y = magnitude * direction;
+			if (closestId == 4 || closestId == 5) axis.z = magnitude * direction;
+		}
+		//System.out.println(axis.x + " " + axis.y + " " + axis.z);*/
+		
+		return check;
+	}
+	
+	private static boolean projectSATTest(Vector3[] aVerts, Vector3[] bVerts, Vector3 axis) {
+		if (axis.x == 0 && axis.y == 0 && axis.z == 0) // checks that the axis is not (0, 0, 0)
+			return false; 
+		
+		double aMin = Double.MAX_VALUE, aMax = -Double.MAX_VALUE, bMin = Double.MAX_VALUE, bMax = -Double.MAX_VALUE;
+		
+		for(int i = 0; i < 8; i++) {
+			double aDist = Vector3.dotProduct(aVerts[i], axis);
+			aMin = (aDist < aMin) ? aDist : aMin;
+			aMax = (aDist > aMax) ? aDist : aMax;
+			double bDist = Vector3.dotProduct(bVerts[i], axis);
+			bMin = (bDist < bMin) ? bDist : bMin;
+			bMax = (bDist > bMax) ? bDist : bMax;
+		}
+		
+		// One-dimensional intersection test between a and b
+		double longSpan = Math.max(aMax, bMax) - Math.min(aMin, bMin);
+		double sumSpan = aMax - aMin + bMax - bMin;
+		boolean check = longSpan > sumSpan;
+		
+		if (!check) {
+			if (aMin > bMax) {
+				double mod = (bMax - aMin);
+				axis.x *= mod;
+				axis.y *= mod;
+				axis.z *= mod;
+			} else {
+				double mod = (aMax - bMin);
+				axis.x *= mod;
+				axis.y *= mod;
+				axis.z *= mod;
+			}
+		}
+		
+		return check;
+	}
+	
+	public static boolean intersectOBB(RigidBody a, RigidBody b, Vector3 penetration) {
+		Vector3[] aPoints = a.collider.getAdjustedPoints(a.getPos(), a.getRot());
+		Vector3[] aNorms = a.collider.getAdjustedNormals(a.getRot());
+		
+		Vector3[] bPoints = b.collider.getAdjustedPoints(b.getPos(), b.getRot());
+		Vector3[] bNorms = b.collider.getAdjustedNormals(b.getRot());
+		
+		Vector3 direction = new Vector3();
+		double magnitude = Double.MAX_VALUE;
+		
+		boolean result = true;
+		for (int i = 0; i < 3; i++) {
+			Vector3 axis = aNorms[i].copy();
+			if (projectSATTest(aPoints, bPoints, axis)) {
+				result = false;
+				break;
+			}
+			double length = Vector3.length(axis);
+			if (length < magnitude) {
+				magnitude = length;
+				direction = Vector3.normalize(axis);
+			}
+		}
+		
+		for (int i = 0; i < 3; i++) {
+			Vector3 axis = bNorms[i].copy();
+			if (projectSATTest(aPoints, bPoints, axis)) {
+				result = false;
+				break;
+			}
+			double length = Vector3.length(axis);
+			if (length < magnitude) {
+				magnitude = length;
+				direction = Vector3.normalize(axis);
+			}
+		}
+		
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				Vector3 axis = Vector3.crossProduct(aNorms[i], bNorms[j]);
+				if (projectSATTest(aPoints, bPoints, axis)) {
+					result = false;
+					break;
+				}
+				double length = Vector3.length(axis);
+				if (length != 0 && length < magnitude) {
+					magnitude = length;
+					direction = Vector3.normalize(axis);
+				}
+			}
+			
+		}
+
+		if (result) {
+			penetration.x = direction.x * magnitude;
+			penetration.y = direction.y * magnitude;
+			penetration.z = direction.z * magnitude;
+			//System.out.println(penetration.x + " " + penetration.y + " " + penetration.z);
+		}
+		
+		return result;
 	}
 }

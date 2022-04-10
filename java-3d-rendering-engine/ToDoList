@@ -13,5 +13,4 @@ To Do
 * Expanding Polygon Algorithm
 * Occlusion Culling
 
-Problem with collision being order dependent
-* Constraint Solver
+// problem with collision detection between plane and cube

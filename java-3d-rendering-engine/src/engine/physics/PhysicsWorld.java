@@ -37,10 +37,12 @@ public class PhysicsWorld {
 				
 				Vector3 point = new Vector3();
 				
-				boolean collided = Collider.intersectBoxes(a, b, point); // broad phase
+				boolean collided = false;
+				//if (CollisionSolver.intersectAABB(a, b)) // broad phase
+					collided = CollisionSolver.intersectOBB(a, b, point); // narrow phase
 				
 				if (collided) {
-					collisions.add(new CollisionSolver(a, b, point)); // narrow phase
+					collisions.add(new CollisionSolver(a, b, point)); 
 				}
 			}
 		}

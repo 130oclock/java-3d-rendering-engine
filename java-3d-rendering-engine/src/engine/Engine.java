@@ -115,9 +115,9 @@ public class Engine extends Canvas implements Runnable {
 		//planet = new Planet(0, 5, 0);
 		
 		new Entity(ModelFileReader.get("carpet"), 0, 0, 0, 10000).rig.setStatic();
-		new Entity(ModelFileReader.get("cube1"), 0, 10, 0, 1.6);
 		new Entity(ModelFileReader.get("cube1"), 0, 3, 0, 3);
-		new Entity (ModelFileReader.get("cube1"), 0, 20, 0, 1);
+		new Entity(ModelFileReader.get("cube"), 0, 10, 0, Quaternion.localRotation(new Vector3(1, 0, 0), Math.PI/4),1.6);
+		//new Entity (ModelFileReader.get("octahedron"), 0, 20, 0, 1);
 		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals(), 5, 30, 0, 20);
 		//new Entity(ModelFileReader.get("boid"), 2, 2, 0);
 		//new Entity(ModelFileReader.get("lowPolySphere"), 0, 0, 0);

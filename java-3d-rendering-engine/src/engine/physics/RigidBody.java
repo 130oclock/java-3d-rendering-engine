@@ -10,7 +10,7 @@ public class RigidBody {
 	private double density = 1;
 	private double mass = 1;
 	// coefficient of restitution, the dampening of collision
-	private double restitution = 0.9;
+	private double restitution = 1;
 	
 	private boolean useGravity = true;
 	public boolean isStatic = false;

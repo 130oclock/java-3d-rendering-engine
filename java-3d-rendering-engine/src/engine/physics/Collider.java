@@ -1,13 +1,28 @@
 package engine.physics;
 
+import engine.matrix.Mat4x4;
+import engine.quaternion.Quaternion;
 import engine.vector.Vector3;
 
 public class Collider {
 	private Vector3 max, min;
+	private Vector3[] points;
+	private Vector3[] normals;
+	private double radius;
+	private int type;
 	
 	public Collider(Vector3 max, Vector3 min) {
 		this.max = max;
 		this.min = min;
+		type = 0;
+		
+		this.points = this.getPoints();
+		this.normals = new Vector3[] { Vector3.left(), Vector3.up(), Vector3.forward() };
+	}
+	
+	public Collider(double radius) {
+		this.radius = radius;
+		type = 1;
 	}
 
 	public Vector3 getMax() {
@@ -18,69 +33,42 @@ public class Collider {
 		return min;
 	}
 	
-	public static boolean intersectBoxes(RigidBody a, RigidBody b, Vector3 axis) {
-		Vector3 difference = Vector3.subtract(a.getPos(), b.getPos());
-		Vector3 aMax = Vector3.add(a.collider.getMax(), difference);
-		Vector3 aMin = Vector3.add(a.collider.getMin(), difference);
-		Vector3 bMax = b.collider.getMax();
-		Vector3 bMin = b.collider.getMin();
-		
-		boolean check = (aMin.x <= bMax.x && aMax.x >= bMin.x) && // check overlap on x axis
-						(aMin.y <= bMax.y && aMax.y >= bMin.y) && // check overlap on y axis
-						(aMin.z <= bMax.z && aMax.z >= bMin.z);   // check overlap on z axis
-		
-		/*boolean checkx = (bStatic && aMax.x <= bMax.x && aMin.x >= bMin.x) || (aStatic && aMax.x >= bMax.x && aMin.x <= bMin.x);
-		boolean checky = (bStatic && aMax.y <= bMax.y && aMin.y >= bMin.y) || (aStatic && aMax.y >= bMax.y && aMin.y <= bMin.y);
-		boolean checkz = (bStatic && aMax.z <= bMax.z && aMin.z >= bMin.z) || (aStatic && aMax.z >= bMax.z && aMin.z <= bMin.z);*/
-		
-		if (check) {
-			double magnitude = 1000;
-			double direction = 1;
-			int closestId = -1;
-			
-			double[] distances = new double[] { aMin.x - bMax.x, aMax.x - bMin.x, aMin.y - bMax.y, aMax.y - bMin.y, aMin.z - bMax.z, aMax.z - bMin.z };
-			for (int i = 0; i < 6; i++) {
-				double d = Math.abs(distances[i]);
-				if (d <= magnitude) {
-					magnitude = d;
-					closestId = i;
-					direction = distances[i];
-				}
-			}
-			
-			direction /= Math.abs(direction);
-			
-			if (closestId == 0 || closestId == 1) axis.x = magnitude * direction;
-			if (closestId == 2 || closestId == 3) axis.y = magnitude * direction;
-			if (closestId == 4 || closestId == 5) axis.z = magnitude * direction;
-			
-			/*double distancex = 1000, distancey = 1000, distancez = 1000;
-			
-			double[] distances = new double[] { aMin.x - bMax.x, aMax.x - bMin.x, aMin.y - bMax.y, aMax.y - bMin.y, aMin.z - bMax.z, aMax.z - bMin.z };
-			for (int i = 0; i < 2; i++) {
-				double d = Math.abs(distances[i]);
-				if (d <= distancex) {
-					distancex = d;
-				}
-			}
-			for (int i = 2; i < 4; i++) {
-				double d = Math.abs(distances[i]);
-				if (d <= distancey) {
-					distancey = d;
-				}
-			}
-			for (int i = 4; i < 6; i++) {
-				double d = Math.abs(distances[i]);
-				if (d <= distancez) {
-					distancez = d;
-				}
-			}
-			
-			//if (!checkx) axis.x = distancex;
-			//if (!checky) axis.y = distancey;
-			//if (!checkz) axis.z = distancez;*/
+	public Vector3[] getPoints() {
+		double maxX = max.x, maxY = max.y, maxZ = max.z, minX = min.x, minY = min.y, minZ = min.z;
+		Vector3[] points = {
+				new Vector3(minX, minY, minZ),
+				new Vector3(maxX, minY, minZ),
+				new Vector3(maxX, maxY, minZ),
+				new Vector3(minX, maxY, minZ),
+				new Vector3(minX, minY, maxZ),
+				new Vector3(maxX, minY, maxZ),
+				new Vector3(maxX, maxY, maxZ),
+				new Vector3(minX, maxY, maxZ),
+		};
+		return points;
+	}
+	
+	public Vector3[] getAdjustedPoints(Vector3 pos, Quaternion rot) {
+		Mat4x4 matRot = Quaternion.generateMatrix(rot, pos);
+		int length = this.points.length;
+		Vector3[] points = new Vector3[length];
+		for (int i = 0; i < length; i++) {
+			points[i] = Vector3.mutiplyMatrixVector(matRot, this.points[i]);
 		}
-		
-		return check;
+		return points;
+	}
+	
+	public Vector3[] getNormals() {
+		return this.normals;
+	}
+	
+	public Vector3[] getAdjustedNormals(Quaternion rot) {
+		Mat4x4 matRot = Quaternion.generateMatrix(rot, null);
+		int length = this.normals.length;
+		Vector3[] points = new Vector3[length];
+		for (int i = 0; i < length; i++) {
+			points[i] = Vector3.mutiplyMatrixVector(matRot, this.normals[i]);
+		}
+		return points;
 	}
 }

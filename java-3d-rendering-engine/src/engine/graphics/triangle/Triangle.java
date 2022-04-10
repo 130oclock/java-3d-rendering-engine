@@ -22,7 +22,7 @@ public class Triangle {
 	
 	public static List<Triangle> triangleRaster = new ArrayList<Triangle>();
 	
-	private Vector3[] p = new Vector3[3];
+	public Vector3[] p = new Vector3[3];
 	private Vector3[] n = new Vector3[3];
 	
 	private Vector2[] t = new Vector2[3];
