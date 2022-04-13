@@ -18,32 +18,47 @@ public class Quaternion {
 		this(1, 0, 0, 0);
 	}
 	
+	// Gets the forward vector from the Quaternion
 	public Vector3 getForwardVector() {
 		double x = 2 * ((this.x * this.z) + (this.w * this.y));
 		double y = 2 * ((this.y * this.z) - (this.w * this.x));
 		double z = 1 - (2 * ((this.x * this.x) + (this.y * this.y)));
 		return new Vector3(x, y, z);
 	}
-	
+
+	// Gets the up vector from the Quaternion
 	public Vector3 getUpVector() {
 		double x = 2 * ((this.x * this.y) - (this.w * this.z));
 		double y = 1 - (2 * ((this.x * this.x) + (this.z * this.z)));
 		double z = 2 * ((this.y * this.z) + (this.w * this.x));
 		return new Vector3(x, y, z);
 	}
-	
+
+	// Gets the right vector from the Quaternion
 	public Vector3 getRightVector() {
 		double x = 1 - (2 * ((this.y * this.y) + (this.z * this.z)));
 		double y = 2 * ((this.x * this.y) + (this.w * this.z));
 		double z = 2 * ((this.x * this.z) - (this.w * this.y));
 		return new Vector3(x, y, z);
 	}
-	
-	public Vector3 getAxis() {
-		return new Vector3(this.x, this.y, this.z);
+
+	// Gets the axis and angle from the Quaternion
+	public double toAxisAngle(Vector3 outAxis) {
+		double angle = 2 * Math.acos(w);
+		outAxis.x = x / Math.sqrt(1 - w * w);
+		outAxis.y = y / Math.sqrt(1 - w * w);
+		outAxis.z = z / Math.sqrt(1 - w * w);
+		return angle;
 	}
 	
+	public Vector3 findAngularDisplacement() {
+		Vector3 axis = new Vector3();
+		double angle = this.toAxisAngle(axis);
+		Vector3 angularDisplacement = Vector3.multiply(axis, angle);
+		return angularDisplacement;
+	}
 
+	// Copies the values from one Quaternion into a new Quaternion
 	public Quaternion copy() {
 		return new Quaternion(this.w, this.x, this.y, this.z);
 	}

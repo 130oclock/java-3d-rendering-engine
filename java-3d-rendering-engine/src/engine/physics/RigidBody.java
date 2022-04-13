@@ -38,8 +38,12 @@ public class RigidBody {
 		restitution = 0;
 	}
 	
-	public Vector3 getPerpendicularOperator(Vector3 displacement) {
-		return displacement;
+	// Find p(t) = | w(t) x r(t) |
+	public Vector3 getAngularVelocityAtPoint(Vector3 displacement, double dt) {
+		Vector3 angularDisplacement = rot.findAngularDisplacement();
+		Vector3 angularSpeed = Vector3.multiplyQuaternion(rot, Vector3.divide(angularDisplacement, dt));
+		
+		return Vector3.crossProduct(angularSpeed, displacement);
 	}
 	
 	public void update(double dt, Vector3 gravity) { // 3d dynamics

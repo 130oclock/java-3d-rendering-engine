@@ -29,6 +29,10 @@ public class CollisionSolver {
 		double e = a.getRestitution() * b.getRestitution();
 		// the impulse magnitude
 		double j = (-(1 + e) * Vector3.dotProduct(relativeVelocity, normal)) / (Vector3.dotProduct(normal, normal) * ((1 / amass) + (1 / bmass)));
+		
+		// find the points where the objects are colliding
+		Vector3 aAngVel = a.getAngularVelocityAtPoint(Vector3.multiply(this.intersection, -0.5), dt);
+		Vector3 bAngVel = b.getAngularVelocityAtPoint(Vector3.multiply(this.intersection, 0.5), dt);
 		//double jrot = 
 		
 		if (!aStatic && !bStatic) {

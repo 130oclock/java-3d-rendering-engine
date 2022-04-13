@@ -1,6 +1,7 @@
 package engine.vector;
 
 import engine.matrix.Mat4x4;
+import engine.quaternion.Quaternion;
 
 public class Vector3 {
 	
@@ -150,6 +151,18 @@ public class Vector3 {
 		double rz = v1.x * v2.y - v1.y * v2.x;
 		
 		return new Vector3(rx, ry, rz);
+	}
+	
+	// Multiplies a Vector3 by a Quaternion
+	public static Vector3 multiplyQuaternion(Quaternion q, Vector3 v) {
+		Quaternion temp = new Quaternion();
+		temp.w = 0;
+		temp.x = v.x;
+		temp.y = v.y;
+		temp.z = v.z;
+		
+		temp = Quaternion.multiply(temp, q);
+		return new Vector3(temp.x, temp.y, temp.z);
 	}
 	
 	// Makes the tangent orthogonal to the normal
