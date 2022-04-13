@@ -93,14 +93,14 @@ public class Engine extends Canvas implements Runnable {
 		engine.frame.setResizable(false);
 		engine.frame.setVisible(true);
 
-		engine.skybox = new Skybox(ModelFileReader.get("sky_box")); // instantiate the sky box
+		engine.skybox = new Skybox(ModelFileReader.get("sky_box")); // instantiate the sky box\
 		
 		engine.start(); // start the engine
 	}
 	
 	public static void loadEntities() {
 		// load models
-		ModelFileReader.loadObj("Models/sky_box.obj", "sky_box", "Textures/skybox.png");
+		ModelFileReader.loadObj("Models/sky_box.obj", "sky_box", "Textures/png-clipart-cube-mapping-night-sky-star-counter-strike-1-6-star-angle-video-game.png"); //skybox.png
 		//ModelFileReader.loadObj("Models/sky_box.obj", "sky_box", "Textures/UV_Grid_Sm.jpg");
 		//ModelFileReader.loadDir("Models", "Textures");
 		//ModelFileReader.loadObj("Models/plane.obj", "plane");
@@ -116,8 +116,8 @@ public class Engine extends Canvas implements Runnable {
 		
 		new Entity(ModelFileReader.get("carpet"), 0, 0, 0, 10000).rig.setStatic();
 		new Entity(ModelFileReader.get("cube1"), 0, 3, 0, 3);
-		new Entity(ModelFileReader.get("cube"), 0, 10, 0, Quaternion.localRotation(new Vector3(1, 0, 0), Math.PI/4),1.6);
-		//new Entity (ModelFileReader.get("octahedron"), 0, 20, 0, 1);
+		new Entity(ModelFileReader.get("cube"), 0, 6, 0, 1.6);
+		new Entity(ModelFileReader.get("octahedron"), 0, 20, 0, 1);
 		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals(), 5, 30, 0, 20);
 		//new Entity(ModelFileReader.get("boid"), 2, 2, 0);
 		//new Entity(ModelFileReader.get("lowPolySphere"), 0, 0, 0);
@@ -127,6 +127,12 @@ public class Engine extends Canvas implements Runnable {
 	public synchronized void start() {
 		running = true;
 		this.thread = new Thread(this, "Engine");
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		this.thread.start();
 	}
 	
@@ -183,7 +189,7 @@ public class Engine extends Canvas implements Runnable {
 		
 		// calculate a rotation and translation matrix that is the inverse of the camera's position and rotation
 		Quaternion.normalize(camera.rot);
-		Mat4x4 matRot = Quaternion.generateMatrix(camera.rot, null);
+		Mat4x4 matRot = Mat4x4.generateMatrix(camera.rot, null, null);
 		Mat4x4 matTrans = Mat4x4.translationMatrix(camera.pos.x, camera.pos.y, camera.pos.z);
 		matTrans = Mat4x4.quickInverse(matTrans);
 		matView = Mat4x4.multiplyMatrix(matTrans, matRot);
@@ -227,6 +233,7 @@ public class Engine extends Canvas implements Runnable {
 		PhysicsWorld.update(dt); // update the physics
 		
 		if (keyb.getAnyKey(KeyEvent.VK_ESCAPE)) { // if the user presses "escape" then close the window
+			System.out.println("Closed");
 			this.frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
 		}
 		

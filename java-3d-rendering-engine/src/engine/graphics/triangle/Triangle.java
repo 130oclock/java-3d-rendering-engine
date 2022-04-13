@@ -421,9 +421,9 @@ public class Triangle {
 	}
 	
 	// Project a list of triangles to screen view
-	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3 pos, Quaternion rot, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light, Color color) {
-		Mat4x4 matWorld = Quaternion.generateMatrix(rot, pos); // Create a matrix based on the object's position and rotation
-		Mat4x4 matRot = Quaternion.generateMatrix(rot, new Vector3()); // Create a matrix based on only the object's rotation, used for normal calculation
+	public static void projectTriangles(Triangle[] trianglesToRaster, Vector3 pos, Quaternion rot, Vector3 scale, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light, Color color) {
+		Mat4x4 matWorld = Mat4x4.generateMatrix(rot, pos, scale); // Create a matrix based on the object's position and rotation
+		Mat4x4 matRot = Mat4x4.generateMatrix(rot, new Vector3(), null); // Create a matrix based on only the object's rotation, used for normal calculation
 		
 		for (Triangle tri : trianglesToRaster) {
 			Triangle triTransformed = new Triangle();
@@ -537,7 +537,7 @@ public class Triangle {
 	}
 	
 	public static void projectSkybox(Triangle[] trianglesToRaster, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, Color color) {
-		Mat4x4 matWorld = Quaternion.generateMatrix(new Quaternion(), camera.pos);
+		Mat4x4 matWorld = Mat4x4.generateMatrix(new Quaternion(), camera.pos, null);
 		
 		for (Triangle tri : trianglesToRaster) {
 			Triangle triTransformed = new Triangle();

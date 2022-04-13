@@ -49,7 +49,7 @@ public class Collider {
 	}
 	
 	public Vector3[] getAdjustedPoints(Vector3 pos, Quaternion rot) {
-		Mat4x4 matRot = Quaternion.generateMatrix(rot, pos);
+		Mat4x4 matRot = Mat4x4.generateMatrix(rot, pos, null);
 		int length = this.points.length;
 		Vector3[] points = new Vector3[length];
 		for (int i = 0; i < length; i++) {
@@ -63,7 +63,7 @@ public class Collider {
 	}
 	
 	public Vector3[] getAdjustedNormals(Quaternion rot) {
-		Mat4x4 matRot = Quaternion.generateMatrix(rot, null);
+		Mat4x4 matRot = Mat4x4.generateMatrix(rot, null, null);
 		int length = this.normals.length;
 		Vector3[] points = new Vector3[length];
 		for (int i = 0; i < length; i++) {

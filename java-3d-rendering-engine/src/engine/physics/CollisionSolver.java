@@ -29,12 +29,15 @@ public class CollisionSolver {
 		double e = a.getRestitution() * b.getRestitution();
 		// the impulse magnitude
 		double j = (-(1 + e) * Vector3.dotProduct(relativeVelocity, normal)) / (Vector3.dotProduct(normal, normal) * ((1 / amass) + (1 / bmass)));
+		//double jrot = 
 		
 		if (!aStatic && !bStatic) {
 			a.addPos(-this.intersection.x / 2, -this.intersection.y / 2, -this.intersection.z / 2);
 			b.addPos(this.intersection.x / 2, this.intersection.y / 2, this.intersection.z / 2);
-			a.addVel(Vector3.multiply(normal, j / amass));
+			
+			a.addVel(Vector3.multiply(normal, j / amass)); // v2 = v1 + (j/M)*n
 			b.addVel(Vector3.multiply(normal, -j / bmass));
+			// w2 = w1 + (r * jn) / I
 		}
 		if (!aStatic && bStatic) { // b is static
 			a.addPos(-this.intersection.x, -this.intersection.y, -this.intersection.z);
@@ -123,15 +126,17 @@ public class CollisionSolver {
 	public static boolean intersectOBB(RigidBody a, RigidBody b, Vector3 penetration) {
 		Vector3[] aPoints = a.collider.getAdjustedPoints(a.getPos(), a.getRot());
 		Vector3[] aNorms = a.collider.getAdjustedNormals(a.getRot());
+		double aLength = aNorms.length;
 		
 		Vector3[] bPoints = b.collider.getAdjustedPoints(b.getPos(), b.getRot());
 		Vector3[] bNorms = b.collider.getAdjustedNormals(b.getRot());
+		double bLength = aNorms.length;
 		
 		Vector3 direction = new Vector3();
 		double magnitude = Double.MAX_VALUE;
 		
 		boolean result = true;
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < aLength; i++) {
 			Vector3 axis = aNorms[i].copy();
 			if (projectSATTest(aPoints, bPoints, axis)) {
 				result = false;
@@ -144,7 +149,7 @@ public class CollisionSolver {
 			}
 		}
 		
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < bLength; i++) {
 			Vector3 axis = bNorms[i].copy();
 			if (projectSATTest(aPoints, bPoints, axis)) {
 				result = false;
@@ -157,8 +162,8 @@ public class CollisionSolver {
 			}
 		}
 		
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
+		for (int i = 0; i < aLength; i++) {
+			for (int j = 0; j < bLength; j++) {
 				Vector3 axis = Vector3.crossProduct(aNorms[i], bNorms[j]);
 				if (projectSATTest(aPoints, bPoints, axis)) {
 					result = false;

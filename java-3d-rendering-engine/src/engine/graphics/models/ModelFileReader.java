@@ -50,6 +50,19 @@ public class ModelFileReader {
 		} 
 	}
 	
+	public static String padLeftSpaces(String inputString, int length) {
+	    if (inputString.length() >= length) {
+	        return inputString;
+	    }
+	    StringBuilder sb = new StringBuilder();
+	    while (sb.length() < length - inputString.length()) {
+	        sb.append(' ');
+	    }
+	    sb.append(inputString);
+
+	    return sb.toString();
+	}
+	
 	public static void loadObj(String filename, String modelname, String texturepath) {
 		try {
 			FileInputStream inputStream = null;
@@ -179,7 +192,7 @@ public class ModelFileReader {
 					}
 				}
 				
-				System.out.println("loaded model: " + modelname + " | " + vertexInd.size() + " vertices | " + num_faces + " triangles | " + texturepath);
+				System.out.println("loaded model: " + padLeftSpaces(modelname, 12) + " | " + padLeftSpaces(String.valueOf(vertexInd.size()), 5) + " vertices | " + padLeftSpaces(String.valueOf(num_faces), 5) + " triangles | " + texturepath);
 			} finally {
 				if (inputStream != null) {
 					try {
@@ -321,7 +334,7 @@ public class ModelFileReader {
 					}
 				}
 				
-				System.out.println("loaded model: " + modelname + " | " + vertexInd.size() + " vertices | " + num_faces + " triangles");
+				System.out.println("loaded model: " + padLeftSpaces(modelname, 12) + " | " + padLeftSpaces(String.valueOf(vertexInd.size()), 5) + " vertices | " + padLeftSpaces(String.valueOf(num_faces), 5) + " triangles |");
 			} finally {
 				if (inputStream != null) {
 					try {

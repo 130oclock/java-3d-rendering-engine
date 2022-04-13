@@ -99,7 +99,7 @@ public class Quaternion {
 	public static Vector3 rotateAround(Vector3 center, Vector3 point, Vector3 axis, double angle) {
 		Vector3 localPoint = Vector3.subtract(point, center);
 		Quaternion q = Quaternion.localRotation(axis, angle);
-		Mat4x4 worldMat = Quaternion.generateMatrix(q, center);
+		Mat4x4 worldMat = Mat4x4.generateMatrix(q, center, null);
 		return Vector3.mutiplyMatrixVector(worldMat, localPoint);
 	}
 	
@@ -154,29 +154,5 @@ public class Quaternion {
 		double s1 = sin_theta / sin_theta_0;
 		
 		return new Quaternion(s0 * w1 + s1 * w2, s0 * x1 + s1 * x2, s0 * y1 + s1 * y2, s0 * z1 + s1 * z2);
-	}
-	
-	public static Mat4x4 generateMatrix(Quaternion q1, Vector3 pos) {
-		double w = q1.w, x = q1.x, y = q1.y, z = q1.z;
-		double sqx = x * x, sqy = y * y, sqz = z * z;
-		
-		Mat4x4 mat = new Mat4x4();
-		Mat4x4.makeBlank(mat);
-		mat.m[0][0] = 1 - (2 * sqy) - (2 * sqz);
-		mat.m[0][1] = (2 * x * y) - (2 * w * z);
-		mat.m[0][2] = (2 * x * z) + (2 * w * y);
-		mat.m[1][0] = (2 * x * y) + (2 * w * z);
-		mat.m[1][1] = 1 - (2 * sqx) - (2 * sqz);
-		mat.m[1][2] = (2 * y * z) - (2 * w * x);
-		mat.m[2][0] = (2 * x * z) - (2 * w * y);
-		mat.m[2][1] = (2 * y * z) + (2 * w * x);
-		mat.m[2][2] = 1 - (2 * sqx) - (2 * sqy);
-		mat.m[3][3] = 1;
-		if (pos != null) {
-			mat.m[3][0] = pos.x;
-			mat.m[3][1] = pos.y;
-			mat.m[3][2] = pos.z;
-		}
-		return mat;
 	}
 }

@@ -46,7 +46,7 @@ public class Planet {
 	}
 	
 	public void project(Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
-		Triangle.projectTriangles(this.terrainFaces, this.pos, new Quaternion(), camera, matView, matProj, WIDTH, HEIGHT, light, Color.WHITE);
+		Triangle.projectTriangles(this.terrainFaces, this.pos, new Quaternion(), new Vector3(1, 1, 1), camera, matView, matProj, WIDTH, HEIGHT, light, Color.WHITE);
 	}
 	
 	private Triangle[] terrainFace(int resolution, Vector3 localup) {

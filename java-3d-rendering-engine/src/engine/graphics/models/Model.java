@@ -1,12 +1,12 @@
 package engine.graphics.models;
 
+import engine.graphics.materials.Material;
 import engine.graphics.triangle.Triangle;
 
 public class Model {
 	
 	public Triangle[] mesh;
-	private int[] textureBufferData;
-	private int textureWidth, textureHeight;
+	private Material mat;
 	
 	public Model(Triangle[] mesh) {
 		this.mesh = mesh;
@@ -14,9 +14,7 @@ public class Model {
 	
 	public Model(Triangle[] mesh, int[] imageBufferData, int textureWidth, int textureHeight) {
 		this.mesh = mesh;
-		this.textureBufferData = imageBufferData;
-		this.textureWidth = textureWidth;
-		this.textureHeight = textureHeight;
+		this.mat = new Material(imageBufferData, textureWidth, textureHeight);
 	}
 	
 	public Model recalcNormals() {
@@ -25,14 +23,14 @@ public class Model {
 	}
 	
 	public int[] getTexture() {
-		return this.textureBufferData;
+		return this.mat.getTexture();
 	}
 	
 	public int getTexWidth() {
-		return this.textureWidth;
+		return this.mat.getWidth();
 	}
 	
 	public int getTexHeight() {
-		return this.textureHeight;
+		return this.mat.getHeight();
 	}
 }

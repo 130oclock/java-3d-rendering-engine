@@ -1,5 +1,8 @@
 package engine.matrix;
 
+import engine.quaternion.Quaternion;
+import engine.vector.Vector3;
+
 public class Mat4x4 {
 	
 	public double[][] m = new double[4][4];
@@ -97,5 +100,34 @@ public class Mat4x4 {
 		matrix.m[2][3] = 1;
 		matrix.m[3][3] = 0;
 		return matrix;
+	}
+	
+	public static Mat4x4 generateMatrix(Quaternion q1, Vector3 pos, Vector3 scale) {
+		double w = q1.w, x = q1.x, y = q1.y, z = q1.z;
+		double sqx = x * x, sqy = y * y, sqz = z * z;
+		
+		Mat4x4 mat = new Mat4x4();
+		Mat4x4.makeBlank(mat);
+		mat.m[0][0] = 1 - (2 * sqy) - (2 * sqz);
+		mat.m[0][1] = (2 * x * y) - (2 * w * z);
+		mat.m[0][2] = (2 * x * z) + (2 * w * y);
+		mat.m[1][0] = (2 * x * y) + (2 * w * z);
+		mat.m[1][1] = 1 - (2 * sqx) - (2 * sqz);
+		mat.m[1][2] = (2 * y * z) - (2 * w * x);
+		mat.m[2][0] = (2 * x * z) - (2 * w * y);
+		mat.m[2][1] = (2 * y * z) + (2 * w * x);
+		mat.m[2][2] = 1 - (2 * sqx) - (2 * sqy);
+		mat.m[3][3] = 1;
+		if (pos != null) {
+			mat.m[3][0] = pos.x;
+			mat.m[3][1] = pos.y;
+			mat.m[3][2] = pos.z;
+		}
+		if (scale != null) {
+			mat.m[0][0] *= scale.x;
+			mat.m[1][1] *= scale.y;
+			mat.m[2][2] *= scale.z;
+		}
+		return mat;
 	}
 }

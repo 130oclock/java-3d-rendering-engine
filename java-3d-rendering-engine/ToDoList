@@ -5,12 +5,13 @@ List
 * Quaternion Rotation
 * Gouraud Shading
 * Texturing
+* Sky Box
+* OBB Collision
+* Collision Linear Response
 
 To Do
 * Physics
-* OBB Collision
+* Collision Rotational Response
 * GJK Algorithm Collision
 * Expanding Polygon Algorithm
 * Occlusion Culling
-
-// problem with collision detection between plane and cube

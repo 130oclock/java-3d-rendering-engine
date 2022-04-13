@@ -5,12 +5,12 @@ import engine.vector.Vector3;
 
 public class RigidBody {
 	private Vector3 pos, vel, force;
-	private Quaternion rot, angl, torque;
+	private Quaternion rot, angvel, torque;
 	
 	private double density = 1;
 	private double mass = 1;
 	// coefficient of restitution, the dampening of collision
-	private double restitution = 1;
+	private double restitution = 0.99;
 	
 	private boolean useGravity = true;
 	public boolean isStatic = false;
@@ -23,11 +23,12 @@ public class RigidBody {
 		
 		this.vel = new Vector3();
 		this.force = new Vector3();
+
+		this.angvel = new Quaternion();
+		this.torque = new Quaternion();
 		
 		this.mass = mass;
 		this.collider = boundingBox;
-		
-		//System.out.println("Max: " + boundingBox.getMax().x + " " + boundingBox.getMax().y + " " + boundingBox.getMax().z + " Min: " + boundingBox.getMin().x + " " + boundingBox.getMin().y + " " + boundingBox.getMin().z);
 		
 		PhysicsWorld.addObject(this);
 	}
@@ -35,6 +36,43 @@ public class RigidBody {
 	public void setStatic() {
 		this.isStatic = true;
 		restitution = 0;
+	}
+	
+	public Vector3 getPerpendicularOperator(Vector3 OB) {
+		return OB;
+	}
+	
+	public void update(double dt, Vector3 gravity) { // 3d dynamics
+		if (useGravity) { // constantly apply gravitational force
+			force.x += mass * gravity.x;
+			force.y += mass * gravity.y;
+			force.z += mass * gravity.z;
+		}
+		
+		vel.x += force.x / mass * dt; // F/m = a
+		vel.y += force.y / mass * dt;
+		vel.z += force.z / mass * dt;
+		
+		pos.x += vel.x * dt;
+		pos.y += vel.y * dt;
+		pos.z += vel.z * dt;
+		
+		if (this.pos.y < -1000) this.pos.y = -1000;
+		
+		Quaternion nTorq = Quaternion.add(angvel, torque);
+		angvel.w = nTorq.w;
+		angvel.x = nTorq.x;
+		angvel.y = nTorq.y;
+		angvel.z = nTorq.z;
+		
+		Quaternion nRot = Quaternion.add(rot, angvel);
+		rot.w = nRot.w;
+		rot.x = nRot.x;
+		rot.y = nRot.y;
+		rot.z = nRot.z;
+
+		force = new Vector3();
+		torque = new Quaternion();
 	}
 	
 	public Vector3 getPos() {
@@ -55,26 +93,6 @@ public class RigidBody {
 	
 	public Vector3 getVelocity() {
 		return this.vel;
-	}
-	
-	public void update(double dt, Vector3 gravity) { // 3d dynamics
-		if (useGravity) { // constantly apply gravitational force
-			force.x += mass * gravity.x;
-			force.y += mass * gravity.y;
-			force.z += mass * gravity.z;
-		}
-		
-		vel.x += force.x / mass * dt; // F/m = a
-		vel.y += force.y / mass * dt;
-		vel.z += force.z / mass * dt;
-		
-		pos.x += vel.x * dt;
-		pos.y += vel.y * dt;
-		pos.z += vel.z * dt;
-		
-		if (this.pos.y < -1000) this.pos.y = -1000;
-
-		force = new Vector3();
 	}
 	
 	public void addVel(double x, double y, double z) {
@@ -117,6 +135,12 @@ public class RigidBody {
 		this.pos.x += x;
 		this.pos.y += y;
 		this.pos.z += z;
+	}
+	
+	public void addPos(Vector3 pos) {
+		this.pos.x += pos.x;
+		this.pos.y += pos.y;
+		this.pos.z += pos.z;
 	}
 	
 	public void setPos(double x, double y, double z) {

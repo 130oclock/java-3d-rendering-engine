@@ -21,6 +21,7 @@ public class Entity {
 	private Model model;
 	public Vector3 pos;
 	private Quaternion rot;
+	private Vector3 scale;
 	private Color color;
 	
 	public RigidBody rig;
@@ -32,6 +33,7 @@ public class Entity {
 		this.rig = new RigidBody(pos, rot, mass, calcBoundingBox(rot));
 		this.pos = this.rig.getPos();
 		this.rot = this.rig.getRot();
+		this.scale = new Vector3(1, 1, 1);
 		
 		entities.add(this);
 	}
@@ -57,7 +59,7 @@ public class Entity {
 	}
 	
 	public void project(Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, EnvironmentLight light) {
-		Triangle.projectTriangles(this.model.mesh, this.pos, this.rot, camera, matView, matProj, WIDTH, HEIGHT, light, this.color);
+		Triangle.projectTriangles(this.model.mesh, this.pos, this.rot, this.scale, camera, matView, matProj, WIDTH, HEIGHT, light, this.color);
 	}
 	
 	public Collider calcBoundingBox(Quaternion rot) {
