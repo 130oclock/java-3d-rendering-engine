@@ -38,8 +38,8 @@ public class RigidBody {
 		restitution = 0;
 	}
 	
-	public Vector3 getPerpendicularOperator(Vector3 OB) {
-		return OB;
+	public Vector3 getPerpendicularOperator(Vector3 displacement) {
+		return displacement;
 	}
 	
 	public void update(double dt, Vector3 gravity) { // 3d dynamics
