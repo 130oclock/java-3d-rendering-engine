@@ -466,6 +466,7 @@ public class Triangle {
 				} else { // calculate a brightness for each vertex of the triangle
 					for (int i = 0; i < 3; i++) {
 						Color adjustedColor1 = EnvironmentLight.blend(adjustedColor, tri.color[i]);
+						dp[i] = Math.min(dp[i], 1);
 						int red1	= (int) ((dp[i] * 255) * ((double) adjustedColor1.getRed() / 255));
 						int green1	= (int) ((dp[i] * 255) * ((double) adjustedColor1.getGreen() / 255));
 						int blue1	= (int) ((dp[i] * 255) * ((double) adjustedColor1.getBlue() / 255));

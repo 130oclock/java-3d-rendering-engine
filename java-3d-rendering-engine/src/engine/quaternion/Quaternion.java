@@ -43,17 +43,35 @@ public class Quaternion {
 	}
 
 	// Gets the axis and angle from the Quaternion
-	public double toAxisAngle(Vector3 outAxis) {
+	public static double toAxisAngle(Quaternion q, Vector3 outAxis) {
+		double w = q.w, x = q.x, y = q.y, z = q.z;
+		
+		if (w > 1) {
+			double magnitude = Quaternion.magnitude(q);
+			w /= magnitude;
+			x /= magnitude;
+			y /= magnitude;
+			z /= magnitude;
+		}
+		
 		double angle = 2 * Math.acos(w);
-		outAxis.x = x / Math.sqrt(1 - w * w);
-		outAxis.y = y / Math.sqrt(1 - w * w);
-		outAxis.z = z / Math.sqrt(1 - w * w);
+		double s = Math.sqrt(1 - w * w);
+		if (s < 0.0001) { // avoid divide by zero
+			outAxis.x = x;
+			outAxis.y = y;
+			outAxis.z = z;
+		} else { // normalize the axis
+			outAxis.x = x / s;
+			outAxis.y = y / s;
+			outAxis.z = z / s;
+		}
+		
 		return angle;
 	}
 	
 	public Vector3 findAngularDisplacement() {
 		Vector3 axis = new Vector3();
-		double angle = this.toAxisAngle(axis);
+		double angle = Quaternion.toAxisAngle(this, axis);
 		Vector3 angularDisplacement = Vector3.multiply(axis, angle);
 		return angularDisplacement;
 	}

@@ -102,12 +102,24 @@ public class Mat4x4 {
 		return matrix;
 	}
 	
+	public static Mat4x4 inertiaTensor(double mass, Vector3 r) {
+		double x = r.x, y = r.y, z = r.z;
+		Mat4x4 mat = new Mat4x4();
+		mat.m[0][0] = mass * (y * y + z * z);
+		mat.m[1][1] = mass * (x * x + z * z);
+		mat.m[2][2] = mass * (x * x + y * y);
+		mat.m[3][3] = 1;
+		mat.m[0][1] = mat.m[1][0] = -mass * x * y;
+		mat.m[0][2] = mat.m[2][0] = -mass * x * z;
+		mat.m[1][2] = mat.m[2][1] = -mass * y * z;
+		return mat;
+	}
+	
 	public static Mat4x4 generateMatrix(Quaternion q1, Vector3 pos, Vector3 scale) {
 		double w = q1.w, x = q1.x, y = q1.y, z = q1.z;
 		double sqx = x * x, sqy = y * y, sqz = z * z;
 		
 		Mat4x4 mat = new Mat4x4();
-		Mat4x4.makeBlank(mat);
 		mat.m[0][0] = 1 - (2 * sqy) - (2 * sqz);
 		mat.m[0][1] = (2 * x * y) - (2 * w * z);
 		mat.m[0][2] = (2 * x * z) + (2 * w * y);

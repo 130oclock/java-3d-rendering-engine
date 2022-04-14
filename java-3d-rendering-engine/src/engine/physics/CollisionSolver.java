@@ -19,20 +19,44 @@ public class CollisionSolver {
 		boolean aStatic = a.isStatic;
 		boolean bStatic = b.isStatic;
 		
+		// rotation and translation of each object
+		Mat4x4 aMatWorld = Mat4x4.generateMatrix(a.getRot(), a.getPos(), null);
+		Mat4x4 bMatWorld = Mat4x4.generateMatrix(b.getRot(), b.getPos(), null);
+		
 		double amass = a.getMass();
 		double bmass = b.getMass();
-		
-		Vector3 relativeVelocity = Vector3.subtract(a.getVelocity(), b.getVelocity());
-		
+
 		// coefficient of restitution
 		//double e = Math.min(a.getRestitution(), b.getRestitution());
 		double e = a.getRestitution() * b.getRestitution();
-		// the impulse magnitude
-		double j = (-(1 + e) * Vector3.dotProduct(relativeVelocity, normal)) / (Vector3.dotProduct(normal, normal) * ((1 / amass) + (1 / bmass)));
 		
 		// find the points where the objects are colliding
-		Vector3 aAngVel = a.getAngularVelocityAtPoint(Vector3.multiply(this.intersection, -0.5), dt);
-		Vector3 bAngVel = b.getAngularVelocityAtPoint(Vector3.multiply(this.intersection, 0.5), dt);
+		Vector3 aAngVel = a.getAngularVelocityAtPoint(Vector3.multiply(this.intersection, 0.5), dt);
+		Vector3 bAngVel = b.getAngularVelocityAtPoint(Vector3.multiply(this.intersection, -0.5), dt);
+		// find inertia tensor for object a
+		Vector3 ra = intersection;
+		Vector3 pa = Vector3.mutiplyMatrixVector(aMatWorld, ra);
+		Vector3 raN = Vector3.crossProduct(ra, normal);
+		Mat4x4 Ia = Mat4x4.quickInverse(Mat4x4.inertiaTensor(amass, ra));
+		// find inertia tensor for object b
+		Vector3 rb = Vector3.multiply(intersection, -1);
+		Vector3 pb = Vector3.mutiplyMatrixVector(bMatWorld, rb);
+		Vector3 rbN = Vector3.crossProduct(rb, normal);
+		Mat4x4 Ib = Mat4x4.quickInverse(Mat4x4.inertiaTensor(bmass, rb));
+
+		// relative velocity of both linear and angular velocities
+		double relativeVelocity = Vector3.dotProduct(Vector3.subtract(a.getVelocity(), b.getVelocity()), normal) + Vector3.dotProduct(Vector3.crossProduct(normal, ra), aAngVel) - Vector3.dotProduct(Vector3.crossProduct(normal, rb), bAngVel);
+
+		//System.out.println(relativeVelocity.x + " " + relativeVelocity.y + " " + relativeVelocity.z);
+		//System.out.println(relativeVelocity);
+
+		// the impulse magnitude
+		//double j = (-(1 + e) * Vector3.dotProduct(relativeVelocity, normal)) / (Vector3.dotProduct(normal, normal) * ((1 / amass) + (1 / bmass)));
+		double j = (-(1 + e) * relativeVelocity) / (/*Vector3.dotProduct(normal, normal) * */((1 / amass) + (1 / bmass)) + (Vector3.dotProduct(raN, Vector3.mutiplyMatrixVector(Ia, raN)) + Vector3.dotProduct(rbN, Vector3.mutiplyMatrixVector(Ib, rbN))));
+		
+		
+		//System.out.println("a" + aAngVel.x + " " + aAngVel.y + " " + aAngVel.z);
+		//System.out.println("b" + bAngVel.x + " " + bAngVel.y + " " + bAngVel.z);
 		//double jrot = 
 		
 		if (!aStatic && !bStatic) {
@@ -41,15 +65,30 @@ public class CollisionSolver {
 			
 			a.addVel(Vector3.multiply(normal, j / amass)); // v2 = v1 + (j/M)*n
 			b.addVel(Vector3.multiply(normal, -j / bmass));
-			// w2 = w1 + (r * jn) / I
+			
+			Vector3 aOmega = Vector3.mutiplyMatrixVector(Ia, Vector3.multiply(aAngVel, -j)); // w2 = w1 + (r * jn) / I
+			double aMag = Vector3.length(aOmega);
+			a.addAngVel(Quaternion.localRotation(aOmega, aMag));
+			
+			Vector3 bOmega = Vector3.mutiplyMatrixVector(Ib, Vector3.multiply(bAngVel, j));
+			double bMag = Vector3.length(bOmega);
+			b.addAngVel(Quaternion.localRotation(bOmega, bMag));
 		}
 		if (!aStatic && bStatic) { // b is static
 			a.addPos(-this.intersection.x, -this.intersection.y, -this.intersection.z);
 			a.addVel(Vector3.multiply(normal, j / amass));
+			
+			/*Vector3 aOmega = Vector3.mutiplyMatrixVector(Ia, Vector3.multiply(aAngVel, j));
+			double aMag = Vector3.length(aOmega);
+			a.addAngVel(Quaternion.localRotation(aOmega, aMag));*/
 		}
 		if (aStatic && !bStatic) { // a is static
 			b.addPos(this.intersection.x, this.intersection.y, this.intersection.z);
 			b.addVel(Vector3.multiply(normal, -j / bmass));
+			
+			/*Vector3 bOmega = Vector3.mutiplyMatrixVector(Ib, Vector3.multiply(bAngVel, -j));
+			double bMag = Vector3.length(bOmega);
+			a.addAngVel(Quaternion.localRotation(bOmega, bMag));*/
 		}
 	}
 	

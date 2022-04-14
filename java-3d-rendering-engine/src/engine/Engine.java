@@ -116,7 +116,7 @@ public class Engine extends Canvas implements Runnable {
 		
 		new Entity(ModelFileReader.get("carpet"), 0, 0, 0, 10000).rig.setStatic();
 		new Entity(ModelFileReader.get("cube1"), 0, 3, 0, 3);
-		new Entity(ModelFileReader.get("cube"), 0, 6, 0, 1.6);
+		new Entity(ModelFileReader.get("cube"), 0, 5.5, 0, 1.6).rig.addVel(0,-0.5,0);
 		new Entity(ModelFileReader.get("octahedron"), 0, 20, 0, 1);
 		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals(), 5, 30, 0, 20);
 		//new Entity(ModelFileReader.get("boid"), 2, 2, 0);

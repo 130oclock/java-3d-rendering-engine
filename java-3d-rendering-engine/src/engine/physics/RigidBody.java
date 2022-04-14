@@ -24,7 +24,7 @@ public class RigidBody {
 		this.vel = new Vector3();
 		this.force = new Vector3();
 
-		this.angvel = new Quaternion();
+		this.angvel = Quaternion.localRotation(new Vector3(0, 0, 1), 0.01);//new Quaternion();
 		this.torque = new Quaternion();
 		
 		this.mass = mass;
@@ -63,13 +63,13 @@ public class RigidBody {
 		
 		if (this.pos.y < -1000) this.pos.y = -1000;
 		
-		Quaternion nTorq = Quaternion.add(angvel, torque);
+		Quaternion nTorq = Quaternion.normalize(Quaternion.multiply(angvel, torque));
 		angvel.w = nTorq.w;
 		angvel.x = nTorq.x;
 		angvel.y = nTorq.y;
 		angvel.z = nTorq.z;
 		
-		Quaternion nRot = Quaternion.add(rot, angvel);
+		Quaternion nRot = Quaternion.normalize(Quaternion.multiply(rot, angvel));
 		rot.w = nRot.w;
 		rot.x = nRot.x;
 		rot.y = nRot.y;
@@ -151,5 +151,13 @@ public class RigidBody {
 		this.pos.x = x;
 		this.pos.y = y;
 		this.pos.z = z;
+	}
+	
+	public void addAngVel(Quaternion vel) {
+		Quaternion nVel = Quaternion.normalize(Quaternion.multiply(vel, angvel));
+		angvel.w = nVel.w;
+		angvel.x = nVel.x;
+		angvel.y = nVel.y;
+		angvel.z = nVel.z;
 	}
 }

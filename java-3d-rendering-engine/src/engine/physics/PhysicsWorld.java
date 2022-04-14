@@ -8,7 +8,7 @@ import engine.vector.Vector3;
 public class PhysicsWorld {
 	public static List<RigidBody> bodies = new ArrayList<RigidBody>();
 	private static List<CollisionSolver> collisions = new ArrayList<CollisionSolver>();
-	public static Vector3 gravity = new Vector3(0, -9.8, 0);
+	public static Vector3 gravity = new Vector3(0, 0, 0);//new Vector3(0, -9.8, 0);
 	
 	public static void addObject(RigidBody rig) {
 		bodies.add(rig);
