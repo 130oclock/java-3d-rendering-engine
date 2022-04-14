@@ -14,6 +14,7 @@ A java based 3d rendering engine loosely based on javidx9's 3d rendering YouTube
 ### Quick Links
 * https://www.scss.tcd.ie/~manzkem/CS7057/cs7057-1516-09-CollisionResponse-mm.pdf
 * https://math.stackexchange.com/questions/2282938/converting-from-quaternion-to-angular-velocity-then-back-to-quaternion#:~:text=Note%20that%202Imq,∗¯q(t).
+* https://chrishecker.com/Rigid_Body_Dynamics
 
 ### Languages
 * Java
