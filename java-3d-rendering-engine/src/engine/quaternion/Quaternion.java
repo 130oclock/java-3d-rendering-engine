@@ -41,6 +41,10 @@ public class Quaternion {
 		double z = 2 * ((this.x * this.z) - (this.w * this.y));
 		return new Vector3(x, y, z);
 	}
+	
+	public Vector3 getBivector() {
+		return new Vector3(x, y, z);
+	}
 
 	// Gets the axis and angle from the Quaternion
 	public static double toAxisAngle(Quaternion q, Vector3 outAxis) {
@@ -67,13 +71,6 @@ public class Quaternion {
 		}
 		
 		return angle;
-	}
-	
-	public Vector3 findAngularDisplacement() {
-		Vector3 axis = new Vector3();
-		double angle = Quaternion.toAxisAngle(this, axis);
-		Vector3 angularDisplacement = Vector3.multiply(axis, angle);
-		return angularDisplacement;
 	}
 
 	// Copies the values from one Quaternion into a new Quaternion

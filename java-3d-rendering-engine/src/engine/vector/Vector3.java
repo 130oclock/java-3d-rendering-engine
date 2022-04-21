@@ -34,6 +34,10 @@ public class Vector3 {
 		return new Vector3(this.x, this.y, this.z);
 	}
 	
+	public String toString() {
+		return x + " " + y + " " + z;
+	}
+	
 	public static Vector3 up() {
 		return new Vector3(0, 1, 0);
 	}

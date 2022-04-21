@@ -1,11 +1,14 @@
 package engine.physics;
 
+import engine.matrix.Mat4x4;
 import engine.quaternion.Quaternion;
 import engine.vector.Vector3;
 
 public class RigidBody {
-	private Vector3 pos, vel, force;
-	private Quaternion rot, angvel, torque;
+	private Vector3 position, velocity, force, angularVelocity, torque;
+	private Quaternion rotation;
+	private Mat4x4 inertiaTensor;
+	private double inverseInertia = 1 / ((0.16666) * 2 * 2 * 1);
 	
 	private double density = 1;
 	private double mass = 1;
@@ -18,14 +21,17 @@ public class RigidBody {
 	Collider collider;
 	
 	public RigidBody(Vector3 pos, Quaternion rot, double mass, Collider boundingBox) {
-		this.pos = pos.copy();
-		this.rot = rot.copy();
+		// linear motion
+		this.position = pos.copy();
 		
-		this.vel = new Vector3();
+		this.velocity = new Vector3();
 		this.force = new Vector3();
 
-		this.angvel = Quaternion.localRotation(new Vector3(0, 0, 1), 0.01);//new Quaternion();
-		this.torque = new Quaternion();
+		// rotation
+		this.rotation = rot.copy();
+		
+		this.angularVelocity = new Vector3(0, 0, 0); // direction is the axis of rotation and length is speed in radians
+		this.torque = new Vector3(0, 0, 0);
 		
 		this.mass = mass;
 		this.collider = boundingBox;
@@ -39,11 +45,14 @@ public class RigidBody {
 	}
 	
 	// Find p(t) = | w(t) x r(t) |
-	public Vector3 getAngularVelocityAtPoint(Vector3 displacement, double dt) {
-		Vector3 angularDisplacement = rot.findAngularDisplacement();
-		Vector3 angularSpeed = Vector3.multiplyQuaternion(rot, Vector3.divide(angularDisplacement, dt));
-		
-		return Vector3.crossProduct(angularSpeed, displacement);
+	public Vector3 getAngularVelocityAtPoint(Vector3 displacementOfPoint) {
+		//Vector3 angularVelocity = new Vector3(); 
+		// find the axis the object is rotating around and the angle it is rotating in radians
+		//double angle = Quaternion.toAxisAngle(rotation, angularVelocity);
+
+		//angularVelocity = Vector3.multiply(angularVelocity, angle);
+		// angular velocity is the cross product of the rotations axis and the point's position from the center of mass
+		return Vector3.crossProduct(angularVelocity, displacementOfPoint);
 	}
 	
 	public void update(double dt, Vector3 gravity) { // 3d dynamics
@@ -53,38 +62,39 @@ public class RigidBody {
 			force.z += mass * gravity.z;
 		}
 		
-		vel.x += force.x / mass * dt; // F/m = a
-		vel.y += force.y / mass * dt;
-		vel.z += force.z / mass * dt;
+		// derive velocity from force
+		velocity.x += force.x / mass * dt; // F/m = a
+		velocity.y += force.y / mass * dt;
+		velocity.z += force.z / mass * dt;
+		// derive position from velocity
+		position.x += velocity.x * dt;
+		position.y += velocity.y * dt;
+		position.z += velocity.z * dt;
+		// prevent the position from going out of bounds
+		if (this.position.y < -1000) this.position.y = -1000;
 		
-		pos.x += vel.x * dt;
-		pos.y += vel.y * dt;
-		pos.z += vel.z * dt;
-		
-		if (this.pos.y < -1000) this.pos.y = -1000;
-		
-		Quaternion nTorq = Quaternion.normalize(Quaternion.multiply(angvel, torque));
-		angvel.w = nTorq.w;
-		angvel.x = nTorq.x;
-		angvel.y = nTorq.y;
-		angvel.z = nTorq.z;
-		
-		Quaternion nRot = Quaternion.normalize(Quaternion.multiply(rot, angvel));
-		rot.w = nRot.w;
-		rot.x = nRot.x;
-		rot.y = nRot.y;
-		rot.z = nRot.z;
+		// derive angular velocity from torque
+		angularVelocity.x += torque.x * inverseInertia;
+		angularVelocity.y += torque.y * inverseInertia;
+		angularVelocity.z += torque.z * inverseInertia;
+		// derive rotation from angular velocity
+		Quaternion spin = Quaternion.localRotation(angularVelocity, Vector3.length(angularVelocity) * dt * 0.5); //new Quaternion(1, angularVelocity.x * dt, angularVelocity.y * dt, angularVelocity.z * dt);//
+		Quaternion nRot = Quaternion.normalize(Quaternion.multiply(rotation, spin));
+		rotation.w = nRot.w;
+		rotation.x = nRot.x;
+		rotation.y = nRot.y;
+		rotation.z = nRot.z;
 
 		force = new Vector3();
-		torque = new Quaternion();
+		torque = new Vector3();
 	}
 	
 	public Vector3 getPos() {
-		return this.pos;
+		return this.position;
 	}
 	
 	public Quaternion getRot() {
-		return this.rot;
+		return this.rotation;
 	}
 	
 	public double getMass() {
@@ -95,26 +105,30 @@ public class RigidBody {
 		return this.restitution;
 	}
 	
+	public double getInverseInertia() {
+		return this.inverseInertia;
+	}
+	
 	public Vector3 getVelocity() {
-		return this.vel;
+		return this.velocity;
 	}
 	
 	public void addVel(double x, double y, double z) {
-		this.vel.x += x;
-		this.vel.y += y;
-		this.vel.z += z;
+		this.velocity.x += x;
+		this.velocity.y += y;
+		this.velocity.z += z;
 	}
 	
 	public void addVel(Vector3 vel) {
-		this.vel.x += vel.x;
-		this.vel.y += vel.y;
-		this.vel.z += vel.z;
+		this.velocity.x += vel.x;
+		this.velocity.y += vel.y;
+		this.velocity.z += vel.z;
 	}
 	
 	public void setVel(double x, double y, double z) {
-		this.vel.x = x;
-		this.vel.y = y;
-		this.vel.z = z;
+		this.velocity.x = x;
+		this.velocity.y = y;
+		this.velocity.z = z;
 	}
 	
 	public void addForce(double x, double y, double z) {
@@ -136,28 +150,39 @@ public class RigidBody {
 	}
 	
 	public void addPos(double x, double y, double z) {
-		this.pos.x += x;
-		this.pos.y += y;
-		this.pos.z += z;
+		this.position.x += x;
+		this.position.y += y;
+		this.position.z += z;
 	}
 	
 	public void addPos(Vector3 pos) {
-		this.pos.x += pos.x;
-		this.pos.y += pos.y;
-		this.pos.z += pos.z;
+		this.position.x += pos.x;
+		this.position.y += pos.y;
+		this.position.z += pos.z;
 	}
 	
 	public void setPos(double x, double y, double z) {
-		this.pos.x = x;
-		this.pos.y = y;
-		this.pos.z = z;
+		this.position.x = x;
+		this.position.y = y;
+		this.position.z = z;
 	}
 	
-	public void addAngVel(Quaternion vel) {
-		Quaternion nVel = Quaternion.normalize(Quaternion.multiply(vel, angvel));
-		angvel.w = nVel.w;
-		angvel.x = nVel.x;
-		angvel.y = nVel.y;
-		angvel.z = nVel.z;
+	public void addAngVel(Vector3 axis, double angle) {
+		Vector3 nVel = Vector3.multiply(axis, angle);
+		angularVelocity.x += nVel.x;
+		angularVelocity.y += nVel.y;
+		angularVelocity.z += nVel.z;
+	}
+	
+	public void addAngVel(Vector3 nVel) {
+		angularVelocity.x += nVel.x;
+		angularVelocity.y += nVel.y;
+		angularVelocity.z += nVel.z;
+	}
+	
+	public void addTorque(Vector3 force) {
+		this.torque.x += force.x;
+		this.torque.y += force.y;
+		this.torque.z += force.z;
 	}
 }
