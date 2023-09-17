@@ -13,6 +13,13 @@ import engine.quaternion.Quaternion;
 import engine.vector.Vector2;
 import engine.vector.Vector3;
 
+/**
+ * The {@code Triangle} class stores three points in 3D space, three points in 2D texture space, and three normals.
+ * 
+ * @author Aidan
+ * @since 1.0
+ * 
+ */
 public class Triangle {
 	
 	private static boolean showClipping = false;
@@ -438,7 +445,7 @@ public class Triangle {
 			Vector3 normal = Triangle.findFaceNormal(triTransformed.p[0], triTransformed.p[1], triTransformed.p[2]); // find the normal of this triangle
 			
 			// Check if the triangle is facing towards the camera
-			Vector3 vCameraRay = Vector3.subtract(triTransformed.p[0], camera.pos); 
+			Vector3 vCameraRay = Vector3.subtract(triTransformed.p[0], camera.position); 
 			if (Vector3.dotProduct(normal, vCameraRay) < 0) {
 				Vector3 lightDirection = light.getDirection();
 
@@ -538,7 +545,7 @@ public class Triangle {
 	}
 	
 	public static void projectSkybox(Triangle[] trianglesToRaster, Camera camera, Mat4x4 matView, Mat4x4 matProj, int WIDTH, int HEIGHT, Color color) {
-		Mat4x4 matWorld = Mat4x4.generateMatrix(new Quaternion(), camera.pos, null);
+		Mat4x4 matWorld = Mat4x4.generateMatrix(new Quaternion(), camera.position, null);
 		
 		for (Triangle tri : trianglesToRaster) {
 			Triangle triTransformed = new Triangle();
@@ -552,7 +559,7 @@ public class Triangle {
 			Vector3 normal = Triangle.findFaceNormal(triTransformed.p[0], triTransformed.p[1], triTransformed.p[2]);
 			
 			// Check if the triangle is facing towards the camera
-			Vector3 vCameraRay = Vector3.subtract(triTransformed.p[0], camera.pos);
+			Vector3 vCameraRay = Vector3.subtract(triTransformed.p[0], camera.position);
 			if (Vector3.dotProduct(normal, vCameraRay) < 0) {
 				triViewed.brightness = new Color[] { color, color, color }; // the sky box always has the same light
 				

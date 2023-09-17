@@ -1,3 +1,9 @@
+/*
+ * File			: Engine.java
+ * 
+ * Description	: This file is the main script that creates the window and runs the main update loop.
+ * 
+ */
 package engine;
 
 import java.awt.AWTException;
@@ -30,11 +36,24 @@ import engine.planets.Planet;
 import engine.quaternion.Quaternion;
 import engine.vector.*;
 
+/**
+ * The {@code Engine} class is an extension of the {@code Canvas} component which draws onto a rectangular area
+ * of the screen and traps input events from the user. It also implements {@code Runnable} which allows it to be run by a thread.
+ * {@code Engine} overrides the {@code run} function to update.
+ * <p>
+ * When the {@code Engine} class is constructed, it creates a window and several event listeners. 
+ * It is then repeatedly updated until a stopping condition is reached such as pressing the 'Esc' key.
+ * 
+ * @author Aidan
+ * @since 1.0
+ * 
+ * @see Canvas
+ * @see Runnable
+ * @see #engine.run()
+ */
 public class Engine extends Canvas implements Runnable {
 	
-	/*
-	 * 
-	 */
+	// Window: These variables are used for creating the window.
 	private static final long serialVersionUID = 1L;
 	
 	private Thread thread;
@@ -47,7 +66,7 @@ public class Engine extends Canvas implements Runnable {
 	private static final int HEIGHT = WIDTH / 16 * 9;
 	private static final int SCALE = 2;
 
-	// Graphics
+	// Graphics: These variables are used to store and draw the next frame.
 	private Screen screen;
 	
 	private BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -61,11 +80,15 @@ public class Engine extends Canvas implements Runnable {
 	private Mat4x4 matView;
 	private Mat4x4 matProj = Mat4x4.makeProjection(90, HEIGHT, WIDTH, 0.1, 1000);
 	
-	// Input
+	// Input: These variables are used to handle user inputs.
 	private UserInput userInput;
 	
+	// Planet: This variable is used when rendering a Planet.
 	private static Planet planet = null;
 	
+	/**
+	 * Constructs a new Engine.
+	 */
 	public Engine() {
 		// Generate Window
 		this.screen = new Screen(WIDTH, HEIGHT);
@@ -81,8 +104,14 @@ public class Engine extends Canvas implements Runnable {
 		this.addMouseMotionListener(this.userInput.mouse);
 	}
 	
+	/**
+	 * Runs at the beginning of the script and initializes the engine.
+	 * Configures the engine and the window and then starts the engine.
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
-		loadEntities(); // load model and texture files into memory
+		loadEntities(); // load models and texture files
 		
 		Engine engine = new Engine(); 
 		engine.frame.setTitle(title);
@@ -93,13 +122,19 @@ public class Engine extends Canvas implements Runnable {
 		engine.frame.setResizable(false);
 		engine.frame.setVisible(true);
 
-		engine.skybox = new Skybox(ModelFileReader.get("sky_box")); // instantiate the sky box\
+		engine.skybox = new Skybox(ModelFileReader.get("sky_box")); // instantiate the sky box
 		
 		engine.start(); // start the engine
 	}
 	
+	/**
+	 * Loads models that are being used and initializes the entities that will display in the scene.
+	 * 
+	 * @see Model
+	 * @see ModelFileReader
+	 * @see Entity
+	 */
 	public static void loadEntities() {
-		// load models
 		ModelFileReader.loadObj("Models/sky_box.obj", "sky_box", "Textures/png-clipart-cube-mapping-night-sky-star-counter-strike-1-6-star-angle-video-game.png"); //skybox.png
 		//ModelFileReader.loadObj("Models/sky_box.obj", "sky_box", "Textures/UV_Grid_Sm.jpg");
 		//ModelFileReader.loadDir("Models", "Textures");
@@ -114,12 +149,12 @@ public class Engine extends Canvas implements Runnable {
 		// initialize any entities
 		//planet = new Planet(0, 5, 0);
 		
-		//new Entity(ModelFileReader.get("carpet"), 0, 0, 0, 10000).rig.setStatic();
-		new Entity(ModelFileReader.get("cube1"), -1.25, 4, 0, Quaternion.localRotation(new Vector3(0,0,0), 1), 3).rig.addTorque(new Vector3(0, 0, 1));
-		new Entity(ModelFileReader.get("cube1"), 1.25, 4, 0, Quaternion.localRotation(new Vector3(0,0,0), 1), 3).rig.addTorque(new Vector3(0, 0, 1));
+		new Entity(ModelFileReader.get("carpet"), 0, 0, 0, 10000).rig.setStatic();
+		// new Entity(ModelFileReader.get("cube1"), -1.25, 4, 0, Quaternion.localRotation(new Vector3(0,0,0), 1), 3).rig.addTorque(new Vector3(0, 0, 1));
+		// new Entity(ModelFileReader.get("cube1"), 1.25, 4, 0, Quaternion.localRotation(new Vector3(0,0,0), 1), 3).rig.addTorque(new Vector3(0, 0, 1));
 
 		//new Entity(ModelFileReader.get("cube1"), 0, 4, 0, Quaternion.localRotation(new Vector3(0,0,0), 1), 3).rig.setStatic();
-		//new Entity(ModelFileReader.get("cube1"), 0, 10, 0, Quaternion.localRotation(new Vector3(0,0,2), 1), 3);
+		new Entity(ModelFileReader.get("cube1"), 0, 10, 0, Quaternion.localRotation(new Vector3(0,0,0), 1), 3);
 		
 		//new Entity(ModelFileReader.get("octahedron"), 0, 20, 0, 1);
 		//new Entity(ModelFileReader.get("utahTeapot").recalcNormals(), 5, 30, 0, 20);
@@ -184,17 +219,17 @@ public class Engine extends Canvas implements Runnable {
 	}
 	
 	private void render() {
-		BufferStrategy bs = this.getBufferStrategy();
+		BufferStrategy bufferStrategy = this.getBufferStrategy();
 		// create a buffer strategy only if it does not already exist
-		if (bs == null) {
+		if (bufferStrategy == null) {
 			this.createBufferStrategy(3);
 			return;
 		}
 		
 		// calculate a rotation and translation matrix that is the inverse of the camera's position and rotation
-		Quaternion.normalize(camera.rot);
-		Mat4x4 matRot = Mat4x4.generateMatrix(camera.rot, null, null);
-		Mat4x4 matTrans = Mat4x4.translationMatrix(camera.pos.x, camera.pos.y, camera.pos.z);
+		Quaternion.normalize(camera.rotation);
+		Mat4x4 matRot = Mat4x4.generateMatrix(camera.rotation, null, null);
+		Mat4x4 matTrans = Mat4x4.translationMatrix(camera.position.x, camera.position.y, camera.position.z);
 		matTrans = Mat4x4.quickInverse(matTrans);
 		matView = Mat4x4.multiplyMatrix(matTrans, matRot);
 		
@@ -214,12 +249,12 @@ public class Engine extends Canvas implements Runnable {
 			imageBufferData[i] = screen.imageBufferData[i];
 		}
 		
-		Graphics g = bs.getDrawGraphics();
+		Graphics g = bufferStrategy.getDrawGraphics();
 		
 		g.drawImage(image, 0, 0, WIDTH * SCALE, HEIGHT * SCALE, null); // draw the image to the screen
 		
 		g.dispose();
-		bs.show();
+		bufferStrategy.show();
 		// clear the list of triangles
 		Triangle.clearRaster();
 	}

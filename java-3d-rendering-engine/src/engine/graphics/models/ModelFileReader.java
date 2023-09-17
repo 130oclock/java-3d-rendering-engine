@@ -16,17 +16,37 @@ import javax.imageio.ImageIO;
 
 import engine.graphics.triangle.Triangle;
 
+/**
+ * The {@code ModelFileReader} class is used to read and store model files into the engine.
+ * It can load models with or without textures.
+ * 
+ * @author Aidan
+ * @since 1.0
+ *
+ */
 public class ModelFileReader {
 	
 	public static List<String> modelnames = new ArrayList<String>();
 	public static List<Model> models = new ArrayList<Model>();
 	
+	/**
+	 * Returns a model from its name.
+	 * 
+	 * @param modelname	the name of the model
+	 * @return the Model object with this name
+	 */
 	public static Model get(String modelname) {
 		int index = modelnames.indexOf(modelname);
 		if (index == -1) return null;
 		return models.get(index);
 	}
 	
+	/**
+	 * Loads all of the model files in a directory.
+	 * 
+	 * @param directoryname		the name of the directory with objects
+	 * @param texturedirname	the name of the directory with textures
+	 */
 	public static void loadDir(String directoryname, String texturedirname) {
 		try (Stream<Path> paths = Files.walk(Paths.get(directoryname))) {
 			List<Path> files = paths.filter(Files::isRegularFile).toList();
@@ -50,6 +70,13 @@ public class ModelFileReader {
 		} 
 	}
 	
+	/**
+	 * Pads the left side of a string with a number of spaces.
+	 * 
+	 * @param inputString	the starting string
+	 * @param length		the number of spaces
+	 * @return a string with a pad of left spaces
+	 */
 	public static String padLeftSpaces(String inputString, int length) {
 	    if (inputString.length() >= length) {
 	        return inputString;
@@ -63,6 +90,13 @@ public class ModelFileReader {
 	    return sb.toString();
 	}
 	
+	/**
+	 * Loads an object with a texture and stores it into a {@code Model} object.
+	 * 
+	 * @param filename		the name of the object file
+	 * @param modelname		the name of the model in the engine
+	 * @param texturepath	the path to the corresponding texture file
+	 */
 	public static void loadObj(String filename, String modelname, String texturepath) {
 		try {
 			FileInputStream inputStream = null;
@@ -223,6 +257,12 @@ public class ModelFileReader {
 		}
 	}
 	
+	/**
+	 * Loads an object without a texture and stores it into a {@code Model} object.
+	 * 
+	 * @param filename		the name of the object file
+	 * @param modelname		the name of the model in the engine
+	 */
 	public static void loadObj(String filename, String modelname) {
 		try {
 			FileInputStream inputStream = null;
